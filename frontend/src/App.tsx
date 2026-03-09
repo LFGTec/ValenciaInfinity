@@ -1,12 +1,8 @@
-import {} from "react";
 import "./App.css";
+import AppRoutes from "./router/AppRoutes";
 
 function App() {
-  return (
-    <>
-      <h1>Valencia Infinity</h1>
-    </>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
