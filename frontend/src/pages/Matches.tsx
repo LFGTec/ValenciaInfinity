@@ -1,4 +1,5 @@
 import MatchesTable from "../components/MatchesTable";
+import { PastGames } from "../components/PastGames";
 import "./Matches.css";
 
 function Matches() {
@@ -13,6 +14,7 @@ function Matches() {
       </p>
 
       <MatchesTable />
+      <PastGames />
     </div>
   );
 }

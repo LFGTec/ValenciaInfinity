@@ -14,18 +14,7 @@ function Game() {
       <div className="game-container">
         {/* Aquí cargamos el juego con un iframe */}
         <iframe
-          src="../unitygame/prueba1/index.html"
-          title="Unity Game"
-          width="100%"
-          height="600px"
-          style={{ border: "none" }}
-        />
-      </div>
-
-      <div className="game-container">
-        {/* Aquí cargamos el juego con un iframe */}
-        <iframe
-          src="../unitygame/PruebaWebGL/index.html"
+          src="../unityGame/Build2GL/index.html"
           title="Unity Game"
           width="100%"
           height="600px"
