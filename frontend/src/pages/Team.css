@@ -1,0 +1,20 @@
+/* CONTENEDOR DE LA PAGINA */
+
+.team-page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+/* TITULO */
+
+.team-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.team-title span {
+  color: #ff6600;
+}

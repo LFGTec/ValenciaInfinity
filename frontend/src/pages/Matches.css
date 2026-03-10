@@ -1,0 +1,25 @@
+
+.matches-page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+
+.matches-page-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.matches-page-title span {
+  color: #ff6600;
+}
+
+
+.matches-page-subtitle {
+  color: #ccc;
+  font-size: 16px;
+  margin-bottom: 40px;
+}

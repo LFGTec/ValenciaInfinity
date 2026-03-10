@@ -1,0 +1,39 @@
+.matches-container {
+  margin-top: 60px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.matches-title {
+  font-size: 26px;
+  margin-bottom: 25px;
+  color: white;
+  text-align: center;
+}
+
+.matches-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #262323;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 15px; /* texto un poco más grande */
+}
+
+.matches-table th {
+  background: #ff6600;
+  color: white;
+  padding: 16px; /* antes 10px */
+  text-align: left;
+}
+
+.matches-table td {
+  padding: 16px; /* antes 10px */
+  border-bottom: 1px solid #333;
+  color: #ccc;
+}
+
+.matches-table tr:hover {
+  background: #333;
+}
