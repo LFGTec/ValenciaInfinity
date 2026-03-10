@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 # Variables de entorno
 .env
+
+Build/
+*.br
+*.wasm
