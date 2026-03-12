@@ -1,5 +1,4 @@
 // src/components/PastFixtures.tsx
-import "./PastGames.css";
 import { useApiSport } from "../hooks/useApiSport";
 
 export function PastGames() {

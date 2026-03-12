@@ -369,3 +369,62 @@
   font-weight: bold;
   color: #ff6600;
 }
+
+/* ==============================
+   PAST FIXTURES / PAST GAMES
+============================== */
+
+.fixtures-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.fixtures-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.fixtures-title span {
+  color: #ff6600;
+}
+
+/* Card de cada partido */
+
+.fixture-card {
+  background: #262323;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 15px;
+  transition: 0.25s;
+}
+
+.fixture-card:hover {
+  border-color: #ff6600;
+  transform: translateY(-3px);
+}
+
+/* Fecha del partido */
+
+.fixture-date {
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+/* Equipos */
+
+.fixture-teams {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Si quieres destacar el resultado */
+
+.fixture-teams span {
+  color: #ff6600;
+}
