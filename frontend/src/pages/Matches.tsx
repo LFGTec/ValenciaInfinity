@@ -1,5 +1,4 @@
-import MatchesTable from "../components/MatchesTable";
-import "./Matches.css";
+import MatchesTable from "./MatchesTable";
 
 function Matches() {
   return (
