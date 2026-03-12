@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getNews } from "../services/newsService";
 import type { News } from "../services/newsService";
-import "./NewList.css";
 
 export default function NewsList() {
   const [news, setNews] = useState<News[]>([]);

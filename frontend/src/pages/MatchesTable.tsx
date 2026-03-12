@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getMatches } from "../services/matchService";
 import type { Match } from "../services/matchService";
-import "./Matches.css";
 
 export default function MatchesTable() {
   const [matches, setMatches] = useState<Match[]>([]);

@@ -1,6 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
-import LogIn from "../pages/LogIn";
 import Team from "../pages/Team";
 import Matches from "../pages/Matches";
 import News from "../pages/News";
@@ -13,7 +12,7 @@ import Game from "../pages/Game";
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<LogIn />} />
+      <Route path="/" element={<Navigate to="/home" replace />} />
       <Route element={<MainLayout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/team" element={<Team />} />

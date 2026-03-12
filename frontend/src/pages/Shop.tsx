@@ -1,5 +1,4 @@
-import ProductsList from "../components/ProductList";
-import "./Shop.css";
+import ProductsList from "./ProductList";
 
 function Shop() {
   return (

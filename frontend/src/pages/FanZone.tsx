@@ -1,5 +1,4 @@
-import RankingTable from "../components/RankingTable";
-import "./FanZone.css";
+import RankingTable from "./RankingTable";
 
 function FanZone() {
   return (

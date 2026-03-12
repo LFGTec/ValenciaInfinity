@@ -1,5 +1,4 @@
-import NewsList from "../components/NewList";
-import "./News.css";
+import NewsList from "../components/NewsList";
 
 function News() {
   return (
