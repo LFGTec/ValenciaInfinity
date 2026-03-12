@@ -111,13 +111,113 @@
 }
 
 /* ==============================
-   TEAM PAGE
+   TEAM PAGE — 3D ALBUM
 ============================== */
 
-.team-page {
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 20px;
+.team-album-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e1c1c 0%, #2d2929 100%);
+}
+
+.team-album-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.team-album-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 60px);
+  color: #ccc;
+  font-size: 18px;
+}
+
+/* Overlay UI (sits on top of the canvas) */
+.album-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Scrolling marquee text in the background */
+.album-marquee {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transform: rotate(-2deg);
+  user-select: none;
+}
+
+.album-marquee-scroll {
+  white-space: nowrap;
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.04);
+  animation: album-marquee-anim 30s linear infinite;
+  letter-spacing: 0.05em;
+}
+
+@keyframes album-marquee-anim {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Navigation buttons at the bottom */
+.album-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  pointer-events: all;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+}
+
+.album-nav::-webkit-scrollbar { height: 4px; }
+.album-nav::-webkit-scrollbar-thumb { background: #FF6600; border-radius: 2px; }
+
+.album-nav-btn {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(4px);
+}
+
+.album-nav-btn:hover {
+  border-color: #FF6600;
+  color: #FF6600;
+}
+
+.album-nav-btn.active {
+  background: #FF6600;
+  color: #ffffff;
+  border-color: #FF6600;
 }
 
 /* ==============================
