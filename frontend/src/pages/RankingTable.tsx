@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getRanking } from "../services/rankingService";
 import type { Ranking } from "../services/rankingService";
-import "./Ranking.css";
 
 export default function RankingTable() {
   const [ranking, setRanking] = useState<Ranking[]>([]);

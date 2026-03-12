@@ -1,6 +1,6 @@
-import MatchesTable from "../components/MatchesTable";
+import MatchesTable from "./MatchesTable";
 import { PastGames } from "../components/PastGames";
-import "./Matches.css";
+
 
 function Matches() {
   return (

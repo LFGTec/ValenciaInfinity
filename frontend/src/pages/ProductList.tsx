@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../services/productService";
 import type { Product } from "../services/productService";
-import "./ProductList.css";
 
 export default function ProductsList() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,8 +16,6 @@ export default function ProductsList() {
 
   return (
     <div className="products-container">
-      <h1 className="products-title">Tienda del Fan</h1>
-
       <div className="products-grid">
         {products.map((product) => (
           <div key={product.id} className="product-card">

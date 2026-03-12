@@ -1,5 +1,4 @@
-import "./Team.css";
-import CardsList from "../components/CardList";
+import CardsList from "./CardList";
 
 function Team() {
   return (
