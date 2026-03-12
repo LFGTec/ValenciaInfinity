@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-import "./Navbar.css";
 
 function Navbar() {
   return (
@@ -70,6 +69,8 @@ function Navbar() {
           </NavLink>
         </li>
       </ul>
+
+      <button className="navbar-login-btn">Iniciar sesión</button>
     </nav>
   );
 }

@@ -1,5 +1,3 @@
-import "./NouMestalla.css";
-
 export default function NouMestalla() {
   return (
     <div className="stadium-container">

@@ -1,6 +1,7 @@
-/* ------------------------------
-   Estilos Globales
------------------------------- */
+/* ==============================
+   ESTILOS GLOBALES
+============================== */
+
 @import "tailwindcss";
 * {
   box-sizing: border-box;
@@ -10,7 +11,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #1e1c1c; /* oscuro para que cards y navbar resalten */
+  background-color: #1e1c1c;
   color: #f0f0f0;
   line-height: 1.5;
 }
@@ -18,4 +19,3 @@ body {
 a {
   text-decoration: none;
 }
-

@@ -1,0 +1,342 @@
+/* ==============================
+   HOME
+============================== */
+
+.home-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.home-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.home-title span {
+  color: #ff6600;
+}
+
+.home-subtitle {
+  font-size: 16px;
+  color: #ccc;
+  margin-bottom: 40px;
+}
+
+/* ==============================
+   MATCHES PAGE
+============================== */
+
+.matches-page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.matches-page-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.matches-page-title span {
+  color: #ff6600;
+}
+
+.matches-page-subtitle {
+  color: #ccc;
+  font-size: 16px;
+  margin-bottom: 40px;
+}
+
+/* ==============================
+   NEWS PAGE
+============================== */
+
+.news-page {
+  max-width: 1100px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.news-page-title {
+  font-size: 36px;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.news-page-title span {
+  color: #ff6600;
+}
+
+/* ==============================
+   SHOP PAGE
+============================== */
+
+.shop-page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.shop-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.shop-title span {
+  color: #ff6600;
+}
+
+.shop-subtitle {
+  font-size: 16px;
+  color: #ccc;
+  margin-bottom: 40px;
+}
+
+/* ==============================
+   FANZONE PAGE
+============================== */
+
+.FanZone-title {
+  font-size: 34px;
+  color: white;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+/* ==============================
+   TEAM PAGE — 3D ALBUM
+============================== */
+
+.team-album-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e1c1c 0%, #2d2929 100%);
+}
+
+.team-album-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.team-album-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 60px);
+  color: #ccc;
+  font-size: 18px;
+}
+
+/* Overlay UI (sits on top of the canvas) */
+.album-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Scrolling marquee text in the background */
+.album-marquee {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transform: rotate(-2deg);
+  user-select: none;
+}
+
+.album-marquee-scroll {
+  white-space: nowrap;
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.04);
+  animation: album-marquee-anim 30s linear infinite;
+  letter-spacing: 0.05em;
+}
+
+@keyframes album-marquee-anim {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Navigation buttons at the bottom */
+.album-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  pointer-events: all;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+}
+
+.album-nav::-webkit-scrollbar { height: 4px; }
+.album-nav::-webkit-scrollbar-thumb { background: #FF6600; border-radius: 2px; }
+
+.album-nav-btn {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(4px);
+}
+
+.album-nav-btn:hover {
+  border-color: #FF6600;
+  color: #FF6600;
+}
+
+.album-nav-btn.active {
+  background: #FF6600;
+  color: #ffffff;
+  border-color: #FF6600;
+}
+
+/* ==============================
+   GAME PAGE
+============================== */
+
+.game-page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+  color: white;
+}
+
+.game-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.game-title span {
+  color: #ff6600;
+}
+
+.game-subtitle {
+  color: #ccc;
+  margin-bottom: 40px;
+}
+
+.game-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.game-info {
+  background: #262323;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #333;
+}
+
+.game-info h2 {
+  color: #ff6600;
+  margin-bottom: 10px;
+}
+
+.game-info ul {
+  padding-left: 20px;
+}
+
+.game-info li {
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+/* ==============================
+   NOU MESTALLA PAGE
+============================== */
+
+.stadium-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 40px 20px;
+  color: white;
+}
+
+.stadium-title {
+  font-size: 40px;
+  margin-bottom: 5px;
+}
+
+.stadium-title span {
+  color: #ff6600;
+}
+
+.stadium-subtitle {
+  color: #aaa;
+  margin-bottom: 40px;
+}
+
+.stadium-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.stadium-card {
+  background: #262323;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  transition: 0.3s;
+}
+
+.stadium-card:hover {
+  border-color: #ff6600;
+  transform: translateY(-4px);
+}
+
+.stadium-card h3 {
+  margin-bottom: 10px;
+  color: #ff9900;
+}
+
+.stadium-description {
+  background: #262323;
+  padding: 30px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  line-height: 1.6;
+}
+
+.stadium-description h2 {
+  margin-bottom: 15px;
+  color: #ff9900;
+}
+
+.stadium-description p {
+  color: #ccc;
+  margin-bottom: 15px;
+}
