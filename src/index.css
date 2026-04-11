@@ -1,0 +1,341 @@
+/* ==============================
+   ESTILOS GLOBALES
+============================== */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1e1c1c;
+  color: #f0f0f0;
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Valencia CF Official Colors */
+  --vcf-black: #000000;
+  --vcf-white: #ffffff;
+  --vcf-blue: #005a87;
+  --vcf-yellow: #ffdf1b;
+  --vcf-orange: #ff671f;
+  --vcf-red: #ee3524;
+
+  /* Theme Variables - Light Mode */
+  --font-size: 14px;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --input-background: #ffffff;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Content backgrounds */
+  --content-bg: #f9fafb;
+  --hover-bg: #f3f4f6;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+}
+
+.dark {
+  /* Theme Variables - Dark Mode */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: #ffffff;
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --input-background: #1a1a1a;
+  --ring: oklch(0.556 0 0);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+
+  /* Content backgrounds */
+  --content-bg: #0f0f0f;
+  --hover-bg: #262626;
+  --gray-50: #262626;
+  --gray-100: #333333;
+  --gray-200: #404040;
+  --gray-300: #525252;
+  --gray-400: #737373;
+  --gray-500: #a3a3a3;
+  --gray-600: #d4d4d4;
+  --gray-700: #e5e5e5;
+  --gray-800: #f5f5f5;
+  --gray-900: #fafafa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(
+    --sidebar-primary-foreground
+  );
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(
+    --sidebar-accent-foreground
+  );
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', sans-serif;
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+.rdp-caption_label {
+  color: #ffffff !important;
+}
+
+.hover\:bg-white:hover {
+  background-color: #ffffff;
+}
+
+.hover\:text-vcf-orange:hover {
+  color: #ff671f;
+}
+
+.hover\:border-vcf-orange:hover {
+  border-color: #ff671f;
+}
+
+.group:hover .group-hover\:text-vcf-orange {
+  color: #ff671f;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+h1 {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-weight: 900;
+}
+
+/* Valencia CF Custom Utility Classes */
+.text-vcf-orange {
+  color: #ff671f;
+}
+
+.text-vcf-blue {
+  color: #005a87;
+}
+
+.text-vcf-yellow {
+  color: #ffdf1b;
+}
+
+.text-vcf-red {
+  color: #ee3524;
+}
+
+.bg-vcf-orange {
+  background-color: #ff671f;
+}
+
+.bg-vcf-blue {
+  background-color: #005a87;
+}
+
+.bg-vcf-yellow {
+  background-color: #ffdf1b;
+}
+
+.bg-vcf-red {
+  background-color: #ee3524;
+}
+
+.border-vcf-orange {
+  border-color: #ff671f;
+}
+
+.border-vcf-blue {
+  border-color: #005a87;
+}
+
+.border-vcf-yellow {
+  border-color: #ffdf1b;
+}
+
+.border-vcf-red {
+  border-color: #ee3524;
+}
+
+.hover\:bg-vcf-orange:hover {
+  background-color: #ff671f;
+}
+
+.hover\:bg-vcf-orange-dark:hover {
+  background-color: #e05516;
+}
+
+.hover\:bg-vcf-blue:hover {
+  background-color: #005a87;
+}
+
+.hover\:bg-vcf-blue-dark:hover {
+  background-color: #004366;
+}
+
+/* Gradients Valencia CF */
+.bg-gradient-vcf {
+  background: linear-gradient(135deg, #ff671f 0%, #ffdf1b 100%);
+}
+
+.bg-gradient-vcf-dark {
+  background: linear-gradient(135deg, #000000 0%, #ff671f 100%);
+}
+
+.bg-gradient-vcf-blue {
+  background: linear-gradient(135deg, #005a87 0%, #ff671f 100%);
+}
+
+/* Theme-aware utility classes */
+.bg-content {
+  background-color: var(--content-bg);
+}
+
+.bg-hover {
+  background-color: var(--hover-bg);
+}
+
+.text-primary-contrast {
+  color: var(--foreground);
+}
+
+.bg-card-themed {
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.border-themed {
+  border-color: var(--border);
+}

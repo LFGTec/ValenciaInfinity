@@ -1,0 +1,22 @@
+import MatchesTable from "./MatchesTable";
+import { PastGames } from "../components/PastGames";
+
+
+function Matches() {
+  return (
+    <div className="matches-page">
+      <h1 className="matches-page-title">
+        Próximos <span>Partidos</span>
+      </h1>
+
+      <p className="matches-page-subtitle">
+        Consulta el calendario de los próximos encuentros del Valencia CF.
+      </p>
+
+      <MatchesTable />
+      <PastGames />
+    </div>
+  );
+}
+
+export default Matches;
