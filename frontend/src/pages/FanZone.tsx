@@ -1,4 +1,4 @@
-import RankingTable from "../components/RankingTable";
+import RankingTable from "../pages/RankingTable";
 import Barraselect from "../components/avatar/Barraselect";
 
 function FanZone() {
