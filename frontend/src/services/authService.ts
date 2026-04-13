@@ -6,6 +6,12 @@ export interface User {
   id: string;
   email: string;
   role: UserRole;
+  full_name?: string;
+  avatar_url?: string;
+  user_metadata?: {
+    full_name?: string;
+    avatar_url?: string;
+  };
 }
 
 export interface AuthSession {
@@ -46,6 +52,9 @@ export async function signUpWithEmail(
         id: data.user.id,
         email: data.user.email || "",
         role: userRole,
+        full_name: data.user.user_metadata?.full_name,
+        avatar_url: data.user.user_metadata?.avatar_url,
+        user_metadata: data.user.user_metadata,
       },
       error: null,
     };
@@ -83,6 +92,9 @@ export async function signInWithEmail(
         id: data.user.id,
         email: data.user.email || "",
         role,
+        full_name: data.user.user_metadata?.full_name,
+        avatar_url: data.user.user_metadata?.avatar_url,
+        user_metadata: data.user.user_metadata,
       },
       error: null,
     };
@@ -141,6 +153,9 @@ export async function getCurrentUser(): Promise<User | null> {
       id: data.session.user.id,
       email: data.session.user.email || "",
       role,
+      full_name: data.session.user.user_metadata?.full_name,
+      avatar_url: data.session.user.user_metadata?.avatar_url,
+      user_metadata: data.session.user.user_metadata,
     };
   } catch (error) {
     console.error("Error getting current user:", error);
@@ -149,14 +164,24 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 /**
- * Sign out
+ * Sign out with complete session cleanup
  */
 export async function signOut(): Promise<{ error: string | null }> {
   try {
+    // Clear session storage first
+    sessionStorage.removeItem("auth_user_role");
+
+    // Sign out from Supabase (clears tokens from localStorage)
     const { error } = await supabase.auth.signOut();
 
     if (error) {
       return { error: error.message };
+    }
+
+    // Additional cleanup for any remaining auth-related data
+    if (typeof window !== "undefined") {
+      // Clear any auth-related localStorage keys
+      localStorage.removeItem("supabase.auth.token");
     }
 
     return { error: null };
@@ -192,6 +217,9 @@ export async function exchangeCodeForSession(
       id: data.user.id,
       email: data.user.email || "",
       role: userRole,
+      full_name: data.user.user_metadata?.full_name,
+      avatar_url: data.user.user_metadata?.avatar_url,
+      user_metadata: data.user.user_metadata,
     };
 
     return { user, error: null };
@@ -224,6 +252,9 @@ export function onAuthStateChange(
         id: session.user.id,
         email: session.user.email || "",
         role,
+        full_name: session.user.user_metadata?.full_name,
+        avatar_url: session.user.user_metadata?.avatar_url,
+        user_metadata: session.user.user_metadata,
       });
     });
 

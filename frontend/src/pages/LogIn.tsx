@@ -12,7 +12,6 @@ import {
   Zap,
   Shield,
   Glasses,
-  User,
 } from "lucide-react";
 import {
   signInWithEmail,
@@ -21,6 +20,7 @@ import {
 } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
 import { useAuth } from "../hooks/useAuth";
+import { validateEmail, getAuthErrorMessage } from "../utils/validation";
 
 const FEATURES = [
   {
@@ -51,13 +51,14 @@ export default function LogInn() {
   const setUser = useSetAtom(setUserAtom);
   const { isAuthenticated } = useAuth();
 
+  const activeTab: UserRole = "fan";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [activeTab, setActiveTab] = useState<UserRole>("fan");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -72,20 +73,51 @@ export default function LogInn() {
     }
   }, [searchParams]);
 
+  // Real-time email validation
+  useEffect(() => {
+    if (email) {
+      const validation = validateEmail(email);
+      setEmailError(validation.valid ? "" : validation.error || "");
+    } else {
+      setEmailError("");
+    }
+  }, [email]);
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Client-side email validation
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      setEmailError(emailValidation.error || "");
+      return;
+    }
+
+    if (!password) {
+      setError("Por favor ingresa tu contraseña");
+      return;
+    }
+
     setIsLoading(true);
 
     const { user, error: signInError } = await signInWithEmail(email, password);
 
     if (signInError) {
-      setError(signInError);
+      const friendlyError = getAuthErrorMessage(signInError);
+      setError(friendlyError);
       setIsLoading(false);
       return;
     }
 
     if (user) {
+      // Store remember me preference
+      if (rememberMe) {
+        localStorage.setItem("remembered_email", email);
+      } else {
+        localStorage.removeItem("remembered_email");
+      }
+
       setUser(user);
       setIsLoading(false);
       navigate("/home", { replace: true });
@@ -99,7 +131,8 @@ export default function LogInn() {
     const { error: googleError } = await signInWithGoogle(activeTab);
 
     if (googleError) {
-      setError(googleError);
+      const friendlyError = getAuthErrorMessage(googleError);
+      setError(friendlyError);
       setIsLoading(false);
     }
   };
@@ -322,15 +355,20 @@ export default function LogInn() {
                     borderRadius: "12px",
                     fontSize: "0.875rem",
                     background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    border: emailError ? "1px solid #ef4444" : "1px solid #e5e7eb",
                     color: "#1a1a1a",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = emailError ? "#ef4444" : "#e5e7eb")}
                 />
               </div>
+              {emailError && (
+                <p style={{ fontSize: "0.75rem", color: "#ef4444", marginTop: "4px" }}>
+                  {emailError}
+                </p>
+              )}
             </div>
 
             {/* Contraseña */}
@@ -428,12 +466,22 @@ export default function LogInn() {
                 </div>
                 <span style={{ fontSize: "0.875rem", color: "#6b7280" }}>Recordarme</span>
               </label>
-              <a
-                href="#"
-                style={{ fontSize: "0.875rem", color: "#ff671f", fontWeight: 600, textDecoration: "none" }}
+              <button
+                type="button"
+                onClick={() => navigate("/forgot-password")}
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#ff671f",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
               >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </button>
             </div>
 
             {/* Error */}
@@ -457,7 +505,7 @@ export default function LogInn() {
             {/* Botón principal */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !email || !password}
               style={{
                 marginTop: "20px",
                 width: "100%",
@@ -468,8 +516,8 @@ export default function LogInn() {
                 color: "#ffffff",
                 background: "#ff671f",
                 border: "none",
-                cursor: isLoading ? "not-allowed" : "pointer",
-                opacity: isLoading ? 0.6 : 1,
+                cursor: isLoading || !email || !password ? "not-allowed" : "pointer",
+                opacity: isLoading || !email || !password ? 0.6 : 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

@@ -10,10 +10,18 @@ import {
   Zap,
   Shield,
   Glasses,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { signUpWithEmail, type UserRole } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
 import { useAuth } from "../hooks/useAuth";
+import {
+  validateEmail,
+  validatePassword,
+  validatePasswordMatch,
+  getAuthErrorMessage,
+} from "../utils/validation";
 
 const FEATURES = [
   {
@@ -43,14 +51,20 @@ export default function SignUp() {
   const setUser = useSetAtom(setUserAtom);
   const { isAuthenticated } = useAuth();
 
+  const activeTab: UserRole = "fan";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<UserRole>("fan");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [passwordStrength, setPasswordStrength] = useState<
+    "weak" | "medium" | "strong"
+  >("weak");
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -58,17 +72,55 @@ export default function SignUp() {
     }
   }, [isAuthenticated, navigate]);
 
+  // Real-time password validation
+  useEffect(() => {
+    if (password) {
+      const validation = validatePassword(password);
+      setPasswordErrors(validation.errors);
+      setPasswordStrength(validation.strength);
+    } else {
+      setPasswordErrors([]);
+      setPasswordStrength("weak");
+    }
+  }, [password]);
+
+  // Real-time email validation
+  useEffect(() => {
+    if (email) {
+      const validation = validateEmail(email);
+      setEmailError(validation.valid ? "" : validation.error || "");
+    } else {
+      setEmailError("");
+    }
+  }, [email]);
+
+  const isPasswordValid = passwordErrors.length === 0 && password.length > 0;
+  const isFormValid =
+    isPasswordValid &&
+    password === confirmPassword &&
+    email &&
+    !emailError;
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+    // Client-side validation
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      setEmailError(emailValidation.error || "");
       return;
     }
 
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      setError("La contraseña no cumple los requisitos de seguridad");
+      return;
+    }
+
+    const matchValidation = validatePasswordMatch(password, confirmPassword);
+    if (!matchValidation.match) {
+      setError(matchValidation.error || "");
       return;
     }
 
@@ -81,15 +133,20 @@ export default function SignUp() {
     );
 
     if (signUpError) {
-      setError(signUpError);
+      const friendlyError = getAuthErrorMessage(signUpError);
+      setError(friendlyError);
       setIsLoading(false);
       return;
     }
 
     if (user) {
       setUser(user);
-      setIsLoading(false);
-      navigate("/home", { replace: true });
+      setShowSuccessMessage(true);
+
+      // Redirect after showing success message
+      setTimeout(() => {
+        navigate("/home", { replace: true });
+      }, 1500);
     }
   };
 
@@ -266,45 +323,30 @@ export default function SignUp() {
             </p>
           </div>
 
-          {/* Tabs */}
-          <div
-            style={{
-              display: "flex",
-              marginBottom: "24px",
-              borderRadius: "12px",
-              overflow: "hidden",
-              background: "#f3f4f6",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            {(["fan", "admin"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
+          {/* Formulario */}
+          <form onSubmit={handleSignUp} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {/* Success Message */}
+            {showSuccessMessage && (
+              <div
                 style={{
-                  flex: 1,
+                  padding: "16px",
+                  borderRadius: "12px",
+                  fontSize: "0.875rem",
+                  textAlign: "center",
+                  background: "rgba(34,197,94,0.1)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  color: "#22c55e",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "8px",
-                  padding: "12px 0",
-                  fontSize: "0.875rem",
-                  fontWeight: 700,
-                  borderRadius: activeTab === tab ? "10px" : undefined,
-                  color: activeTab === tab ? "#ff671f" : "#6b7280",
-                  border: activeTab === tab ? "2px solid #ff671f" : "2px solid transparent",
-                  background: "transparent",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
                 }}
               >
-                {tab === "fan" ? "Aficionado" : "Administrador"}
-              </button>
-            ))}
-          </div>
+                <CheckCircle size={18} />
+                ¡Cuenta creada! Redirigiendo...
+              </div>
+            )}
 
-          {/* Formulario */}
-          <form onSubmit={handleSignUp} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {/* Email */}
             <div>
               <label
@@ -340,15 +382,20 @@ export default function SignUp() {
                     borderRadius: "12px",
                     fontSize: "0.875rem",
                     background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    border: emailError ? "1px solid #ef4444" : "1px solid #e5e7eb",
                     color: "#1a1a1a",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = emailError ? "#ef4444" : "#e5e7eb")}
                 />
               </div>
+              {emailError && (
+                <p style={{ fontSize: "0.75rem", color: "#ef4444", marginTop: "4px" }}>
+                  {emailError}
+                </p>
+              )}
             </div>
 
             {/* Contraseña */}
@@ -386,13 +433,13 @@ export default function SignUp() {
                     borderRadius: "12px",
                     fontSize: "0.875rem",
                     background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    border: passwordErrors.length > 0 && password ? "1px solid #ef4444" : "1px solid #e5e7eb",
                     color: "#1a1a1a",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = passwordErrors.length > 0 ? "#ef4444" : "#e5e7eb")}
                 />
                 <button
                   type="button"
@@ -417,6 +464,94 @@ export default function SignUp() {
                   )}
                 </button>
               </div>
+
+              {/* Password Strength Indicator */}
+              {password && (
+                <div style={{ marginTop: "12px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        height: "4px",
+                        borderRadius: "2px",
+                        background: "#e5e7eb",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: "100%",
+                          width: passwordStrength === "weak" ? "33%" : passwordStrength === "medium" ? "66%" : "100%",
+                          background:
+                            passwordStrength === "weak"
+                              ? "#ef4444"
+                              : passwordStrength === "medium"
+                              ? "#f59e0b"
+                              : "#22c55e",
+                          transition: "all 0.3s",
+                        }}
+                      />
+                    </div>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color:
+                          passwordStrength === "weak"
+                            ? "#ef4444"
+                            : passwordStrength === "medium"
+                            ? "#f59e0b"
+                            : "#22c55e",
+                      }}
+                    >
+                      {passwordStrength === "weak"
+                        ? "Débil"
+                        : passwordStrength === "medium"
+                        ? "Media"
+                        : "Fuerte"}
+                    </span>
+                  </div>
+
+                  {/* Requirements List */}
+                  {passwordErrors.length > 0 && (
+                    <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                      <p style={{ marginBottom: "6px", fontWeight: 500 }}>Requisitos faltantes:</p>
+                      <ul
+                        style={{
+                          listStyle: "none",
+                          padding: 0,
+                          margin: 0,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "4px",
+                        }}
+                      >
+                        {passwordErrors.map((err) => (
+                          <li
+                            key={err}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              color: "#ef4444",
+                            }}
+                          >
+                            <AlertCircle size={12} />
+                            {err}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Confirmar contraseña */}
@@ -454,13 +589,21 @@ export default function SignUp() {
                     borderRadius: "12px",
                     fontSize: "0.875rem",
                     background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    border:
+                      confirmPassword && password !== confirmPassword
+                        ? "1px solid #ef4444"
+                        : "1px solid #e5e7eb",
                     color: "#1a1a1a",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                  onBlur={(e) =>
+                    (e.currentTarget.style.borderColor =
+                      confirmPassword && password !== confirmPassword
+                        ? "#ef4444"
+                        : "#e5e7eb")
+                  }
                 />
                 <button
                   type="button"
@@ -485,6 +628,11 @@ export default function SignUp() {
                   )}
                 </button>
               </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p style={{ fontSize: "0.75rem", color: "#ef4444", marginTop: "4px" }}>
+                  Las contraseñas no coinciden
+                </p>
+              )}
             </div>
 
             {/* Error */}
@@ -508,7 +656,7 @@ export default function SignUp() {
             {/* Botón principal */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !isFormValid}
               style={{
                 marginTop: "20px",
                 width: "100%",
@@ -519,8 +667,8 @@ export default function SignUp() {
                 color: "#ffffff",
                 background: "#ff671f",
                 border: "none",
-                cursor: isLoading ? "not-allowed" : "pointer",
-                opacity: isLoading ? 0.6 : 1,
+                cursor: isLoading || !isFormValid ? "not-allowed" : "pointer",
+                opacity: isLoading || !isFormValid ? 0.6 : 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
