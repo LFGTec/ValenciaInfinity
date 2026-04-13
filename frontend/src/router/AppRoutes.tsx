@@ -8,10 +8,6 @@ import Shop from "../pages/Shop";
 import NouMestalla from "../pages/NouMestalla";
 import MainLayout from "../layouts/MainLayout";
 import Game from "../pages/Game";
-import LogIn from "../pages/LogIn";
-import SignUp from "../pages/SignUp";
-import AuthCallback from "../pages/AuthCallback";
-import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
   return (
