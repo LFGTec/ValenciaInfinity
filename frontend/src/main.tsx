@@ -1,15 +1,11 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import "./styles/components.css";
-import "./styles/pages.css";
-import App from "./App.tsx";
-import { BrowserRouter } from "react-router-dom";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import './index.css';
+import App from './App'
+import { Wireframe } from "./components/Wireframe";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+      <App /> 
+  </React.StrictMode>
 );

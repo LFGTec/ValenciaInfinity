@@ -1,19 +1,19 @@
-// src/services/newsService.ts
-
 import { supabase } from "./supabaseClient";
 
 export type News = {
-  id: number;
+  id: string;
   titulo: string;
   contenido: string;
-  autor: string;
-  vistas: number;
+  autor?: string;
+  vistas?: number;
+  imagen?: string;
+  categoria?: string;
+  fecha?: string;
+  comentarios?: number;
 };
 
 export const getNews = async (): Promise<News[]> => {
-  const { data, error } = await supabase
-    .from("News")
-    .select("*");
+  const { data, error } = await supabase.from("News").select("*");
 
   if (error) {
     console.error("Error al obtener las noticias:", error);
