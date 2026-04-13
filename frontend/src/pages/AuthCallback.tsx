@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetAtom } from "jotai";
+import { supabase } from "../services/supabaseClient";
 import { getCurrentUser } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
 
@@ -12,24 +13,30 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get current user (Supabase should have set the session already)
+        console.log("🔄 AuthCallback - Iniciando...");
+
+        // Esperar un poco para que Supabase procese la sesión
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Obtener el usuario actual (Supabase ya intercambió el código automáticamente)
         const user = await getCurrentUser();
+        console.log("👤 Usuario obtenido:", user?.email);
 
         if (user) {
+          console.log("✅ Autenticado como:", user.email);
           setUser(user);
-          // Redirect to home after a short delay to ensure state is set
-          setTimeout(() => {
-            navigate("/home", { replace: true });
-          }, 100);
+          // Redirigir inmediatamente
+          navigate("/home", { replace: true });
         } else {
+          console.error("❌ No hay usuario");
           setError("No se pudo completar el inicio de sesión");
           setTimeout(() => {
             navigate("/login?error=auth_failed", { replace: true });
           }, 2000);
         }
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Error en autenticación";
+        const message = err instanceof Error ? err.message : "Error desconocido";
+        console.error("❌ Excepción:", message);
         setError(message);
         setTimeout(() => {
           navigate(

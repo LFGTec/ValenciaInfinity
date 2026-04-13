@@ -100,7 +100,6 @@ export async function signInWithGoogle(
 ): Promise<{ error: string | null }> {
   try {
     const redirectUrl = `${window.location.origin}/auth/callback`;
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -109,15 +108,13 @@ export async function signInWithGoogle(
           access_type: "offline",
           prompt: "consent",
         },
-        scopes: "profile email",
       },
     });
 
     if (error) {
+      console.error("❌ Google OAuth Error:", error);
       return { error: error.message };
     }
-
-    // Store the intended user role in sessionStorage to use after OAuth redirect
     sessionStorage.setItem("auth_user_role", userRole);
 
     return { error: null };
@@ -166,6 +163,43 @@ export async function signOut(): Promise<{ error: string | null }> {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Signout failed";
     return { error: message };
+  }
+}
+
+/**
+ * Exchange authorization code for session (OAuth callback)
+ */
+export async function exchangeCodeForSession(
+  code: string
+): Promise<{ user: User | null; error: string | null }> {
+  try {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.error("❌ Code exchange error:", error);
+      return { user: null, error: error.message };
+    }
+
+    if (!data.user) {
+      console.error("❌ No user returned from code exchange");
+      return { user: null, error: "No user returned from OAuth" };
+    }
+
+    const userRole = (sessionStorage.getItem("auth_user_role") as UserRole) || "fan";
+    sessionStorage.removeItem("auth_user_role");
+
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email || "",
+      role: userRole,
+    };
+
+    return { user, error: null };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Code exchange failed";
+    console.error("❌ Code exchange exception:", message);
+    return { user: null, error: message };
   }
 }
 

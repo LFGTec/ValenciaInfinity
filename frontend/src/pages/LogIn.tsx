@@ -283,45 +283,7 @@ export default function LogInn() {
           </div>
 
           {/* Tabs Fan / Admin */}
-          <div
-            style={{
-              display: "flex",
-              marginBottom: "24px",
-              borderRadius: "12px",
-              overflow: "hidden",
-              background: "#f3f4f6",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            {[
-              { id: "fan" as const, label: "Aficionado", icon: User },
-              { id: "admin" as const, label: "Administrador", icon: Shield },
-            ].map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  padding: "12px 0",
-                  fontSize: "0.875rem",
-                  fontWeight: 700,
-                  borderRadius: activeTab === id ? "10px" : undefined,
-                  color: activeTab === id ? "#ff671f" : "#6b7280",
-                  border: activeTab === id ? "2px solid #ff671f" : "2px solid transparent",
-                  background: "transparent",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-              >
-                <Icon size={15} />
-                {label}
-              </button>
-            ))}
-          </div>
+          
 
           {/* Formulario */}
           <form onSubmit={handleEmailLogin} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
