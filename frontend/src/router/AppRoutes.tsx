@@ -16,7 +16,7 @@ import ProtectedRoute from "./ProtectedRoute";
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public auth routes */}
       <Route path="/login" element={<LogIn />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
@@ -24,17 +24,21 @@ export default function AppRoutes() {
       {/* Redirect root to home */}
       <Route path="/" element={<Navigate to="/home" replace />} />
 
-      {/* Protected routes */}
+      {/* Public routes (no authentication required) */}
+      <Route element={<MainLayout />}>
+        <Route path="/home" element={<Home />} />
+        <Route path="/team" element={<Team />} />
+        <Route path="/matches" element={<Matches />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/nou-mestalla" element={<NouMestalla />} />
+        <Route path="/shop" element={<Shop />} />
+      </Route>
+
+      {/* Protected routes (authentication required) */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/matches" element={<Matches />} />
-          <Route path="/news" element={<News />} />
           <Route path="/fanzone" element={<FanZone />} />
           <Route path="/game" element={<Game />} />
-          <Route path="/nou-mestalla" element={<NouMestalla />} />
-          <Route path="/shop" element={<Shop />} />
         </Route>
       </Route>
     </Routes>
