@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSetAtom } from "jotai";
 import {
@@ -83,7 +83,7 @@ export default function LogInn() {
     }
   }, [email]);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 

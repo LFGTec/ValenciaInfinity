@@ -1,4 +1,6 @@
-export function EyeIcon({ size = 16, color = "currentColor" }) {
+type IconProps = { size?: number; color?: string };
+
+export function EyeIcon({ size = 16, color = "currentColor" }: IconProps) {
   return (
     <svg
       width={size}
@@ -16,7 +18,7 @@ export function EyeIcon({ size = 16, color = "currentColor" }) {
   );
 }
 
-export function EyeOffIcon({ size = 16, color = "currentColor" }) {
+export function EyeOffIcon({ size = 16, color = "currentColor" }: IconProps) {
   return (
     <svg
       width={size}

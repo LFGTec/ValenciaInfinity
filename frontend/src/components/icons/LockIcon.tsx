@@ -1,4 +1,6 @@
-export function LockIcon({ size = 16, color = "currentColor" }) {
+type IconProps = { size?: number; color?: string };
+
+export function LockIcon({ size = 16, color = "currentColor" }: IconProps) {
   return (
     <svg
       width={size}

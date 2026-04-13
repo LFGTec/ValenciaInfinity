@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Check, ChevronRight } from "lucide-react";
 import { updatePassword } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
-import { getAuthErrorMessage } from "../utils/validation";
+import { validatePassword, validatePasswordMatch, getAuthErrorMessage } from "../utils/validation";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -25,33 +25,20 @@ export default function ResetPassword() {
     }
   }, [isAuthenticated, navigate]);
 
-  // Password validation
-  const validatePassword = (password: string): { valid: boolean; error?: string } => {
-    if (password.length < 8) {
-      return { valid: false, error: "Mínimo 8 caracteres" };
-    }
-    if (!/[A-Z]/.test(password)) {
-      return { valid: false, error: "Falta una mayúscula" };
-    }
-    if (!/[0-9]/.test(password)) {
-      return { valid: false, error: "Falta un número" };
-    }
-    return { valid: true };
-  };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setNewPassword(value);
 
     if (value) {
       const validation = validatePassword(value);
-      setPasswordError(validation.valid ? "" : validation.error || "");
+      setPasswordError(validation.valid ? "" : validation.errors[0] || "");
     } else {
       setPasswordError("");
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -63,12 +50,13 @@ export default function ResetPassword() {
 
     const validation = validatePassword(newPassword);
     if (!validation.valid) {
-      setPasswordError(validation.error || "Contraseña inválida");
+      setPasswordError(validation.errors[0] || "Contraseña inválida");
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+    const matchValidation = validatePasswordMatch(newPassword, confirmPassword);
+    if (!matchValidation.match) {
+      setError(matchValidation.error || "Las contraseñas no coinciden");
       return;
     }
 

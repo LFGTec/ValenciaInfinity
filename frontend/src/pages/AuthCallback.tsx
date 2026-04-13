@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetAtom } from "jotai";
-import { supabase } from "../services/supabaseClient";
 import { getCurrentUser } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, ChevronLeft, Check } from "lucide-react";
 import { requestPasswordReset } from "../services/authService";
@@ -13,7 +13,7 @@ export default function ForgotPassword() {
   const [submitted, setSubmitted] = useState(false);
 
   // Real-time email validation
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEmail(value);
 
@@ -25,7 +25,7 @@ export default function ForgotPassword() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 

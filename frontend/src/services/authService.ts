@@ -181,7 +181,7 @@ export async function signOut(): Promise<{ error: string | null }> {
     // Additional cleanup for any remaining auth-related data
     if (typeof window !== "undefined") {
       // Clear any auth-related localStorage keys
-      localStorage.removeItem("supabase.auth.token");
+      localStorage.removeItem("auth_token");
     }
 
     return { error: null };

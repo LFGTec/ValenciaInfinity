@@ -1,7 +1,6 @@
 import MatchesTable from "./MatchesTable";
 import { PastGames } from "../components/PastGames";
 
-
 function Matches() {
   return (
     <div className="matches-page">

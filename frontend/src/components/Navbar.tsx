@@ -112,7 +112,7 @@ function Navbar() {
               borderRadius: "8px",
               transition: "background 0.2s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
             disabled={isSigningOut}
           >
@@ -146,14 +146,14 @@ function Navbar() {
                 {user.user_metadata?.full_name?.charAt(0).toUpperCase() || "U"}
               </div>
             )}
-            <span style={{ color: "#1a1a1a", fontSize: "0.875rem", fontWeight: 500, maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <span style={{ color: "#ffffff", fontSize: "0.875rem", fontWeight: 500, maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {user.user_metadata?.full_name?.split(" ")[0] || user.email?.split("@")[0]}
             </span>
             <svg
               style={{
                 width: "16px",
                 height: "16px",
-                color: "#6b7280",
+                color: "#d1d5db",
                 transform: showDropdown ? "rotate(180deg)" : "rotate(0deg)",
                 transition: "transform 0.2s",
               }}
@@ -245,49 +245,6 @@ function Navbar() {
                 </div>
               </div>
 
-              {/* Menu Items */}
-              <div style={{ padding: "8px 4px" }}>
-                <button
-                  onClick={() => {
-                    navigate("/profile");
-                    setShowDropdown(false);
-                  }}
-                  className="w-full text-left px-4 py-2 hover:bg-orange-50 transition-colors rounded-lg"
-                  style={{
-                    color: "#1a1a1a",
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    background: "none",
-                    border: "none",
-                    margin: "4px 0",
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>👤</span>
-                  Mi perfil
-                </button>
-                <button
-                  onClick={() => {
-                    navigate("/settings");
-                    setShowDropdown(false);
-                  }}
-                  className="w-full text-left px-4 py-2 hover:bg-orange-50 transition-colors rounded-lg"
-                  style={{
-                    color: "#1a1a1a",
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    background: "none",
-                    border: "none",
-                    margin: "4px 0",
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>⚙️</span>
-                  Configuración
-                </button>
-              </div>
-
-              {/* Divider */}
-              <div style={{ height: "1px", background: "#f0f0f0", margin: "0 4px" }} />
-
               {/* Logout Button */}
               <div style={{ padding: "8px 4px" }}>
                 <button
@@ -324,4 +281,3 @@ function Navbar() {
 }
 
 export default Navbar;
-

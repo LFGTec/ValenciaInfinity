@@ -6,13 +6,11 @@ import {
   onAuthStateChange,
 } from "./services/authService";
 import {
-  authAtom,
   setLoadingAtom,
   setUserAtom,
 } from "./stores/authStore";
 
 function App() {
-  const setAuth = useSetAtom(authAtom);
   const setUser = useSetAtom(setUserAtom);
   const setLoading = useSetAtom(setLoadingAtom);
 
@@ -37,7 +35,7 @@ function App() {
         unsubscribe();
       }
     };
-  }, [setAuth, setUser, setLoading]);
+  }, [setUser, setLoading]);
 
   return <AppRoutes />;
 }
