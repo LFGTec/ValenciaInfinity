@@ -134,56 +134,232 @@
 }
 
 /* ==============================
-   NEWS LIST
+   NEWS CARDS
 ============================== */
+
+.news-loading {
+  color: white;
+  font-size: 18px;
+  margin-top: 20px;
+}
 
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  align-items: start;
 }
 
 .news-card {
-  background-color: #262323;
-  border-radius: 10px;
-  padding: 20px;
-  border: 1px solid #333;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.news-card:hover {
-  transform: translateY(-5px);
-  border-color: #ff6600;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-}
-
-.news-title {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #ff9900;
-}
-
-.news-content {
-  font-size: 14px;
-  color: #ccc;
-  margin-bottom: 15px;
-}
-
-.news-footer {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #888;
+  flex-direction: column;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
-.news-author {
-  font-weight: bold;
+.news-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 245px;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 22px;
+  background: #1a1a1a;
 }
 
-.news-views {
-  color: #ff6600;
+.news-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
 }
+
+.news-card:hover .news-card-image {
+  transform: scale(1.04);
+}
+
+.news-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.45) 40%,
+    rgba(0, 0, 0, 0.08) 75%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.news-category-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  background: #ff671f;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+.news-card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.news-card-title {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.35;
+  color: white;
+  margin: 0 0 14px 0;
+  transition: color 0.25s ease;
+}
+
+.news-card:hover .news-card-title {
+  color: #ff671f;
+}
+
+.news-card-content {
+  font-size: 16px;
+  line-height: 1.65;
+  color: #cfd3d8;
+  margin: 0 0 18px 0;
+}
+
+.news-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  color: #cfd3d8;
+}
+
+.news-card-date {
+  color: #cfd3d8;
+}
+
+.news-dot {
+  color: #ff671f;
+}
+
+.news-card-views,
+.news-card-comments {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #00a3e0;
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+
+@media (max-width: 1200px) {
+  .news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .news-image-wrapper {
+    height: 260px;
+  }
+
+  .news-card-title {
+    font-size: 18px;
+  }
+
+  .news-card-content {
+    font-size: 15px;
+  }
+}
+
+/* ============================== 
+   ADMIN NEWS CARD ACTIONS
+============================== */
+
+
+.news-card {
+  position: relative;
+}
+
+.news-card-menu-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  background: rgba(10, 10, 10, 0.88);
+  color: white;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 5;
+}
+
+
+.news-card-menu-btn:hover {
+  border-color: #ff671f;
+  color: #ff671f;
+}
+
+.news-card-actions {
+  position: absolute;
+  top: 60px;
+  right: 14px;
+  min-width: 160px;
+  background: #141414;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 6;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+
+.news-card-actions button {
+  background: transparent;
+  border: none;
+  color: white;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+
+.news-card-actions button:hover {
+  background: #1f1f1f;
+  color: #ff671f;
+}
+
+
 
 /* ==============================
    MATCHES TABLE

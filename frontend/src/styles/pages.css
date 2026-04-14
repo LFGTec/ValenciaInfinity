@@ -56,48 +56,223 @@
    NEWS PAGE
 ============================== */
 
-.news-page {
-  max-width: 1100px;
-  margin: auto;
-  padding: 40px 20px;
+.news-page-wrapper {
+  min-height: 100vh;
+  background-color: #0b0b0b;
 }
 
-.news-page-title {
-  font-size: 36px;
+.news-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.news-header {
+  margin-bottom: 24px;
+}
+
+.news-main-title {
+  font-size: 45px;
+  font-weight: 900;
+  line-height: 1;
+  color: white;
+  margin-bottom: 14px;
+}
+
+.news-main-subtitle {
+  font-size: 16px;
+  color: #d1d5db;
+  margin-bottom: 28px;
+}
+
+.news-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 40px;
+}
+
+.news-filter-btn {
+  background: #1a1a1a;
+  color: white;
+  border: 2px solid #3a3a3a;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.news-filter-btn:hover {
+  border-color: #ff671f;
+}
+
+.news-filter-btn.active {
+  background: #ff671f;
+  border-color: #ff671f;
   color: white;
 }
 
-.news-page-title span {
-  color: #ff6600;
+.news-list-spacing {
+  margin-top: 10px;
 }
 
-/* ==============================
-   SHOP PAGE
+.news-load-more-container {
+  text-align: center;
+  margin-top: 48px;
+}
+
+.news-load-more-btn {
+  background: #ff671f;
+  color: white;
+  border: 2px solid #ff671f;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.news-load-more-btn:hover {
+  background: #e05516;
+  border-color: #e05516;
+}
+
+
+/* ============================== 
+   ADMIN NEWS (AGREGADO)
 ============================== */
 
-.shop-page {
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 20px;
+
+.news-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.shop-title {
-  font-size: 36px;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 10px;
-}
 
-.shop-title span {
-  color: #ff6600;
-}
-
-.shop-subtitle {
+.news-add-btn {
+  background: transparent;
+  border: 2px solid #ff671f;
+  color: #ff671f;
+  padding: 12px 20px;
+  border-radius: 10px;
   font-size: 16px;
-  color: #ccc;
-  margin-bottom: 40px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
 }
+
+
+.news-add-btn:hover {
+  background: #ff671f;
+  color: #000;
+}
+
+.news-admin-container {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px 0;
+}
+
+.news-add-btn {
+  background-color: #ff7a00;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.news-add-btn:hover {
+  background-color: #e66d00;
+}
+
+
+/* ==============================
+   News add list
+============================== */
+
+
+.news-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 20px 0 30px 0;
+  padding: 24px;
+  background: #111111;
+  border: 1px solid #2a2a2a;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.news-input,
+.news-textarea,
+.news-select {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #333333;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.news-input::placeholder,
+.news-textarea::placeholder {
+  color: #b0b0b0;
+}
+
+.news-input:focus,
+.news-textarea:focus,
+.news-select:focus {
+  border-color: #ff7a00;
+  box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.2);
+}
+
+.news-textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.news-select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.news-submit-btn {
+  width: 100%;
+  padding: 14px 18px;
+  background: #ff7a00;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.news-submit-btn:hover {
+  background: #e66d00;
+  transform: translateY(-1px);
+}
+
+.news-submit-btn:active {
+  transform: translateY(0);
+}
+
 
 /* ==============================
    FANZONE PAGE
