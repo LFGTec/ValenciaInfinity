@@ -124,7 +124,7 @@ export default function MainLayout() {
                 </div>
               ) : (
                 <Link to="/login" className="bg-vcf-orange px-4 py-2 rounded-lg text-white font-bold text-sm">
-                  LOGIN
+                  INICIAR SESIÓN
                 </Link>
               )}
 
