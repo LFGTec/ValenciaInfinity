@@ -1,45 +1,49 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Home from "../pages/Home";
-import Team from "../pages/Team";
-import Matches from "../pages/Matches";
+import MainLayout from "../layouts/MainsLayout";
+import ProtectedRoute from "./ProtectedRoute";
+
+// Páginas
+import {HomePage} from "../pages/HomePage";
+import { TeamPage }from "../pages/TeamPage";
+import { MatchesPage } from "../pages/MatchesPage";
 import News from "../pages/News";
-import FanZone from "../pages/FanZone";
-import Shop from "../pages/Shop";
-import NouMestalla from "../pages/NouMestalla";
-import MainLayout from "../layouts/MainLayout";
-import Game from "../pages/Game";
+import { FansZonePage } from "../pages/FansZonePage";
+import { AdminPage } from "../pages/AdminViews/AdminPage"; // Nuevo: Aquí pegas el AdminContent del wireframe
 import LogIn from "../pages/LogIn";
+import { UserProfile} from "../components/features/UserProfile"
+
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
-import ProtectedRoute from "./ProtectedRoute";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public auth routes */}
+      {/* Rutas sin Layout (Login/Signup) */}
       <Route path="/login" element={<LogIn />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* Redirect root to home */}
-      <Route path="/" element={<Navigate to="/home" replace />} />
-
-      {/* Public routes (no authentication required) */}
+      {/* Rutas con MainLayout (Header/Footer del Wireframe) */}
       <Route element={<MainLayout />}>
-        <Route path="/home" element={<Home />} />
-        <Route path="/team" element={<Team />} />
-        <Route path="/matches" element={<Matches />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/team" element={<TeamPage />} />
+        <Route path="/matches" element={<MatchesPage />} />
         <Route path="/news" element={<News />} />
-        <Route path="/nou-mestalla" element={<NouMestalla />} />
-        <Route path="/shop" element={<Shop />} />
+        
+        {/* Rutas Protegidas */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/fanzone" element={<FansZonePage />} />
+          <Route path="/profile" element={<UserProfile />} />
+        </Route>
       </Route>
 
-      {/* Protected routes (authentication required) */}
-      <Route element={<ProtectedRoute />}>
-        <Route element={<MainLayout />}>
-          <Route path="/fanzone" element={<FanZone />} />
-          <Route path="/game" element={<Game />} />
-        </Route>
+      {/* Ruta de Admin (Puedes usar un layout distinto o ninguno) */}
+      <Route element={<ProtectedRoute adminOnly />}>
+         <Route path="/admin" element={<AdminPage />} />
       </Route>
     </Routes>
   );

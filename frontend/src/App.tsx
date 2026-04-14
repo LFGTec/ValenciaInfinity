@@ -11,13 +11,12 @@ import {
   setUserAtom,
 } from "./stores/authStore";
 
-function App() {
+export function App() {
   const setAuth = useSetAtom(authAtom);
   const setUser = useSetAtom(setUserAtom);
   const setLoading = useSetAtom(setLoadingAtom);
 
   useEffect(() => {
-    // Initialize auth state on app mount
     const initializeAuth = async () => {
       setLoading(true);
       const user = await getCurrentUser();
@@ -42,4 +41,3 @@ function App() {
   return <AppRoutes />;
 }
 
-export default App;

@@ -264,3 +264,53 @@ export function onAuthStateChange(
     return null;
   }
 }
+
+
+export async function requestPasswordReset(
+  email: string
+): Promise<{ error: string | null }> {
+  try {
+    const redirectUrl = `${window.location.origin}/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { error: null };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Password reset request failed";
+    return { error: message };
+  }
+}
+
+export async function updatePassword(
+  newPassword: string,
+  currentPassword?: string
+): Promise<{ error: string | null }> {
+  try {
+    const updateData: { password: string; currentPassword?: string } = {
+      password: newPassword,
+    };
+
+    if (currentPassword) {
+      updateData.currentPassword = currentPassword;
+    }
+
+    const { error } = await supabase.auth.updateUser(updateData);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { error: null };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Password update failed";
+    return { error: message };
+  }
+}
+
