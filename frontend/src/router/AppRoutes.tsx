@@ -19,6 +19,10 @@ import ResetPassword from "../pages/ResetPassword";
 import {Juego} from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
 
+import { ManageCards } from "@/pages/AdminViews/ManageCards";
+import  AdminLayout  from "@/layouts/AdminLayout"
+
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -44,10 +48,13 @@ export default function AppRoutes() {
           <Route path="/juego" element={<Juego />} />
         </Route>
       </Route>
-
-      {/* Ruta de Admin (Puedes usar un layout distinto o ninguno) */}
-      <Route element={<ProtectedRoute adminOnly />}>
-         <Route path="/admin" element={<AdminPage />} />
+      
+      {/*Rutas de Admin*/}
+      <Route element={<AdminLayout />}>
+        <Route element={<ProtectedRoute adminOnly={true} />}>
+            <Route path="/admin/cards" element={<ManageCards />} />
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        </Route>
       </Route>
     </Routes>
   );
