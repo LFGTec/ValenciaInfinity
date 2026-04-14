@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRanking, type Ranking } from "@/services/rankingService";
+import { getNews } from "../services/newsService";
+import type { News } from "../services/newsService";
 import {
   Video,
   Clock,
@@ -21,6 +23,7 @@ import newsImage1 from "../assets/Noticia2.png";
 import newsImage2 from "../assets/Noticia3.png";
 import newsImage3 from "../assets/Noticia4.png";
 import newsImage4 from "../assets/Vivelospartidos.png";
+import newsImage5 from "../assets/Noticia5.png";
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
 import card1 from "../assets/CartaAmarilla.png";
 import card2 from "../assets/CartaAzul.png";
@@ -30,9 +33,12 @@ import avatar1 from "../assets/Avatar1.png";
 import avatar2 from "../assets/Avatar2.png";
 import avatar3 from "../assets/Avatar3.png";
 
-export function HomePage() {
+export default function HomePage() {
   const [ranking, setRanking] = useState<Ranking[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rankingLoading, setRankingLoading] = useState(true);
+
+  const [news, setNews] = useState<News[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
 
   useEffect(() => {
     const fetchRanking = async () => {
@@ -43,12 +49,30 @@ export function HomePage() {
         console.error("Error cargando ranking:", error);
         setRanking([]);
       } finally {
-        setLoading(false);
+        setRankingLoading(false);
       }
     };
 
     fetchRanking();
   }, []);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const fetchedNews = await getNews();
+        setNews(fetchedNews ?? []);
+      } catch (error) {
+        console.error("Error cargando noticias:", error);
+        setNews([]);
+      } finally {
+        setNewsLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  const fallbackNewsImages = [newsImage1, newsImage2, newsImage3, newsImage5];
 
   return (
     <div className="bg-content">
@@ -133,39 +157,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Quick Stats Bar */}
-      {/* <section className="bg-card border-b-2 border-border py-4">
-        <div className="max-w-[1600px] mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { icon: Star, label: "TU RACHA", value: "12 DÍAS", path: "/fanzone" },
-              { icon: Trophy, label: "NIVEL", value: "15", path: "/fanzone" },
-              { icon: BookOpen, label: "ÁLBUM", value: "72%", path: "/fanzone" },
-              { icon: Award, label: "PUNTOS", value: "2,340", path: "/fanzone" },
-            ].map((stat, i) => (
-              <Link
-                key={i}
-                to={stat.path}
-                className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-card hover:shadow-lg transition-all border-2 border-transparent hover:border-vcf-orange"
-              >
-                <div className="w-10 h-10 bg-vcf-orange rounded-lg flex items-center justify-center shadow-md text-white">
-                  <stat.icon size={20} />
-                </div>
-
-                <div className="text-left">
-                  <div className="text-xs text-muted-foreground font-bold">
-                    {stat.label}
-                  </div>
-                  <div className="text-lg md:text-xl font-black text-foreground">
-                    {stat.value}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
       {/* Main Content */}
       <div className="max-w-[1600px] mx-auto px-4 py-6 md:py-8">
         {/* Latest News */}
@@ -183,73 +174,88 @@ export function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link to="/news" className="lg:col-span-2 lg:row-span-2 group cursor-pointer">
-              <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
-                <img
-                  src={valenciaVictoryImage}
-                  alt="Valencia CF Victoria"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
+          {newsLoading ? (
+            <div className="text-center py-8 text-muted-foreground font-bold">
+              Cargando noticias...
+            </div>
+          ) : news.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground font-bold">
+              No hay noticias disponibles.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Noticia principal */}
+              <Link
+                to="/news"
+                className="lg:col-span-2 lg:row-span-2 group cursor-pointer"
+              >
+                <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
+                  <img
+                    src={news[0]?.imagen || valenciaVictoryImage}
+                    alt={news[0]?.titulo || "Noticia principal"}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = valenciaVictoryImage;
+                    }}
+                  />
 
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h3 className="text-2xl md:text-3xl font-black mb-2 group-hover:text-vcf-yellow transition-colors">
-                    Victoria histórica del Valencia CF en el Mestalla
-                  </h3>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
 
-                  <p className="text-sm mb-3 opacity-90">
-                    El equipo suma tres puntos importantes en la lucha por los puestos europeos.
-                  </p>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h3 className="text-2xl md:text-3xl font-black mb-2 group-hover:text-vcf-yellow transition-colors">
+                      {news[0]?.titulo || "Sin título"}
+                    </h3>
 
-                  <div className="flex items-center gap-4 text-xs">
-                    <span>Hace 2 horas</span>
-                    <span className="text-vcf-yellow">•</span>
-                    <span className="flex items-center gap-1">
-                      <Eye size={14} /> 1,234
-                    </span>
+                    <p className="text-sm mb-3 opacity-90 line-clamp-3">
+                      {news[0]?.contenido || "Sin contenido disponible."}
+                    </p>
+
+                    <div className="flex items-center gap-4 text-xs">
+                      <span>{news[0]?.fecha || "Fecha no disponible"}</span>
+                      <span className="text-vcf-yellow">•</span>
+                      <span className="flex items-center gap-1">
+                        <Eye size={14} /> {news[0]?.vistas ?? 0}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-
-            {[1, 2, 3, 4].map((item) => (
-              <Link key={item} to="/news" className="group cursor-pointer">
-                <div className="relative h-40 bg-muted rounded-lg overflow-hidden mb-3 shadow-md hover:shadow-lg transition-all">
-                  <img
-                    src={
-                      item === 1
-                        ? newsImage1
-                        : item === 2
-                        ? newsImage2
-                        : item === 3
-                        ? newsImage3
-                        : newsImage4
-                    }
-                    alt={`Noticia ${item}`}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-                </div>
-
-                <h3 className="font-black text-base mb-2 group-hover:text-vcf-orange transition-colors text-foreground">
-                  Noticia importante del equipo #{item}
-                </h3>
-
-                <p className="text-sm text-muted-foreground mb-2">
-                  Breve descripción de la noticia para captar la atención del lector.
-                </p>
-
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>Hace {item} horas</span>
-                  <span className="text-white">•</span>
-                  <span className="flex items-center gap-1">
-                    <Eye size={12} /> {500 - item * 50}
-                  </span>
-                </div>
               </Link>
-            ))}
-          </div>
+
+              {/* Noticias secundarias */}
+              {news.slice(1, 5).map((item, index) => (
+                <Link key={item.id} to="/news" className="group cursor-pointer">
+                  <div className="relative h-40 bg-muted rounded-lg overflow-hidden mb-3 shadow-md hover:shadow-lg transition-all">
+                    <img
+                      src={item.imagen || fallbackNewsImages[index] || newsImage5}
+                      alt={item.titulo}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          fallbackNewsImages[index] || newsImage5;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
+                  </div>
+
+                  <h3 className="font-black text-base mb-2 group-hover:text-vcf-orange transition-colors text-foreground">
+                    {item.titulo}
+                  </h3>
+
+                  <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                    {item.contenido}
+                  </p>
+
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>{item.fecha || "Fecha no disponible"}</span>
+                    <span className="text-white">•</span>
+                    <span className="flex items-center gap-1">
+                      <Eye size={12} /> {item.vistas ?? 0}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Match Rooms CTA */}
@@ -449,7 +455,7 @@ export function HomePage() {
             to="/fanzone"
             className="block bg-card border-2 border-vcf-orange rounded-lg overflow-hidden cursor-pointer hover:border-vcf-yellow hover:shadow-2xl transition-all"
           >
-            {loading ? (
+            {rankingLoading ? (
               <div className="p-8 text-center text-muted-foreground font-bold">
                 Cargando ranking...
               </div>
