@@ -134,7 +134,7 @@ export function HomePage() {
       </section>
 
       {/* Quick Stats Bar */}
-      <section className="bg-card border-b-2 border-border py-4">
+      {/* <section className="bg-card border-b-2 border-border py-4">
         <div className="max-w-[1600px] mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
@@ -164,7 +164,7 @@ export function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Main Content */}
       <div className="max-w-[1600px] mx-auto px-4 py-6 md:py-8">
