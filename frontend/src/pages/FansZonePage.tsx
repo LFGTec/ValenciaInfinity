@@ -12,6 +12,6 @@ interface PageProps {
 
 export function FansZonePage() {
   return (
-    <p> FANS</p>
+    <></>
   );
 }

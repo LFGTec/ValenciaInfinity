@@ -13,6 +13,8 @@ type Props = {
 export default function NewsList({ category }: Props) {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  
+
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -21,9 +23,7 @@ export default function NewsList({ category }: Props) {
       setNews(data);
       setLoading(false);
     };
-  
 
-    
     fetchNews();
   }, [category]);
 

@@ -1,6 +1,6 @@
 import NewsList from "../components/NewsList";
 
-function News() {
+export function News() {
   return (
     <section className="news-page-wrapper">
       <div className="news-page-container">
@@ -25,7 +25,7 @@ function News() {
         </div>
 
         <div className="news-list-spacing">
-          <NewsList/>
+          <NewsList category="TODAS" />
         </div>
 
         <div className="news-load-more-container">
@@ -35,5 +35,3 @@ function News() {
     </section>
   );
 }
-
-export default News;

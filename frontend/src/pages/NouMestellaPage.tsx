@@ -34,4 +34,8 @@ const IMG_WORLDCUP =
   "https://images.unsplash.com/photo-1703379650594-e981d8e26d87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080";
 
 export function NouMestellaPage() {
+  return (
+    <></>
+  )
+  
 }

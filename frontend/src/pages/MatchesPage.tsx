@@ -12,6 +12,6 @@ import {
 // ─── Matches Page ─────────────────────────────────────────────────────────────
 export function MatchesPage() {
   return (
-    <p>MATCH</p>
+    <></>
   );
 }
