@@ -3,7 +3,7 @@ import MainLayout from "../layouts/MainsLayout";
 import ProtectedRoute from "./ProtectedRoute";
 
 // Páginas
-import {HomePage} from "../pages/HomePage";
+import HomePage from "../pages/HomePage";
 import { TeamPage }from "../pages/TeamPage";
 import { MatchesPage } from "../pages/MatchesPage";
 import {News} from "../pages/News";
