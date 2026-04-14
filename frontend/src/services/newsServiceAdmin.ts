@@ -58,3 +58,24 @@ export const addNews = async (news: News): Promise<News | null> => {
 
   return data as News;
 };
+
+export const uploadNewsImage = async (file: File): Promise<string> => {
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+  const filePath = `news/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from("news-images")
+    .upload(filePath, file);
+
+  if (error) {
+    console.error("Error al subir imagen:", error);
+    throw error;
+  }
+
+  const { data } = supabase.storage
+    .from("news-images")
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+};
