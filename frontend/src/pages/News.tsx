@@ -28,9 +28,7 @@ export function News() {
           <NewsList category="TODAS" />
         </div>
 
-        <div className="news-load-more-container">
-          <button className="news-load-more-btn">CARGAR MÁS NOTICIAS</button>
-        </div>
+        
       </div>
     </section>
   );

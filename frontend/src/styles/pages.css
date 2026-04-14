@@ -58,7 +58,9 @@
 
 .news-page-wrapper {
   min-height: 100vh;
-  background-color: #0b0b0b;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .news-page-container {
@@ -75,13 +77,13 @@
   font-size: 45px;
   font-weight: 900;
   line-height: 1;
-  color: white;
+  color: var(--foreground);
   margin-bottom: 14px;
 }
 
 .news-main-subtitle {
   font-size: 16px;
-  color: #d1d5db;
+  color: var(--muted-foreground);
   margin-bottom: 28px;
 }
 
@@ -93,9 +95,9 @@
 }
 
 .news-filter-btn {
-  background: #1a1a1a;
-  color: white;
-  border: 2px solid #3a3a3a;
+  background: var(--card);
+  color: var(--foreground);
+  border: 2px solid var(--border);
   padding: 12px 24px;
   border-radius: 10px;
   font-size: 16px;
@@ -107,6 +109,7 @@
 
 .news-filter-btn:hover {
   border-color: #ff671f;
+  color: #ff671f;
 }
 
 .news-filter-btn.active {
@@ -141,11 +144,9 @@
   border-color: #e05516;
 }
 
-
 /* ============================== 
-   ADMIN NEWS (AGREGADO)
+   ADMIN NEWS
 ============================== */
-
 
 .news-header-row {
   display: flex;
@@ -155,26 +156,6 @@
   flex-wrap: wrap;
 }
 
-
-.news-add-btn {
-  background: transparent;
-  border: 2px solid #ff671f;
-  color: #ff671f;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  white-space: nowrap;
-}
-
-
-.news-add-btn:hover {
-  background: #ff671f;
-  color: #000;
-}
-
 .news-admin-container {
   display: flex;
   justify-content: flex-end;
@@ -182,25 +163,25 @@
 }
 
 .news-add-btn {
-  background-color: #ff7a00;
+  background: #ff7a00;
   color: white;
   border: none;
   padding: 10px 16px;
   border-radius: 8px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 800;
   cursor: pointer;
   transition: 0.2s ease;
+  white-space: nowrap;
 }
 
 .news-add-btn:hover {
-  background-color: #e66d00;
+  background: #e66d00;
 }
-
 
 /* ==============================
    News add list
 ============================== */
-
 
 .news-add-form {
   display: flex;
@@ -208,10 +189,10 @@
   gap: 14px;
   margin: 20px 0 30px 0;
   padding: 24px;
-  background: #111111;
-  border: 1px solid #2a2a2a;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 18px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
 .news-input,
@@ -219,9 +200,9 @@
 .news-select {
   width: 100%;
   padding: 14px 16px;
-  background-color: #1a1a1a;
-  color: #ffffff;
-  border: 1px solid #333333;
+  background-color: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
   border-radius: 12px;
   font-size: 15px;
   outline: none;
@@ -231,7 +212,7 @@
 
 .news-input::placeholder,
 .news-textarea::placeholder {
-  color: #b0b0b0;
+  color: var(--muted-foreground);
 }
 
 .news-input:focus,
@@ -272,7 +253,6 @@
 .news-submit-btn:active {
   transform: translateY(0);
 }
-
 
 /* ==============================
    FANZONE PAGE
