@@ -161,7 +161,7 @@
   padding: 0;
 }
 
-/* ===== IMAGEN ===== */
+
 
 .news-image-wrapper {
   position: relative;
@@ -212,7 +212,6 @@
   text-transform: uppercase;
 }
 
-/* ===== CONTENIDO ===== */
 
 .news-card-body {
   display: flex;
@@ -233,7 +232,7 @@
   color: #ff671f;
 }
 
-/* 🔥 AQUÍ LA SOLUCIÓN */
+
 .news-card-content {
   font-size: 16px;
   line-height: 1.65;
