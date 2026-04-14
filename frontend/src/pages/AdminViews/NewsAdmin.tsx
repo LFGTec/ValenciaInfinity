@@ -146,9 +146,6 @@ function NewsAdmin() {
           <NewsList category={selectedCategory} />
         </div>
 
-        <div className="news-load-more-container">
-          <button className="news-load-more-btn">CARGAR MÁS NOTICIAS</button>
-        </div>
       </div>
     </section>
   );

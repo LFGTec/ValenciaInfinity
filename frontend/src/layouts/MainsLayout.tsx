@@ -55,7 +55,7 @@ export default function MainLayout() {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) => `
-                    px-10 py-2 font-bold text-sm tracking-wide transition-all
+                    px-6 py-2 font-bold text-sm tracking-wide transition-all
                     ${isActive ? "text-vcf-orange border-b-4 border-vcf-orange" : "text-white hover:text-vcf-orange"}
                   `}
                 >
