@@ -17,6 +17,10 @@ import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 
+import { ManageCards } from "@/pages/AdminViews/ManageCards";
+import  AdminLayout  from "@/layouts/AdminLayout"
+
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -40,10 +44,13 @@ export default function AppRoutes() {
           <Route path="/profile" element={<UserProfile />} />
         </Route>
       </Route>
-
-      {/* Ruta de Admin (Puedes usar un layout distinto o ninguno) */}
-      <Route element={<ProtectedRoute adminOnly />}>
-         <Route path="/admin" element={<AdminPage />} />
+      
+      {/*Rutas de Admin*/}
+      <Route element={<AdminLayout />}>
+        <Route element={<ProtectedRoute adminOnly={true} />}>
+            <Route path="/admin/cards" element={<ManageCards />} />
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        </Route>
       </Route>
     </Routes>
   );

@@ -28,7 +28,7 @@ export async function addCard(
   nombre: string,
   rareza: string,
   tipo: string,
-  temporada: string,
+  temporada: number,
   numero: number,
   file?: File 
 ) {
