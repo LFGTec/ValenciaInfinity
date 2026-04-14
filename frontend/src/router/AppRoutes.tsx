@@ -11,8 +11,6 @@ import Game from "../pages/Game";
 import LogIn from "../pages/LogIn";
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
-import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
@@ -22,24 +20,22 @@ export default function AppRoutes() {
       <Route path="/login" element={<LogIn />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Redirect root to home */}
       <Route path="/" element={<Navigate to="/home" replace />} />
+
+      {/* Public routes (no authentication required) */}
       <Route element={<MainLayout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/team" element={<Team />} />
         <Route path="/matches" element={<Matches />} />
         <Route path="/news" element={<News />} />
-        <Route path="/fanzone" element={<FanZone />} />
-        <Route path="/game" element={<Game />} />
         <Route path="/nou-mestalla" element={<NouMestalla />} />
         <Route path="/shop" element={<Shop />} />
       </Route>
 
       {/* Protected routes (authentication required) */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/reset-password" element={<ResetPassword />} />
         <Route element={<MainLayout />}>
           <Route path="/fanzone" element={<FanZone />} />
           <Route path="/game" element={<Game />} />
