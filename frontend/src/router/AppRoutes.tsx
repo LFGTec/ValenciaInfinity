@@ -6,7 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import {HomePage} from "../pages/HomePage";
 import { TeamPage }from "../pages/TeamPage";
 import { MatchesPage } from "../pages/MatchesPage";
-import News from "../pages/News";
+import {News} from "../pages/News";
 import { FansZonePage } from "../pages/FansZonePage";
 import { AdminPage } from "../pages/AdminViews/AdminPage"; // Nuevo: Aquí pegas el AdminContent del wireframe
 import LogIn from "../pages/LogIn";
@@ -16,6 +16,8 @@ import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import {Juego} from "../pages/Juego";
+import { NouMestellaPage } from "../pages/NouMestellaPage";
 
 export default function AppRoutes() {
   return (
@@ -33,11 +35,13 @@ export default function AppRoutes() {
         <Route path="/team" element={<TeamPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/news" element={<News />} />
+        <Route path="/nou-mestalla" element={<NouMestellaPage/>} />
         
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/fanzone" element={<FansZonePage />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/juego" element={<Juego />} />
         </Route>
       </Route>
 

@@ -1,4 +1,4 @@
-export function News() {
+export function Juego() {
   return (
     <></>
   );

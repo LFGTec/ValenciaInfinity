@@ -48,6 +48,7 @@ export default function MainLayout() {
                 { path: "/matches", label: "PARTIDOS" },
                 { path: "/news", label: "NOTICIAS" },
                 { path: "/fanzone", label: "ZONA FAN" },
+                { path: "/juego", label: "JUEGO" },
                 { path: "/nou-mestalla", label: "NOU MESTALLA" },
               ].map((item) => (
                 <NavLink
