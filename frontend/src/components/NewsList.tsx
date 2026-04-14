@@ -6,19 +6,24 @@ import type { News } from "../services/newsService";
 const fallbackImage =
   "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
 
-export default function NewsList() {
+type Props = {
+  category: string;
+};
+
+export default function NewsList({ category }: Props) {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchNews = async () => {
-      const data = await getNews();
+      setLoading(true);
+      const data = await getNews(category);
       setNews(data);
       setLoading(false);
     };
 
     fetchNews();
-  }, []);
+  }, [category]);
 
   if (loading) return <p className="news-loading">Cargando noticias...</p>;
 
@@ -28,7 +33,7 @@ export default function NewsList() {
         <article key={item.id} className="news-card">
           <div className="news-image-wrapper">
             <img
-              src={item.imagen || fallbackImage}
+              src={item.Imagen || fallbackImage}
               alt={item.titulo}
               className="news-card-image"
               onError={(e) => {
@@ -39,7 +44,7 @@ export default function NewsList() {
             <div className="news-image-overlay"></div>
 
             <span className="news-category-badge">
-              {item.categoria || (i % 3 === 0 ? "EQUIPO" : i % 3 === 1 ? "PARTIDO" : "CLUB")}
+              {item.categoria || "SIN CATEGORÍA"}
             </span>
           </div>
 
@@ -50,7 +55,7 @@ export default function NewsList() {
 
             <div className="news-card-footer">
               <span className="news-card-date">
-                {item.fecha || `Hace ${i + 1} horas`}
+                {item.published_at || `Hace ${i + 1} horas`}
               </span>
 
               <span className="news-dot">•</span>

@@ -25,7 +25,7 @@ function News() {
         </div>
 
         <div className="news-list-spacing">
-          <NewsList />
+          <NewsList/>
         </div>
 
         <div className="news-load-more-container">
