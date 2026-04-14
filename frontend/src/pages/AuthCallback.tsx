@@ -46,8 +46,13 @@ export default function AuthCallback() {
         if (user) {
           console.log("✅ [AuthCallback] Autenticado como:", user.email, "role:", user.role);
           setUser(user);
-          // Redirect immediately
-          navigate("/home", { replace: true });
+
+          // Redirección inteligente basada en el rol
+          if (user.role?.toLowerCase() === 'admin') {
+            navigate("/admin/cards", { replace: true });
+          } else {
+            navigate("/home", { replace: true });
+          }
         } else {
           console.error("❌ [AuthCallback] No user returned from code exchange");
           setError("No se pudo completar el inicio de sesión");

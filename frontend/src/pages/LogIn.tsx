@@ -49,8 +49,7 @@ export default function LogInn() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const setUser = useSetAtom(setUserAtom);
-  const { isAuthenticated } = useAuth();
-
+  const { isAuthenticated, user } = useAuth();
   const activeTab: UserRole = "fan";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,10 +60,14 @@ export default function LogInn() {
   const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/home", { replace: true });
+    if (isAuthenticated && user) { // Añade 'user' a la condición
+      if (user.role?.toLowerCase() === 'admin') {
+        navigate("/admin/cards", { replace: true });
+      } else {
+        navigate("/home", { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   useEffect(() => {
     const errorMsg = searchParams.get("error");
@@ -114,6 +117,14 @@ export default function LogInn() {
       // Store remember me preference
       if (rememberMe) {
         localStorage.setItem("remembered_email", email);
+        setUser(user);
+        setIsLoading(false);
+
+        if (user.role?.toLowerCase() === 'admin') {
+          navigate("/admin/cards", { replace: true });
+        } else {
+          navigate("/home", { replace: true });
+        }
       } else {
         localStorage.removeItem("remembered_email");
       }

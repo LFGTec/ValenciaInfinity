@@ -10,34 +10,30 @@ import {
   setLoadingAtom,
   setUserAtom,
 } from "./stores/authStore";
+import { finishLoadingAtom } from "./stores/authStore"; // Importa el nuevo átomo
 
 export function App() {
-  const setAuth = useSetAtom(authAtom);
-  const setUser = useSetAtom(setUserAtom);
-  const setLoading = useSetAtom(setLoadingAtom);
+  const finishLoading = useSetAtom(finishLoadingAtom);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      setLoading(true);
-      const user = await getCurrentUser();
-      setUser(user);
-      setLoading(false);
+      try {
+        const user = await getCurrentUser();
+        finishLoading(user); // ⚡ Actualización única: User + Loading false
+      } catch (error) {
+        console.error(error);
+        finishLoading(null);
+      }
     };
 
     initializeAuth();
 
-    // Subscribe to auth changes
     const unsubscribe = onAuthStateChange((user) => {
-      setUser(user);
+      finishLoading(user); // ⚡ Actualización única también aquí
     });
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [setAuth, setUser, setLoading]);
+    return () => unsubscribe?.();
+  }, [finishLoading]);
 
   return <AppRoutes />;
 }
-

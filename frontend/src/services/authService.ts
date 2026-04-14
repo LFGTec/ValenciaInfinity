@@ -5,7 +5,7 @@ export type UserRole = "fan" | "admin";
 export interface User {
   id: string;
   email: string;
-  role: UserRole;
+  role: string;
   full_name?: string;
   avatar_url?: string;
   user_metadata?: {
@@ -173,10 +173,10 @@ async function getUserProfile(userId: string): Promise<User | null> {
     return {
       id: data.id,
       email: data.email,
-      role: data.role as UserRole,
+      role: data.role,
       full_name: data.full_name,
       avatar_url: data.avatar_url,
-      user_metadata: { role: data.role },
+      user_metadata: {  },
     };
   } catch (error) {
     console.error("❌ [authService] Exception en getUserProfile:", error);
@@ -261,34 +261,31 @@ export async function exchangeCodeForSession(
   try {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (error) {
-      console.error("❌ Code exchange error:", error);
-      return { user: null, error: error.message };
+    if (error) return { user: null, error: error.message };
+    if (!data.user) return { user: null, error: "No user returned" };
+
+    // 🔴 LA PIEZA QUE FALTA: Buscar el perfil real en la tabla 'profiles'
+    const profile = await getUserProfile(data.user.id);
+    
+    if (profile) {
+      return { user: profile, error: null };
     }
 
-    if (!data.user) {
-      console.error("❌ No user returned from code exchange");
-      return { user: null, error: "No user returned from OAuth" };
-    }
-
+    // Si no hay perfil, usamos el fallback de siempre
     const userRole = (sessionStorage.getItem("auth_user_role") as UserRole) || "fan";
-    sessionStorage.removeItem("auth_user_role");
-
-    const user: User = {
-      id: data.user.id,
-      email: data.user.email || "",
-      role: userRole,
-      full_name: data.user.user_metadata?.full_name,
-      avatar_url: data.user.user_metadata?.avatar_url,
-      user_metadata: data.user.user_metadata,
+    return {
+      user: {
+        id: data.user.id,
+        email: data.user.email || "",
+        role: userRole,
+        full_name: data.user.user_metadata?.full_name,
+        avatar_url: data.user.user_metadata?.avatar_url,
+        user_metadata: data.user.user_metadata,
+      },
+      error: null,
     };
-
-    return { user, error: null };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Code exchange failed";
-    console.error("❌ Code exchange exception:", message);
-    return { user: null, error: message };
+    return { user: null, error: "Code exchange failed" };
   }
 }
 
