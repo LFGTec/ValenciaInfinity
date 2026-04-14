@@ -72,20 +72,34 @@ export async function signInWithEmail(
   password: string
 ): Promise<{ user: User | null; error: string | null }> {
   try {
+    console.log("🔵 [authService] signInWithEmail iniciado:", { email });
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
+    console.log("🔵 [authService] signInWithEmail response:", { user: data.user?.email, error });
+
     if (error) {
+      console.error("❌ [authService] signInWithEmail error:", error.message);
       return { user: null, error: error.message };
     }
 
     if (!data.user) {
+      console.error("❌ [authService] signInWithEmail: No user returned");
       return { user: null, error: "No user returned from login" };
     }
 
+    // Obtener el rol de la BD en lugar de user_metadata
+    const profile = await getUserProfile(data.user.id);
+    if (profile) {
+      console.log("✅ [authService] signInWithEmail exitoso, role:", profile.role);
+      return { user: profile, error: null };
+    }
+
+    // Fallback si no encuentra en BD
     const role = (data.user.user_metadata?.role as UserRole) || "fan";
+    console.log("⚪ [authService] Usando role de metadata:", role);
 
     return {
       user: {
@@ -100,6 +114,7 @@ export async function signInWithEmail(
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Login failed";
+    console.error("❌ [authService] signInWithEmail exception:", message);
     return { user: null, error: message };
   }
 }
@@ -137,17 +152,63 @@ export async function signInWithGoogle(
 }
 
 /**
+ * Get user profile with role from database
+ */
+async function getUserProfile(userId: string): Promise<User | null> {
+  try {
+    console.log("🔵 [authService] Obteniendo perfil de BD:", userId);
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error("❌ [authService] Error obteniendo perfil:", error.message);
+      return null;
+    }
+
+    console.log("✅ [authService] Perfil obtenido:", { email: data.email, role: data.role });
+
+    return {
+      id: data.id,
+      email: data.email,
+      role: data.role as UserRole,
+      full_name: data.full_name,
+      avatar_url: data.avatar_url,
+      user_metadata: { role: data.role },
+    };
+  } catch (error) {
+    console.error("❌ [authService] Exception en getUserProfile:", error);
+    return null;
+  }
+}
+
+/**
  * Get current logged-in user
  */
 export async function getCurrentUser(): Promise<User | null> {
   try {
+    console.log("🔵 [authService] getCurrentUser iniciado");
     const { data } = await supabase.auth.getSession();
 
+    console.log("🔵 [authService] getCurrentUser session:", { hasSession: !!data.session, userEmail: data.session?.user?.email });
+
     if (!data.session?.user) {
+      console.log("⚪ [authService] getCurrentUser: No session found");
       return null;
     }
 
+    // Obtener el rol de la BD
+    const profile = await getUserProfile(data.session.user.id);
+    if (profile) {
+      console.log("✅ [authService] getCurrentUser exitoso, user:", profile.email, "role:", profile.role);
+      return profile;
+    }
+
+    // Fallback
     const role = (data.session.user.user_metadata?.role as UserRole) || "fan";
+    console.log("⚪ [authService] Usando role de metadata:", role);
 
     return {
       id: data.session.user.id,
@@ -158,7 +219,7 @@ export async function getCurrentUser(): Promise<User | null> {
       user_metadata: data.session.user.user_metadata,
     };
   } catch (error) {
-    console.error("Error getting current user:", error);
+    console.error("❌ [authService] Error getting current user:", error);
     return null;
   }
 }
@@ -246,8 +307,15 @@ export function onAuthStateChange(
         return;
       }
 
-      const role = (session.user.user_metadata?.role as UserRole) || "fan";
+      // Obtener el rol de la BD
+      const profile = await getUserProfile(session.user.id);
+      if (profile) {
+        callback(profile);
+        return;
+      }
 
+      // Fallback si no encuentra en BD
+      const role = (session.user.user_metadata?.role as UserRole) || "fan";
       callback({
         id: session.user.id,
         email: session.user.email || "",
