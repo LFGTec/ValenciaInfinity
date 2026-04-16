@@ -52,9 +52,9 @@ export default function AppRoutes() {
       
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
-        <Route element={<ProtectedRoute adminOnly={true} />}>
-            <Route path="/admin/news" element={<NewsAdmin />} />
+      <Route path="/admin/news" element={<NewsAdmin />} />
             <Route path="/admin/cards" element={<ManageCards />} />
+        <Route element={<ProtectedRoute adminOnly={true} />}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
       </Route>
