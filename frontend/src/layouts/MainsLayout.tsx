@@ -55,7 +55,7 @@ export default function MainLayout() {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) => `
-                    px-10 py-2 font-bold text-sm tracking-wide transition-all
+                    px-4 md:px-6 py-2 font-bold text-sm tracking-wide transition-all
                     ${isActive ? "text-vcf-orange border-b-4 border-vcf-orange" : "text-white hover:text-vcf-orange"}
                   `}
                 >
@@ -65,7 +65,7 @@ export default function MainLayout() {
             </nav>
 
             {/* Acciones Derecha */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-[260px] justify-end">
               
               {/* Puntos (Solo si está autenticado) */}
               {isAuthenticated && (
@@ -80,53 +80,51 @@ export default function MainLayout() {
               </button>
 
               {/* Perfil / Dropdown */}
-              {isAuthenticated && user ? (
-                <div className="relative">
-                  <button 
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
+              {/* Perfil / Login (contenedor fijo) */}
+              <div className="w-[120px] flex justify-end relative">
+                {isAuthenticated && user ? (
+                  <div className="relative">
+                    <button 
+                      onClick={() => setShowDropdown(!showDropdown)}
+                      className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
+                    >
+                      <img 
+                        src={user.user_metadata?.avatar_url || "https://via.placeholder.com/150"} 
+                        alt="User" 
+                        className="w-9 h-9 rounded-full border-2 border-vcf-orange object-cover"
+                      />
+                      <ChevronDown size={16} className={`text-white transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showDropdown && (
+                      <div className="absolute right-0 mt-3 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-2 z-[100]">
+                        <div className="px-4 py-3 border-b border-white/5">
+                          <p className="text-sm font-bold text-white truncate">{user.user_metadata?.full_name}</p> 
+                          <p className="text-xs text-gray-500 truncate">{user.email}</p> 
+                        </div> 
+                        <Link to="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"> 
+                          <User size={16} /> Mi Perfil </Link> 
+                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"> 
+                          <Settings size={16} /> Configuración 
+                        </Link> 
+                        <div className="border-t border-white/5 mt-1"> 
+                          <button onClick={handleLogout} disabled={isSigningOut} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" > 
+                            <LogOut size={16} /> 
+                            {isSigningOut ? "Saliendo..." : "Cerrar Sesión"} 
+                          </button> 
+                        </div> 
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link 
+                    to="/login" 
+                    className="bg-vcf-orange px-4 py-2 rounded-lg text-white font-bold text-sm"
                   >
-                    <img 
-                      src={user.user_metadata?.avatar_url || "https://via.placeholder.com/150"} 
-                      alt="User" 
-                      className="w-9 h-9 rounded-full border-2 border-vcf-orange object-cover"
-                    />
-                    <ChevronDown size={16} className={`text-white transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {showDropdown && (
-                    <div className="absolute right-0 mt-3 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-2 z-[100] animate-in fade-in slide-in-from-top-2">
-                      <div className="px-4 py-3 border-b border-white/5">
-                        <p className="text-sm font-bold text-white truncate">{user.user_metadata?.full_name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                      </div>
-                      
-                      <Link to="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors">
-                        <User size={16} /> Mi Perfil
-                      </Link>
-                      
-                      <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors">
-                        <Settings size={16} /> Configuración
-                      </Link>
-
-                      <div className="border-t border-white/5 mt-1">
-                        <button 
-                          onClick={handleLogout}
-                          disabled={isSigningOut}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors"
-                        >
-                          <LogOut size={16} /> {isSigningOut ? "Saliendo..." : "Cerrar Sesión"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link to="/login" className="bg-vcf-orange px-4 py-2 rounded-lg text-white font-bold text-sm">
-                  LOGIN
-                </Link>
-              )}
+                    LOGIN
+                  </Link>
+                )}
+              </div>
 
               {/* Mobile Menu Toggle */}
               <button className="lg:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

@@ -154,7 +154,7 @@ export async function signInWithGoogle(
 /**
  * Get user profile with role from database
  */
-async function getUserProfile(userId: string): Promise<User | null> {
+export async function getUserProfile(userId: string): Promise<User | null> {
   try {
     console.log("🔵 [authService] Obteniendo perfil de BD:", userId);
     const { data, error } = await supabase
@@ -201,6 +201,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     // Obtener el rol de la BD
     const profile = await getUserProfile(data.session.user.id);
+    console.log("PROFILE RESULT:", profile);
     if (profile) {
       console.log("✅ [authService] getCurrentUser exitoso, user:", profile.email, "role:", profile.role);
       return profile;

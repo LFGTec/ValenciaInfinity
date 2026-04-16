@@ -11,29 +11,12 @@ import {
   setUserAtom,
 } from "./stores/authStore";
 import { finishLoadingAtom } from "./stores/authStore"; // Importa el nuevo átomo
+import { AuthProvider } from "./providers/AuthProvider";
 
 export function App() {
-  const finishLoading = useSetAtom(finishLoadingAtom);
-
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const user = await getCurrentUser();
-        finishLoading(user); // ⚡ Actualización única: User + Loading false
-      } catch (error) {
-        console.error(error);
-        finishLoading(null);
-      }
-    };
-
-    initializeAuth();
-
-    const unsubscribe = onAuthStateChange((user) => {
-      finishLoading(user); // ⚡ Actualización única también aquí
-    });
-
-    return () => unsubscribe?.();
-  }, [finishLoading]);
-
-  return <AppRoutes />;
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
 }
