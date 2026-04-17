@@ -9,29 +9,23 @@ export default function ProtectedRoute({ adminOnly = false }: ProtectedRouteProp
   const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // 1. Si está cargando la sesión inicial, mostramos un spinner o nada
+  // MIENTRAS ESTÉ CARGANDO, NO RENDERIZAS NADA O UN SPINNER
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-vcf-orange">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-vcf-orange"></div>
-      </div>
-    );
+    return <div className="h-screen flex items-center justify-center">Verificando credenciales...</div>;
   }
 
-  // 2. Si no está autenticado, lo mandamos al login
-  if (!isAuthenticated) {
+  // SI YA NO CARGA Y NO HAY USUARIO
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 3. Validación de Admin
-  // Asumiendo que en tu base de datos el rol se guarda como 'admin'
-  const isAdmin = user?.role === 'admin';
+  // VALIDACIÓN DE ROL
+  const isAdmin = user.role?.toLowerCase() === 'admin';
 
   if (adminOnly && !isAdmin) {
-    console.warn("Acceso denegado: Se requiere rol de administrador");
+    console.warn("Acceso denegado: No eres admin", user);
     return <Navigate to="/home" replace />;
   }
 
-  // 4. Si todo es correcto, renderiza las rutas hijas
   return <Outlet />;
 }

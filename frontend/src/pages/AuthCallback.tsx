@@ -1,34 +1,60 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSetAtom } from "jotai";
-import { supabase } from "../services/supabaseClient";
-import { getCurrentUser } from "../services/authService";
+import { exchangeCodeForSession } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const setUser = useSetAtom(setUserAtom);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        console.log("🔄 AuthCallback - Iniciando...");
+        // Extract code from URL
+        const code = searchParams.get("code");
 
-        // Esperar un poco para que Supabase procese la sesión
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (!code) {
+          console.error("❌ [AuthCallback] No authorization code found");
+          setError("No authorization code found");
+          setTimeout(() => {
+            navigate("/login?error=no_code", { replace: true });
+          }, 2000);
+          return;
+        }
 
-        // Obtener el usuario actual (Supabase ya intercambió el código automáticamente)
-        const user = await getCurrentUser();
-        console.log("👤 Usuario obtenido:", user?.email);
+        // Exchange code for session
+        console.log("🔵 [AuthCallback] Intercambiando código por sesión...");
+        const { user, error: exchangeError } = await exchangeCodeForSession(code);
+
+        console.log("🔵 [AuthCallback] exchangeCodeForSession result:", { user: user?.email, error: exchangeError });
+
+        if (exchangeError) {
+          console.error("❌ [AuthCallback] Code exchange failed:", exchangeError);
+          setError(exchangeError);
+          setTimeout(() => {
+            navigate(
+              `/login?error=${encodeURIComponent(exchangeError)}`,
+              { replace: true }
+            );
+          }, 2000);
+          return;
+        }
 
         if (user) {
-          console.log("✅ Autenticado como:", user.email);
+          console.log("✅ [AuthCallback] Autenticado como:", user.email, "role:", user.role);
           setUser(user);
-          // Redirigir inmediatamente
-          navigate("/home", { replace: true });
+
+          // Redirección inteligente basada en el rol
+          if (user.role?.toLowerCase() === 'admin') {
+            navigate("/admin/cards", { replace: true });
+          } else {
+            navigate("/home", { replace: true });
+          }
         } else {
-          console.error("❌ No hay usuario");
+          console.error("❌ [AuthCallback] No user returned from code exchange");
           setError("No se pudo completar el inicio de sesión");
           setTimeout(() => {
             navigate("/login?error=auth_failed", { replace: true });
@@ -36,7 +62,7 @@ export default function AuthCallback() {
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Error desconocido";
-        console.error("❌ Excepción:", message);
+        console.error("❌ [AuthCallback] Excepción:", message);
         setError(message);
         setTimeout(() => {
           navigate(
@@ -48,7 +74,7 @@ export default function AuthCallback() {
     };
 
     handleCallback();
-  }, [navigate, setUser]);
+  }, [navigate, setUser, searchParams]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

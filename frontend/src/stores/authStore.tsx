@@ -51,14 +51,3 @@ export const setLoadingAtom = atom(
     });
   }
 );
-
-export const finishLoadingAtom = atom(
-  null,
-  (_get, set, user: User | null) => {
-    set(authAtom, {
-      user,
-      loading: false, // Apagamos el loading junto con el user
-      error: null,
-    });
-  }
-);
