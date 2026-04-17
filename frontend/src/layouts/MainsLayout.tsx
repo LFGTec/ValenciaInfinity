@@ -55,7 +55,7 @@ export default function MainLayout() {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) => `
-                    px-4 md:px-6 py-2 font-bold text-sm tracking-wide transition-all
+                    px-6 py-2 font-bold text-sm tracking-wide transition-all
                     ${isActive ? "text-vcf-orange border-b-4 border-vcf-orange" : "text-white hover:text-vcf-orange"}
                   `}
                 >
@@ -114,17 +114,14 @@ export default function MainLayout() {
                           </button> 
                         </div> 
                       </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link 
-                    to="/login" 
-                    className="bg-vcf-orange px-4 py-2 rounded-lg text-white font-bold text-sm"
-                  >
-                    LOGIN
-                  </Link>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className="bg-vcf-orange px-4 py-2 rounded-lg text-white font-bold text-sm">
+                  INICIAR SESIÓN
+                </Link>
+              )}
 
               {/* Mobile Menu Toggle */}
               <button className="lg:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
