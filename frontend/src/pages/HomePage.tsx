@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRanking, type Ranking } from "@/services/rankingService";
-import { getNews } from "../services/newsService";
-import type { News } from "../services/newsService";
+import { useNoticias } from "@/hooks/useNoticias";
 import {
   Video,
   Clock,
   Users,
-  Star,
-  Trophy,
-  BookOpen,
-  Award,
   ArrowRight,
-  Eye,
   Gamepad2,
   Ticket,
 } from "lucide-react";
@@ -22,7 +16,6 @@ import valenciaVictoryImage from "../assets/Noticia1.png";
 import newsImage1 from "../assets/Noticia2.png";
 import newsImage2 from "../assets/Noticia3.png";
 import newsImage3 from "../assets/Noticia4.png";
-import newsImage4 from "../assets/Vivelospartidos.png";
 import newsImage5 from "../assets/Noticia5.png";
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
 import card1 from "../assets/CartaAmarilla.png";
@@ -37,8 +30,7 @@ export default function HomePage() {
   const [ranking, setRanking] = useState<Ranking[]>([]);
   const [rankingLoading, setRankingLoading] = useState(true);
 
-  const [news, setNews] = useState<News[]>([]);
-  const [newsLoading, setNewsLoading] = useState(true);
+  const { noticias: news, cargando: newsLoading } = useNoticias();
 
   useEffect(() => {
     const fetchRanking = async () => {
@@ -56,23 +48,13 @@ export default function HomePage() {
     fetchRanking();
   }, []);
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const fetchedNews = await getNews();
-        setNews(fetchedNews ?? []);
-      } catch (error) {
-        console.error("Error cargando noticias:", error);
-        setNews([]);
-      } finally {
-        setNewsLoading(false);
-      }
-    };
-
-    fetchNews();
-  }, []);
-
   const fallbackNewsImages = [newsImage1, newsImage2, newsImage3, newsImage5];
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+  };
 
   return (
     <div className="bg-content">
@@ -183,77 +165,121 @@ export default function HomePage() {
               No hay noticias disponibles.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Noticia principal */}
-              <Link
-                to="/news"
-                className="lg:col-span-2 lg:row-span-2 group cursor-pointer"
-              >
-                <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
-                  <img
-                    src={news[0]?.imagen || valenciaVictoryImage}
-                    alt={news[0]?.titulo || "Noticia principal"}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = valenciaVictoryImage;
-                    }}
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-2xl md:text-3xl font-black mb-2 group-hover:text-vcf-yellow transition-colors">
-                      {news[0]?.titulo || "Sin título"}
-                    </h3>
-
-                    <p className="text-sm mb-3 opacity-90 line-clamp-3">
-                      {news[0]?.contenido || "Sin contenido disponible."}
-                    </p>
-
-                    <div className="flex items-center gap-4 text-xs">
-                      <span>{news[0]?.fecha || "Fecha no disponible"}</span>
-                      <span className="text-vcf-yellow">•</span>
-                      <span className="flex items-center gap-1">
-                        <Eye size={14} /> {news[0]?.vistas ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Noticias secundarias */}
-              {news.slice(1, 5).map((item, index) => (
-                <Link key={item.id} to="/news" className="group cursor-pointer">
-                  <div className="relative h-40 bg-muted rounded-lg overflow-hidden mb-3 shadow-md hover:shadow-lg transition-all">
+            <div className="flex flex-col gap-4">
+              {/* Fila superior: destacada + 2 laterales */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Noticia principal */}
+                <a
+                  href={news[0]?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lg:col-span-2 group cursor-pointer"
+                >
+                  <div className="relative h-[340px] md:h-[400px] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all">
                     <img
-                      src={item.imagen || fallbackNewsImages[index] || newsImage5}
-                      alt={item.titulo}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      src={news[0]?.imagen || valenciaVictoryImage}
+                      alt={news[0]?.titulo || "Noticia principal"}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
-                        e.currentTarget.src =
-                          fallbackNewsImages[index] || newsImage5;
+                        e.currentTarget.src = valenciaVictoryImage;
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 text-white">
+                      <span className="inline-block bg-[#ff671f] text-white px-3 py-1 rounded text-xs font-black mb-3 uppercase">
+                        {news[0]?.categoria}
+                      </span>
+                      <h3 className="text-xl md:text-2xl font-black mb-2 group-hover:text-vcf-yellow transition-colors leading-tight">
+                        {news[0]?.titulo || "Sin título"}
+                      </h3>
+                      <p className="text-sm mb-3 opacity-90 line-clamp-2">
+                        {news[0]?.descripcion || ""}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs">
+                        <span>{formatDate(news[0]?.fechaPublicacion)}</span>
+                        <span className="text-vcf-yellow">•</span>
+                        <span className="text-[#00a3e0]">{news[0]?.fuente}</span>
+                      </div>
+                    </div>
                   </div>
+                </a>
 
-                  <h3 className="font-black text-base mb-2 group-hover:text-vcf-orange transition-colors text-foreground">
-                    {item.titulo}
-                  </h3>
+                {/* Columna derecha: 2 noticias apiladas */}
+                <div className="flex flex-col gap-4">
+                  {news.slice(1, 3).map((item, index) => (
+                    <a
+                      key={item.url}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 group cursor-pointer"
+                    >
+                      <div className="relative h-[188px] md:h-[192px] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+                        <img
+                          src={item.imagen || fallbackNewsImages[index] || newsImage5}
+                          alt={item.titulo}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.src = fallbackNewsImages[index] || newsImage5;
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                        <span className="absolute top-2 left-2 bg-[#ff671f] text-white px-2 py-1 rounded text-xs font-black uppercase">
+                          {item.categoria}
+                        </span>
+                        <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                          <h3 className="font-black text-sm leading-tight group-hover:text-vcf-yellow transition-colors line-clamp-2">
+                            {item.titulo}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs mt-1 opacity-80">
+                            <span>{formatDate(item.fechaPublicacion)}</span>
+                            <span className="text-[#ff671f]">•</span>
+                            <span className="text-[#00a3e0]">{item.fuente}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
 
-                  <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                    {item.contenido}
-                  </p>
-
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{item.fecha || "Fecha no disponible"}</span>
-                    <span className="text-white">•</span>
-                    <span className="flex items-center gap-1">
-                      <Eye size={12} /> {item.vistas ?? 0}
-                    </span>
-                  </div>
-                </Link>
-              ))}
+              {/* Fila inferior: 3 noticias iguales */}
+              {news.length > 3 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {news.slice(3, 6).map((item, index) => (
+                    <a
+                      key={item.url}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group cursor-pointer"
+                    >
+                      <div className="relative aspect-video rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all mb-3">
+                        <img
+                          src={item.imagen || fallbackNewsImages[index] || newsImage5}
+                          alt={item.titulo}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.src = fallbackNewsImages[index] || newsImage5;
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <span className="absolute top-2 left-2 bg-[#ff671f] text-white px-2 py-1 rounded text-xs font-black uppercase">
+                          {item.categoria}
+                        </span>
+                      </div>
+                      <h3 className="font-black text-sm md:text-base mb-1 group-hover:text-vcf-orange transition-colors text-foreground line-clamp-2 leading-tight">
+                        {item.titulo}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{formatDate(item.fechaPublicacion)}</span>
+                        <span className="text-[#ff671f]">•</span>
+                        <span className="text-[#00a3e0]">{item.fuente}</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -465,29 +491,36 @@ export default function HomePage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-4 p-6 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange">
-                  {ranking.slice(0, 3).map((user, i) => {
-                    const colors = ["bg-gray-300", "bg-vcf-orange", "bg-gray-400"];
-                    const avatars = [avatar2, avatar1, avatar3];
+                <div className="grid grid-cols-3 gap-4 px-6 pt-6 pb-2 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange items-end">
+                  {/* Orden de visualización: 2º izquierda, 1º centro, 3º derecha */}
+                  {[1, 0, 2].map((rankIndex) => {
+                    const user = ranking[rankIndex];
+                    if (!user) return null;
+                    const place = rankIndex + 1;
+                    const colors = ["bg-vcf-yellow", "bg-gray-300", "bg-amber-600"];
+                    const avatars = [avatar1, avatar2, avatar3];
+                    const podiumMb = ["mb-8", "mb-4", "mb-0"];
+                    const badgeSize = rankIndex === 0 ? "w-20 h-20 text-2xl" : "w-16 h-16 text-xl";
+                    const imgSize = rankIndex === 0 ? "w-16 h-16" : "w-12 h-12";
 
                     return (
                       <div
                         key={user.id}
-                        className={`text-center ${i === 0 ? "transform scale-110 -mt-4" : ""}`}
+                        className={`text-center ${podiumMb[rankIndex]}`}
                       >
                         <div
-                          className={`w-20 h-20 mx-auto rounded-full mb-3 flex items-center justify-center shadow-lg ${colors[i]} text-white`}
+                          className={`${badgeSize} mx-auto rounded-full mb-3 flex items-center justify-center shadow-lg ${colors[rankIndex]} text-white`}
                         >
-                          <span className="text-2xl font-black">{i + 1}</span>
+                          <span className="font-black">{place}</span>
                         </div>
 
                         <img
-                          src={avatars[i]}
+                          src={avatars[rankIndex]}
                           alt={user.fan_nombre}
-                          className="w-16 h-16 rounded-full mx-auto mb-2 shadow-md object-cover"
+                          className={`${imgSize} rounded-full mx-auto mb-2 shadow-md object-cover`}
                         />
 
-                        <div className="font-black mb-1 text-foreground">
+                        <div className="font-black mb-1 text-foreground text-sm">
                           {user.fan_nombre}
                         </div>
 
