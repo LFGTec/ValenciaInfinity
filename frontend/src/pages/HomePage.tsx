@@ -191,7 +191,7 @@ export default function HomePage() {
               >
                 <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
                   <img
-                    src={news[0]?.imagen || valenciaVictoryImage}
+                    src={news[0]?.Imagen || valenciaVictoryImage}
                     alt={news[0]?.titulo || "Noticia principal"}
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={(e) => {
@@ -211,7 +211,7 @@ export default function HomePage() {
                     </p>
 
                     <div className="flex items-center gap-4 text-xs">
-                      <span>{news[0]?.fecha || "Fecha no disponible"}</span>
+                      <span>{news[0]?.published_at || "Fecha no disponible"}</span>
                       <span className="text-vcf-yellow">•</span>
                       <span className="flex items-center gap-1">
                         <Eye size={14} /> {news[0]?.vistas ?? 0}
@@ -226,7 +226,7 @@ export default function HomePage() {
                 <Link key={item.id} to="/news" className="group cursor-pointer">
                   <div className="relative h-40 bg-muted rounded-lg overflow-hidden mb-3 shadow-md hover:shadow-lg transition-all">
                     <img
-                      src={item.imagen || fallbackNewsImages[index] || newsImage5}
+                      src={item.Imagen || fallbackNewsImages[index] || newsImage5}
                       alt={item.titulo}
                       className="absolute inset-0 w-full h-full object-cover"
                       onError={(e) => {
@@ -246,7 +246,7 @@ export default function HomePage() {
                   </p>
 
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{item.fecha || "Fecha no disponible"}</span>
+                    <span>{item.published_at || "Fecha no disponible"}</span>
                     <span className="text-white">•</span>
                     <span className="flex items-center gap-1">
                       <Eye size={12} /> {item.vistas ?? 0}
