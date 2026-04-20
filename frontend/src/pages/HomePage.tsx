@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRanking, type Ranking } from "@/services/rankingService";
 import { getNews } from "../services/newsService";
@@ -7,10 +7,6 @@ import {
   Video,
   Clock,
   Users,
-  Star,
-  Trophy,
-  BookOpen,
-  Award,
   ArrowRight,
   Eye,
   Gamepad2,
@@ -22,7 +18,6 @@ import valenciaVictoryImage from "../assets/Noticia1.png";
 import newsImage1 from "../assets/Noticia2.png";
 import newsImage2 from "../assets/Noticia3.png";
 import newsImage3 from "../assets/Noticia4.png";
-import newsImage4 from "../assets/Vivelospartidos.png";
 import newsImage5 from "../assets/Noticia5.png";
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
 import card1 from "../assets/CartaAmarilla.png";

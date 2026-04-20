@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Share2,
   ShoppingCart,
   DollarSign,
-  Filter,
   Search,
   TrendingUp,
-  Users,
   Package,
   MessageSquare,
   Check,
@@ -205,15 +203,15 @@ export function CardExchange() {
     );
   };
 
-  const handleRemoveListing = (listingId: string) => {
+  const handleRemoveListing = () => {
     alert("Publicación eliminada");
   };
 
-  const handleAcceptTrade = (tradeId: string) => {
+  const handleAcceptTrade = () => {
     alert("Intercambio aceptado");
   };
 
-  const handleRejectTrade = (tradeId: string) => {
+  const handleRejectTrade = () => {
     alert("Intercambio rechazado");
   };
 
@@ -238,7 +236,7 @@ export function CardExchange() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Card Preview */}
               <div>
-                <div className="aspect-[2/3] bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg mb-4 shadow-lg relative flex items-center justify-center p-4">
+                <div className=" from-orange-50 to-yellow-50 rounded-lg mb-4 shadow-lg relative flex items-center justify-center p-4">
                   <div
                     className={`absolute top-0 left-0 right-0 h-2 ${rarityColors[selectedCard.card.rarity]}`}
                   ></div>
@@ -580,7 +578,7 @@ export function CardExchange() {
 
                     <button
                       onClick={() =>
-                        handleRemoveListing(listing.id)
+                        handleRemoveListing()
                       }
                       className="px-4 py-2 bg-black text-white rounded-lg font-bold hover:bg-black/80 transition-all shadow-lg hover:shadow-xl hover:scale-105"
                     >
@@ -716,7 +714,7 @@ export function CardExchange() {
                   <div className="flex gap-3">
                     <button
                       onClick={() =>
-                        handleAcceptTrade(trade.id)
+                        handleAcceptTrade()
                       }
                       className="flex-1 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
                     >
@@ -726,7 +724,7 @@ export function CardExchange() {
 
                     <button
                       onClick={() =>
-                        handleRejectTrade(trade.id)
+                        handleRejectTrade()
                       }
                       className="flex-1 py-3 bg-black text-white rounded-lg font-bold hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
                     >

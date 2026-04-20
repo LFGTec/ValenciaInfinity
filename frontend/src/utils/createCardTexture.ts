@@ -87,7 +87,6 @@ function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: numbe
   // Temporada
   ctx.fillStyle = "#888";
   ctx.font = `${Math.round(CARD_H * 0.075)}px Arial`;
-  ctx.fillText(card.temporada, x + CARD_W / 2, nameY + Math.round(CARD_H * 0.28), CARD_W - 6);
 
   // Border
   ctx.strokeStyle = "#e0e0e0";

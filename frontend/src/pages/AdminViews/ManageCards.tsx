@@ -5,8 +5,6 @@ import {
   Plus,
   Search,
   Filter,
-  Edit,
-  Trash2,
   X,
   Upload,
   Star,
@@ -24,7 +22,7 @@ export function ManageCards(){
     const [searchTerm, setSearchTerm] = useState("");
 
 
-
+    console.log(loading)
     const categories = [
         {
         id: "Todas",
@@ -71,11 +69,6 @@ export function ManageCards(){
     const getCategoryColor = (category: string) => {
         const cat = categories.find((c) => c.id === category);
         return cat?.color || "bg-gray-400";
-    };
-
-    const getCategoryBorderColor = (category: string) => {
-        const cat = categories.find((c) => c.id === category);
-        return cat?.borderColor || "border-gray-400";
     };
 
     const getCategoryIcon = (category: string) => {

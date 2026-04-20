@@ -5,7 +5,6 @@ import {
   Mail,
   Lock,
   LogIn,
-  Trophy,
   User,
   ChevronRight,
   Star,
