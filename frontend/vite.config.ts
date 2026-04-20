@@ -17,16 +17,6 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-football/, ""),
       },
-      "/rss-marca": {
-        target: "https://e00-marca.uecdn.es",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/rss-marca/, ""),
-      },
-      "/rss-as": {
-        target: "https://as.com",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/rss-as/, ""),
-      },
     },
   },
 });
