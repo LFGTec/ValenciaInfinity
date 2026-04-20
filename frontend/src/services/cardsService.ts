@@ -38,7 +38,7 @@ export async function addCard(
     if (file) {
       const fileName = `${Date.now()}-${file.name}`;
 
-      const { data, error } = await supabase.storage
+      const {  error } = await supabase.storage
         .from("imagenesCartas")
         .upload(fileName, file);
 

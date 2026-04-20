@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRanking, type Ranking } from "@/services/rankingService";
 import { useNoticias } from "@/hooks/useNoticias";
@@ -53,7 +53,11 @@ export default function HomePage() {
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+    return d.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   return (
@@ -198,7 +202,9 @@ export default function HomePage() {
                       <div className="flex items-center gap-3 text-xs">
                         <span>{formatDate(news[0]?.fechaPublicacion)}</span>
                         <span className="text-vcf-yellow">•</span>
-                        <span className="text-[#00a3e0]">{news[0]?.fuente}</span>
+                        <span className="text-[#00a3e0]">
+                          {news[0]?.fuente}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -216,11 +222,16 @@ export default function HomePage() {
                     >
                       <div className="relative h-[188px] md:h-[192px] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
                         <img
-                          src={item.imagen || fallbackNewsImages[index] || newsImage5}
+                          src={
+                            item.imagen ||
+                            fallbackNewsImages[index] ||
+                            newsImage5
+                          }
                           alt={item.titulo}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           onError={(e) => {
-                            e.currentTarget.src = fallbackNewsImages[index] || newsImage5;
+                            e.currentTarget.src =
+                              fallbackNewsImages[index] || newsImage5;
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
@@ -234,7 +245,9 @@ export default function HomePage() {
                           <div className="flex items-center gap-2 text-xs mt-1 opacity-80">
                             <span>{formatDate(item.fechaPublicacion)}</span>
                             <span className="text-[#ff671f]">•</span>
-                            <span className="text-[#00a3e0]">{item.fuente}</span>
+                            <span className="text-[#00a3e0]">
+                              {item.fuente}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -256,11 +269,16 @@ export default function HomePage() {
                     >
                       <div className="relative aspect-video rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all mb-3">
                         <img
-                          src={item.imagen || fallbackNewsImages[index] || newsImage5}
+                          src={
+                            item.imagen ||
+                            fallbackNewsImages[index] ||
+                            newsImage5
+                          }
                           alt={item.titulo}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           onError={(e) => {
-                            e.currentTarget.src = fallbackNewsImages[index] || newsImage5;
+                            e.currentTarget.src =
+                              fallbackNewsImages[index] || newsImage5;
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -301,11 +319,13 @@ export default function HomePage() {
               </div>
 
               <h2 className="text-4xl font-black mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-                VIVE LOS PARTIDOS CON TUS <span className="text-vcf-orange">AMIGOS</span>
+                VIVE LOS PARTIDOS CON TUS{" "}
+                <span className="text-vcf-orange">AMIGOS</span>
               </h2>
 
               <p className="text-lg mb-6 opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                Crea tu Match Room y disfruta de la experiencia de ver el partido en tiempo real.
+                Crea tu Match Room y disfruta de la experiencia de ver el
+                partido en tiempo real.
               </p>
 
               <Link
@@ -383,10 +403,12 @@ export default function HomePage() {
 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                   <span className="flex items-center gap-1">
-                    <Clock size={14} className="text-foreground" /> {challenge.time}
+                    <Clock size={14} className="text-foreground" />{" "}
+                    {challenge.time}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Users size={14} className="text-vcf-blue" /> {challenge.participants}
+                    <Users size={14} className="text-vcf-blue" />{" "}
+                    {challenge.participants}
                   </span>
                 </div>
 
@@ -406,7 +428,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-card rounded-xl p-8 shadow-lg border-2 border-vcf-orange">
             <div>
               <h2 className="text-4xl font-black mb-4 text-foreground">
-                COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE CARTAS
+                COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE
+                CARTAS
               </h2>
 
               <p className="text-lg text-muted-foreground mb-6">
@@ -415,8 +438,12 @@ export default function HomePage() {
 
               <div className="mb-6">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="font-black text-foreground">Tu Progreso</span>
-                  <span className="font-black text-vcf-orange">145/200 (72%)</span>
+                  <span className="font-black text-foreground">
+                    Tu Progreso
+                  </span>
+                  <span className="font-black text-vcf-orange">
+                    145/200 (72%)
+                  </span>
                 </div>
 
                 <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
@@ -497,10 +524,17 @@ export default function HomePage() {
                     const user = ranking[rankIndex];
                     if (!user) return null;
                     const place = rankIndex + 1;
-                    const colors = ["bg-vcf-yellow", "bg-gray-300", "bg-amber-600"];
+                    const colors = [
+                      "bg-vcf-yellow",
+                      "bg-gray-300",
+                      "bg-amber-600",
+                    ];
                     const avatars = [avatar1, avatar2, avatar3];
                     const podiumMb = ["mb-8", "mb-4", "mb-0"];
-                    const badgeSize = rankIndex === 0 ? "w-20 h-20 text-2xl" : "w-16 h-16 text-xl";
+                    const badgeSize =
+                      rankIndex === 0
+                        ? "w-20 h-20 text-2xl"
+                        : "w-16 h-16 text-xl";
                     const imgSize = rankIndex === 0 ? "w-16 h-16" : "w-12 h-12";
 
                     return (

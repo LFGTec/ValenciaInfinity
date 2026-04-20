@@ -8,7 +8,6 @@ import { TeamPage }from "../pages/TeamPage";
 import { MatchesPage } from "../pages/MatchesPage";
 import {News} from "../pages/News";
 import { FansZonePage } from "../pages/FansZonePage";
-import { AdminPage } from "../pages/AdminViews/AdminPage"; // Nuevo: Aquí pegas el AdminContent del wireframe
 import LogIn from "../pages/LogIn";
 import { UserProfile} from "../components/features/UserProfile"
 import NewsAdmin from "../pages/AdminViews/NewsAdmin.tsx";
@@ -16,7 +15,6 @@ import NewsAdmin from "../pages/AdminViews/NewsAdmin.tsx";
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
 import {Juego} from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
 

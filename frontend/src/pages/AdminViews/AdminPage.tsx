@@ -1,39 +1,10 @@
-import React, { useState, useEffect } from "react";
 // import vcfShield from "../assets/EscudoValenciaCF.png";
 // import valenciaPointsIcon from "../assets/ValenciaPoints.png";
 import {
-  Home,
-  Trophy,
-  Calendar,
-  Users,
-  Bell,
-  ShoppingBag,
-  Video,
-  Menu,
-  X,
-  Search,
-  ChevronDown,
-  Play,
-  MessageSquare,
-  TrendingUp,
   FileText,
-  Gift,
   Gamepad2,
-  Globe,
-  User,
-  Settings,
-  LogOut,
-  Clock,
-  Star,
-  Award,
-  Share2,
-  Heart,
-  Eye,
   ArrowRight,
   BookOpen,
-  Ticket,
-  Sun,
-  Moon,
 } from "lucide-react";
 
 
@@ -58,7 +29,6 @@ export function AdminPage() {
           {
             label: "Usuarios Activos",
             value: "1,234",
-            icon: Users,
             color: "bg-vcf-blue",
           },
           {

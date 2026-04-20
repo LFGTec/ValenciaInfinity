@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link, NavLink, useNavigate, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { 
-  Sun, Moon, Bell, Menu, X, User, LogOut, Settings, ChevronDown 
+  Sun, Moon, Menu, X, User, LogOut, Settings, ChevronDown 
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";
 import valenciaPointsIcon from "../assets/ValenciaPoints.png";
@@ -10,7 +10,6 @@ import valenciaPointsIcon from "../assets/ValenciaPoints.png";
 export default function MainLayout() {
   const { user, isAuthenticated, signOut, isSigningOut } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
