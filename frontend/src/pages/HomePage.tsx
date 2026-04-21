@@ -29,12 +29,14 @@ import avatar2 from "../assets/Avatar2.png";
 import avatar3 from "../assets/Avatar3.png";
 
 export default function HomePage() {
+  //Guarda el ranking y las noticias en el estado para mostrarlos en la página
   const [ranking, setRanking] = useState<Ranking[]>([]);
+  //Dice si el ranking esta cargando empieza con true pq al principio no se obtienen datos
   const [rankingLoading, setRankingLoading] = useState(true);
 
   const [news, setNews] = useState<News[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
-
+  //Cuando se abre la página se monta por primera vez y se ejecuta el useEffect, que llama a la función fetchRanking, que obtiene el ranking de la base de datos y lo guarda en el estado, y luego hace lo mismo con las noticias
   useEffect(() => {
     const fetchRanking = async () => {
       try {
@@ -66,7 +68,7 @@ export default function HomePage() {
 
     fetchNews();
   }, []);
-
+  //Arreglo para traer imagenes con respaldo
   const fallbackNewsImages = [newsImage1, newsImage2, newsImage3, newsImage5];
 
   return (
@@ -112,6 +114,7 @@ export default function HomePage() {
                 { v: "35", l: "MIN" },
                 { v: "22", l: "SEG" },
               ].map((t, i, arr) => (
+                //Divide en t cada elementp, i el indice y arr el array complto
                 <div key={i} className="flex items-center gap-2 md:gap-4">
                   <div className="text-center bg-black/60 backdrop-blur-sm border border-white/20 px-3 md:px-6 py-3 md:py-4 rounded-xl shadow-lg">
                     <div className="text-2xl md:text-3xl font-black text-[#ff671f] drop-shadow-md">
@@ -126,16 +129,19 @@ export default function HomePage() {
                     <div className="text-xl md:text-2xl font-black text-vcf-yellow drop-shadow-md">
                       :
                     </div>
+                    //Muestra : si no es el último elemento
                   )}
                 </div>
               ))}
             </div>
-
+            
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link
+              /* crea el link que te lleva al matchroom */
                 to="/game"
                 className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 text-sm md:text-base"
               >
+                
                 <Video size={20} />
                 <span>CREAR MATCH ROOM</span>
               </Link>
@@ -302,7 +308,7 @@ export default function HomePage() {
               VER TODOS <ArrowRight size={16} />
             </Link>
           </div>
-
+          {/* Arreglo de desafios*/}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               {
@@ -329,9 +335,11 @@ export default function HomePage() {
                 color: "from-white to-white",
                 iconColor: "text-[#ff671f]",
               },
+              //Recorre el arreglo y por cada desafio crea una tarjeta
             ].map((challenge, i) => (
               <div
                 key={i}
+                //Crea una carta con fondo, borde, padding, hover, cursor pointer, y un group
                 className="bg-card border-2 border-border rounded-lg p-6 hover:border-vcf-orange hover:shadow-xl transition-all cursor-pointer group"
               >
                 <div className="flex items-start justify-between mb-4">
@@ -414,6 +422,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-3 gap-4">
+              {/* Recorre el arreglo de imagenes de cartas */}
               {[card1, card2, card3, card4, card1, card2].map((cardImg, i) => (
                 <Link
                   key={i}
@@ -460,6 +469,7 @@ export default function HomePage() {
               </div>
             ) : (
               <>
+              {/* Recorre el ranking y muestra los primeros 3 en un estilo destacado, y luego del 4 al 10 en un estilo de lista */}
                 <div className="grid grid-cols-3 gap-4 p-6 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange">
                   {ranking.slice(0, 3).map((user, i) => {
                     const colors = ["bg-gray-300", "bg-vcf-orange", "bg-gray-400"];
@@ -493,7 +503,7 @@ export default function HomePage() {
                     );
                   })}
                 </div>
-
+                {/* Lista del 4 al 10 en el raking */}
                 <div className="divide-y divide-border">
                   {ranking.slice(3, 10).map((user, i) => (
                     <div

@@ -21,6 +21,8 @@ import { NouMestellaPage } from "../pages/NouMestellaPage";
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
 import  AdminLayout  from "@/layouts/AdminLayout"
 
+import { TriviasQuizzes } from  "../components/features/TriviasQuizzes"
+
 
 export default function AppRoutes() {
   return (
@@ -45,6 +47,7 @@ export default function AppRoutes() {
           <Route path="/fanzone" element={<FansZonePage />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
+          <Route path="/trivias" element={<TriviasQuizzes />} />
         </Route>
       </Route>
       
