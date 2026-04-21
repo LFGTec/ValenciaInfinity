@@ -68,7 +68,7 @@ export default function HomePage() {
 
     fetchNews();
   }, []);
-  //Arreglo para traer imagenes con respaldo
+  //Arreglo de imagenes de noticias para usar como fallback en caso de que alguna noticia no tenga imagen, o la imagen no cargue
   const fallbackNewsImages = [newsImage1, newsImage2, newsImage3, newsImage5];
 
   return (
@@ -193,7 +193,6 @@ export default function HomePage() {
                 <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
                   <img
                     src={news[0]?.Imagen || valenciaVictoryImage}
-                    alt={news[0]?.titulo || "Noticia principal"}
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = valenciaVictoryImage;
