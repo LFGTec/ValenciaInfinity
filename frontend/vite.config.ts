@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   server: {
-    proxy: {
+    proxy: {//servidro de vite hace la peticion
       "/api-football": {
         target: "https://api.football-data.org",
         changeOrigin: true,

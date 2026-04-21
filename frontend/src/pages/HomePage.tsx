@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getRanking, type Ranking } from "@/services/rankingService";
 import { useNoticias } from "@/hooks/useNoticias";
@@ -28,6 +28,7 @@ const fallbackImage =
 export default function HomePage() {
   const [ranking, setRanking] = useState<Ranking[]>([]);
   const [rankingLoading, setRankingLoading] = useState(true);
+  const navigate = useNavigate();
   const { noticias: news, cargando: newsLoading } = useNoticias();
 
   const formatDate = (dateStr: string) => {
@@ -169,11 +170,9 @@ export default function HomePage() {
               {news.slice(0, 6).map((item, i) => {
                 const isFeatured = i === 0;
                 return (
-                  <motion.a
+                  <motion.div
                     key={item.url}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={() => navigate("/news")}
                     className={`relative rounded-[14px] overflow-hidden cursor-pointer group no-underline shadow-[0_4px_20px_rgba(0,0,0,0.18)] ${
                       isFeatured ? "md:col-span-2 md:row-span-2" : ""
                     }`}
@@ -218,7 +217,7 @@ export default function HomePage() {
                         <span className="text-[#4db8e8]">{item.fuente}</span>
                       </div>
                     </div>
-                  </motion.a>
+                  </motion.div>
                 );
               })}
             </div>
