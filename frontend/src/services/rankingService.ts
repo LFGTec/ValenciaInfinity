@@ -6,6 +6,7 @@ export type Ranking = {
   puntos: number;
   nivel: string;
 };
+//Agregar imagen del usuario
 //Modelo de ranking, con id, nombre del fan, puntos y nivel
 
 export const getRanking = async (): Promise<Ranking[]> => {
@@ -13,7 +14,7 @@ export const getRanking = async (): Promise<Ranking[]> => {
     .from("ranking")
     //va a la tabla de ranking
     .select("*")
-    //Trae todas las columnas
+    //Trae todas las columnas3
     .order("puntos", { ascending: false });
     //Ordena de mayor a menor
 

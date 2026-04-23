@@ -42,6 +42,7 @@ export default function HomePage() {
       try {
         const fetchedData = await getRanking();
         setRanking(fetchedData ?? []);
+        //Si no se obtienen datos, se guarda un array vacío para evitar errores al renderizar
       } catch (error) {
         console.error("Error cargando ranking:", error);
         setRanking([]);
@@ -193,6 +194,7 @@ export default function HomePage() {
                 <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
                   <img
                     src={news[0]?.Imagen || valenciaVictoryImage}
+                    //ORDENAR POR FECHA
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = valenciaVictoryImage;
