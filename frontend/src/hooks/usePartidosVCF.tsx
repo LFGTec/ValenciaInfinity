@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 export interface Partido {
-  id: string;
+  id: string; //atributos
   dia: number;
   mes: number;
   anio: number;
@@ -28,10 +28,11 @@ export interface EstadisticasTemporada {
   jornada: number;
 }
 
-const API_KEY = import.meta.env.VITE_FOOTBALL_API_KEY;
-const VCF_ID = 95;
+const API_KEY = import.meta.env.VITE_FOOTBALL_API_KEY; // api key
+const VCF_ID = 95; // id valencia
 
 const MESES_CORTO = [
+  // meses corto
   "ENE",
   "FEB",
   "MAR",
@@ -47,31 +48,36 @@ const MESES_CORTO = [
 ];
 
 const COMPETICION_MAP: Record<string, string> = {
+  // nombres cortos
   "Primera Division": "LA LIGA",
   "Copa del Rey": "COPA DEL REY",
   "UEFA Champions League": "CHAMPIONS",
 };
 
 function mapearPartido(match: any, estado: "JUGADO" | "PROXIMO"): Partido {
-  const fecha = new Date(match.utcDate);
-  const esLocal = match.homeTeam.id === VCF_ID;
-  const rival = esLocal ? match.awayTeam : match.homeTeam;
+  //funcion que adapta los datos de la api en el objeto partido
+  const fecha = new Date(match.utcDate); // fecha api
+  const esLocal = match.homeTeam.id === VCF_ID; // es local?
+  const rival = esLocal ? match.awayTeam : match.homeTeam; // rival
 
   const tieneResultado =
+    // ya jugado?
     match.score?.fullTime?.home !== null &&
     match.score?.fullTime?.away !== null;
 
   return {
-    id: String(match.id),
+    id: String(match.id), // id string
     dia: fecha.getDate(),
     mes: fecha.getMonth(),
     anio: fecha.getFullYear(),
-    mesTexto: MESES_CORTO[fecha.getMonth()],
-    hora: `${String(fecha.getHours()).padStart(2, "0")}:${String(fecha.getMinutes()).padStart(2, "0")}h`,
-    rival: rival.shortName ?? rival.name,
+    mesTexto: MESES_CORTO[fecha.getMonth()], // mes texto
+    hora: `${String(fecha.getHours()).padStart(2, "0")}:${String(
+      fecha.getMinutes(),
+    ).padStart(2, "0")}h`, // formato hora
+    rival: rival.shortName ?? rival.name, // nombre rival
     competicion:
-      COMPETICION_MAP[match.competition.name] ?? match.competition.name,
-    jornada: match.matchday ? `JOR. ${match.matchday}` : undefined,
+      COMPETICION_MAP[match.competition.name] ?? match.competition.name, // map liga
+    jornada: match.matchday ? `JOR. ${match.matchday}` : undefined, // jornada
     casa: esLocal,
     escudoRival: rival.crest,
     codigoRival: rival.tla,
@@ -81,24 +87,25 @@ function mapearPartido(match: any, estado: "JUGADO" | "PROXIMO"): Partido {
           local: match.score.fullTime.home,
           visitante: match.score.fullTime.away,
         }
-      : undefined,
+      : undefined, // si hay marcador
   };
 }
 
 export function usePartidosVCF() {
-  const [proximos, setProximos] = useState<Partido[]>([]);
-  const [jugados, setJugados] = useState<Partido[]>([]);
+  const [proximos, setProximos] = useState<Partido[]>([]); // futuros
+  const [jugados, setJugados] = useState<Partido[]>([]); // pasados
   const [estadisticas, setEstadisticas] =
-    useState<EstadisticasTemporada | null>(null);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+    useState<EstadisticasTemporada | null>(null); // stats
+  const [cargando, setCargando] = useState(true); // loading
+  const [error, setError] = useState<string | null>(null); // error
 
   useEffect(() => {
     async function fetchTodo() {
       try {
-        const headers = { "X-Auth-Token": API_KEY };
-        const base = `/api-football/v4/teams/${VCF_ID}/matches`;
+        const headers = { "X-Auth-Token": API_KEY }; // auth
+        const base = `/api-football/v4/teams/${VCF_ID}/matches`; // url base
 
+        // 3 requests al mismo tiempo
         const [resProximos, resJugados, resStats] = await Promise.all([
           fetch(`${base}?status=SCHEDULED&competitions=2014&limit=5`, {
             headers,
@@ -109,30 +116,31 @@ export function usePartidosVCF() {
           fetch(`${base}?status=FINISHED&competitions=2014`, { headers }),
         ]);
 
-        if (!resProximos.ok)
-          throw new Error(`Próximos: Error ${resProximos.status}`);
-        if (!resJugados.ok)
-          throw new Error(`Jugados: Error ${resJugados.status}`);
-        if (!resStats.ok) throw new Error(`Stats: Error ${resStats.status}`);
+        // validar errores
+        if (!resProximos.ok) throw new Error(`Proximos: ${resProximos.status}`);
+        if (!resJugados.ok) throw new Error(`Jugados: ${resJugados.status}`);
+        if (!resStats.ok) throw new Error(`Stats: ${resStats.status}`);
 
+        // convertir a json
         const [dataProximos, dataJugados, dataStats] = await Promise.all([
           resProximos.json(),
           resJugados.json(),
           resStats.json(),
         ]);
 
+        // guardar proximos
         setProximos(
-          (dataProximos.matches as any[]).map((m) =>
-            mapearPartido(m, "PROXIMO"),
-          ),
-        );
-        setJugados(
-          (dataJugados.matches as any[])
-            .reverse()
-            .map((m) => mapearPartido(m, "JUGADO")),
+          dataProximos.matches.map((m: any) => mapearPartido(m, "PROXIMO")),
         );
 
-        // Calcular estadísticas manualmente desde los partidos
+        // guardar jugados
+        setJugados(
+          dataJugados.matches
+            .reverse() // ordenar
+            .map((m: any) => mapearPartido(m, "JUGADO")),
+        );
+
+        // calcular stats
         const matches = dataStats.matches as any[];
 
         let ganados = 0,
@@ -143,13 +151,17 @@ export function usePartidosVCF() {
 
         matches.forEach((m: any) => {
           const esLocal = m.homeTeam.id === VCF_ID;
+
+          // goles
           golesAFavor += esLocal
             ? m.score.fullTime.home
             : m.score.fullTime.away;
+
           golesEnContra += esLocal
             ? m.score.fullTime.away
             : m.score.fullTime.home;
 
+          // resultado
           if (m.score.winner === "DRAW") {
             empatados++;
           } else if (
@@ -164,6 +176,7 @@ export function usePartidosVCF() {
 
         const ultimaJornada = matches[matches.length - 1]?.matchday ?? 0;
 
+        // guardar stats
         setEstadisticas({
           jugados: matches.length,
           ganados,
@@ -175,14 +188,14 @@ export function usePartidosVCF() {
           jornada: ultimaJornada,
         });
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message); // guardar error
       } finally {
-        setCargando(false);
+        setCargando(false); // quitar loading
       }
     }
 
-    fetchTodo();
+    fetchTodo(); // ejecutar
   }, []);
 
-  return { proximos, jugados, estadisticas, cargando, error };
+  return { proximos, jugados, estadisticas, cargando, error }; // return hook
 }

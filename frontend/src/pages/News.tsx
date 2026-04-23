@@ -1,6 +1,15 @@
+import { useState } from "react";
 import NewsList from "../components/NewsList";
+import type { Categoria } from "@/hooks/useNoticias";
 
 export function News() {
+  const [selectedCategory, setSelectedCategory] = useState<Categoria>("TODAS");
+  const [visibleCount, setVisibleCount] = useState(9);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 6);
+  };
+
   return (
     <section className="news-page-wrapper">
       <div className="news-page-container">
@@ -16,7 +25,11 @@ export function News() {
             (cat, index) => (
               <button
                 key={cat}
-                className={`news-filter-btn ${index === 0 ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedCategory(cat as Categoria);
+                  setVisibleCount(9);
+                }}
+                className={`news-filter-btn ${selectedCategory === cat ? "active" : ""}`}
               >
                 {cat}
               </button>
@@ -25,7 +38,11 @@ export function News() {
         </div>
 
         <div className="news-list-spacing">
-          <NewsList category="TODAS" />
+          <NewsList 
+            category={selectedCategory} 
+            visibleCount={visibleCount}
+            onLoadMore={handleLoadMore}
+          />
         </div>
 
         

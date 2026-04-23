@@ -11,11 +11,21 @@ export default defineConfig({
     },
   },
   server: {
-    proxy: {
+    proxy: {//servidro de vite hace la peticion
       "/api-football": {
         target: "https://api.football-data.org",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-football/, ""),
+      },
+      "/rss-marca": {
+        target: "https://e00-marca.uecdn.es",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/rss-marca/, ""),
+      },
+      "/rss-as": {
+        target: "https://as.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/rss-as/, ""),
       },
     },
   },
