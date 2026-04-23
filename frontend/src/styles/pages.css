@@ -53,6 +53,98 @@
 }
 
 /* ==============================
+   NEWS PAGE
+============================== */
+
+.news-page-wrapper {
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.news-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.news-header {
+  margin-bottom: 24px;
+}
+
+.news-main-title {
+  font-size: 45px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--foreground);
+  margin-bottom: 14px;
+}
+
+.news-main-subtitle {
+  font-size: 16px;
+  color: var(--muted-foreground);
+  margin-bottom: 28px;
+}
+
+.news-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.news-filter-btn {
+  background: var(--card);
+  color: var(--foreground);
+  border: 2px solid var(--border);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.news-filter-btn:hover {
+  border-color: #ff671f;
+  color: #ff671f;
+}
+
+.news-filter-btn.active {
+  background: #ff671f;
+  border-color: #ff671f;
+  color: white;
+}
+
+.news-list-spacing {
+  margin-top: 10px;
+}
+
+.news-load-more-container {
+  text-align: center;
+  margin-top: 48px;
+}
+
+.news-load-more-btn {
+  background: #ff671f;
+  color: white;
+  border: 2px solid #ff671f;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.news-load-more-btn:hover {
+  background: #e05516;
+  border-color: #e05516;
+}
+
+/* ============================== 
    ADMIN NEWS
 ============================== */
 
