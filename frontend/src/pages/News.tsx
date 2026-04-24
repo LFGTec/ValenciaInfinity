@@ -11,30 +11,36 @@ export function News() {
   };
 
   return (
-    <section className="news-page-wrapper">
-      <div className="news-page-container">
-        <div className="news-header">
-          <h1 className="news-main-title">NOTICIAS</h1>
-          <p className="news-main-subtitle">
+    <section className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+      <div>
+        <div className="mb-8">
+          <h1 className="text-5xl font-black mb-3 text-foreground">NOTICIAS</h1>
+          <p className="text-base text-muted-foreground">
             Toda la actualidad del Valencia CF
           </p>
         </div>
 
-        <div className="news-filters">
-          {["TODAS", "EQUIPO", "FICHAJES", "PARTIDOS", "CANTERA", "CLUB"].map(
-            (cat, index) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  setSelectedCategory(cat as Categoria);
-                  setVisibleCount(9);
-                }}
-                className={`news-filter-btn ${selectedCategory === cat ? "active" : ""}`}
-              >
-                {cat}
-              </button>
-            )
-          )}
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <div className="flex gap-3 overflow-x-auto pb-1 flex-1">
+            {["TODAS", "EQUIPO", "FICHAJES", "PARTIDOS", "CANTERA", "CLUB"].map(
+              (cat) => (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    setSelectedCategory(cat as Categoria);
+                    setVisibleCount(9);
+                  }}
+                  className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all text-base ${
+                    selectedCategory === cat
+                      ? "bg-vcf-orange text-white"
+                      : "bg-card border-2 border-border hover:border-vcf-orange text-foreground"
+                  }`}
+                >
+                  {cat}
+                </button>
+              )
+            )}
+          </div>
         </div>
 
         <div className="news-list-spacing">

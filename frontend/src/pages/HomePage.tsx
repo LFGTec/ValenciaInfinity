@@ -176,13 +176,22 @@ export default function HomePage() {
                     className={`relative rounded-[14px] overflow-hidden cursor-pointer group no-underline shadow-[0_4px_20px_rgba(0,0,0,0.18)] ${
                       isFeatured ? "md:col-span-2 md:row-span-2" : ""
                     }`}
-                    whileHover={{ scale: 1.015, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+                    whileHover={{
+                      scale: 1.015,
+                      transition: {
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      },
+                    }}
                   >
                     <img
                       src={item.imagen || fallbackImage}
                       alt={item.titulo}
                       className="absolute inset-0 w-full h-full object-cover transition-[transform,filter] duration-500 group-hover:scale-[1.05] group-hover:brightness-105"
-                      onError={(e) => { e.currentTarget.src = fallbackImage; }}
+                      onError={(e) => {
+                        e.currentTarget.src = fallbackImage;
+                      }}
                     />
 
                     {/* Shine sweep */}
@@ -203,7 +212,9 @@ export default function HomePage() {
 
                     {/* Text at bottom */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 z-[2]">
-                      <h2 className={`font-black text-white leading-tight mb-2 transition-colors duration-300 group-hover:text-[#ff9a5c] ${isFeatured ? "text-xl md:text-2xl" : "text-sm md:text-base line-clamp-2"}`}>
+                      <h2
+                        className={`font-black text-white leading-tight mb-2 transition-colors duration-300 group-hover:text-[#ff9a5c] ${isFeatured ? "text-xl md:text-2xl" : "text-sm md:text-base line-clamp-2"}`}
+                      >
                         {item.titulo}
                       </h2>
                       {isFeatured && (
