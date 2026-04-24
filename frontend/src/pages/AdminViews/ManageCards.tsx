@@ -12,6 +12,7 @@ import {
   Gem,
   Award,
 } from "lucide-react";
+import { Toast } from "@/components/ui.disabled/Toast";
 
 export function ManageCards(){
 
@@ -20,6 +21,10 @@ export function ManageCards(){
     const [loading, setLoading] = useState(true);
     const [filterCategory, setFilterCategory] = useState<string>("Todas");
     const [searchTerm, setSearchTerm] = useState("");
+    const [toast, setToast] = useState<{
+        message: string;
+        type: "success" | "error";
+    } | null>(null);
 
 
     console.log(loading)
@@ -102,6 +107,23 @@ export function ManageCards(){
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); 
 
+    // Validación
+    if (!formData.nombre.trim()) {
+      setToast({
+        message: "El nombre de la carta es obligatorio",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!formData.numero || parseInt(formData.numero) <= 0) {
+      setToast({
+        message: "El valor de la carta debe ser mayor a 0",
+        type: "error",
+      });
+      return;
+    }
+
     try {
         await addCard(
         formData.nombre,
@@ -123,11 +145,17 @@ export function ManageCards(){
         numero: 0,
         });
         setFile(null);
+        setShowForm(false);
 
-        alert("Carta agregada correctamente");
+        setToast({
+        message: `Carta "${formData.nombre}" creada exitosamente`,
+        type: "success",
+        });
     } catch (error) {
-        console.error(error);
-        alert("Error al guardar la carta");
+        setToast({
+        message: `Error al guardar la carta`,
+        type: "error",
+        });
     }
     };
 
@@ -458,6 +486,14 @@ export function ManageCards(){
                     </form>
                 </div>
                 </div>
+            )}
+            {/* Toast Notifications */}
+            {toast && (
+                <Toast
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast(null)}
+                />
             )}
         </div>
     );
