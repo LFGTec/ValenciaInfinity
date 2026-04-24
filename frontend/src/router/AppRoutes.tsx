@@ -11,17 +11,15 @@ import { FansZonePage } from "../pages/FansZonePage";
 import LogIn from "../pages/LogIn";
 import { UserProfile} from "../components/features/UserProfile"
 import NewsAdmin from "../pages/AdminViews/NewsAdmin.tsx";
-
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import {Juego} from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
-
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
 import  AdminLayout  from "@/layouts/AdminLayout"
-
 import { TriviasQuizzes } from  "../components/features/TriviasQuizzes"
+import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 
 
 export default function AppRoutes() {
@@ -55,6 +53,7 @@ export default function AppRoutes() {
       <Route element={<AdminLayout />}>
       <Route path="/admin/news" element={<NewsAdmin />} />
             <Route path="/admin/cards" element={<ManageCards />} />
+      <Route path="/admin/trivias" element={<CrearTrivias/>} />
         <Route element={<ProtectedRoute adminOnly={true} />}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
