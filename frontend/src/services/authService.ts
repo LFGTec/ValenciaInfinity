@@ -20,6 +20,21 @@ export interface AuthSession {
   error: string | null;
 }
 
+function getOAuthRedirectUrl(): string {
+  const configured = import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined;
+  if (configured && configured.trim().length > 0) {
+    try {
+      const parsed = new URL(configured.trim());
+      if (parsed.pathname.endsWith("/auth/callback")) {
+        return parsed.toString();
+      }
+    } catch {
+      // Fallback a origin si la variable no es una URL valida.
+    }
+  }
+  return `${window.location.origin}/auth/callback`;
+}
+
 /**
  * Sign up with email and password
  */
@@ -126,7 +141,7 @@ export async function signInWithGoogle(
   userRole: UserRole
 ): Promise<{ error: string | null }> {
   try {
-    const redirectUrl = `${window.location.origin}/auth/callback`;
+    const redirectUrl = getOAuthRedirectUrl();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -336,7 +351,7 @@ export async function requestPasswordReset(
   email: string
 ): Promise<{ error: string | null }> {
   try {
-    const redirectUrl = `${window.location.origin}/reset-password`;
+    const redirectUrl = getOAuthRedirectUrl().replace("/auth/callback", "/reset-password");
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     });

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSetAtom } from "jotai";
-import { exchangeCodeForSession } from "../services/authService";
+import { exchangeCodeForSession, getCurrentUser } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
+import { supabase } from "../services/supabaseClient";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -10,66 +11,88 @@ export default function AuthCallback() {
   const setUser = useSetAtom(setUserAtom);
   const [error, setError] = useState<string | null>(null);
 
+  const navigateByRole = (role?: string) => {
+    if (role?.toLowerCase() === "admin") {
+      navigate("/admin/cards", { replace: true });
+    } else {
+      navigate("/home", { replace: true });
+    }
+  };
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const SESSION_RETRIES = 3;
+  const SESSION_RETRY_DELAY_MS = 120;
+
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Extract code from URL
+        // 1) PKCE flow: code in query string
         const code = searchParams.get("code");
 
-        if (!code) {
-          console.error("❌ [AuthCallback] No authorization code found");
-          setError("No authorization code found");
-          setTimeout(() => {
-            navigate("/login?error=no_code", { replace: true });
-          }, 2000);
-          return;
-        }
+        if (code) {
+          console.log("🔵 [AuthCallback] Intercambiando código por sesión...");
+          const { user, error: exchangeError } = await exchangeCodeForSession(code);
 
-        // Exchange code for session
-        console.log("🔵 [AuthCallback] Intercambiando código por sesión...");
-        const { user, error: exchangeError } = await exchangeCodeForSession(code);
-
-        console.log("🔵 [AuthCallback] exchangeCodeForSession result:", { user: user?.email, error: exchangeError });
-
-        if (exchangeError) {
-          console.error("❌ [AuthCallback] Code exchange failed:", exchangeError);
-          setError(exchangeError);
-          setTimeout(() => {
-            navigate(
-              `/login?error=${encodeURIComponent(exchangeError)}`,
-              { replace: true }
-            );
-          }, 2000);
-          return;
-        }
-
-        if (user) {
-          console.log("✅ [AuthCallback] Autenticado como:", user.email, "role:", user.role);
-          setUser(user);
-
-          // Redirección inteligente basada en el rol
-          if (user.role?.toLowerCase() === 'admin') {
-            navigate("/admin/cards", { replace: true });
-          } else {
-            navigate("/home", { replace: true });
+          if (exchangeError) {
+            throw new Error(exchangeError);
           }
-        } else {
-          console.error("❌ [AuthCallback] No user returned from code exchange");
-          setError("No se pudo completar el inicio de sesión");
-          setTimeout(() => {
-            navigate("/login?error=auth_failed", { replace: true });
-          }, 2000);
+
+          if (user) {
+            console.log("✅ [AuthCallback] Autenticado como:", user.email, "role:", user.role);
+            setUser(user);
+            navigateByRole(user.role);
+            return;
+          }
         }
+
+        // 2) Hash flow fallback: #access_token=...&refresh_token=...
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+
+        if (accessToken && refreshToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (sessionError) {
+            throw new Error(sessionError.message);
+          }
+
+          const currentUser = await getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+            navigateByRole(currentUser.role);
+            return;
+          }
+        }
+
+        // 3) Grace period: espera corta por sesión restaurada para evitar flash de error
+        for (let i = 0; i < SESSION_RETRIES; i++) {
+          const { data } = await supabase.auth.getSession();
+          if (data.session?.user) {
+            const currentUser = await getCurrentUser();
+            if (currentUser) {
+              setUser(currentUser);
+              navigateByRole(currentUser.role);
+              return;
+            }
+          }
+          await wait(SESSION_RETRY_DELAY_MS);
+        }
+
+        throw new Error("No se pudo completar la autenticación");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Error desconocido";
         console.error("❌ [AuthCallback] Excepción:", message);
-        setError(message);
+        setError("No se pudo iniciar sesión. Redirigiendo...");
         setTimeout(() => {
           navigate(
             `/login?error=${encodeURIComponent(message)}`,
             { replace: true }
           );
-        }, 2000);
+        }, 700);
       }
     };
 
@@ -84,9 +107,9 @@ export default function AuthCallback() {
             <div
               className="p-4 rounded-lg mb-4"
               style={{
-                background: "rgba(238,53,36,0.1)",
-                border: "1px solid rgba(238,53,36,0.3)",
-                color: "#EE3524",
+                background: "rgba(0,0,0,0.05)",
+                border: "1px solid rgba(0,0,0,0.1)",
+                color: "#374151",
               }}
             >
               <p className="font-semibold">{error}</p>

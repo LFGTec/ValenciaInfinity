@@ -24,6 +24,37 @@ const CARD_W = Math.floor((W - PAD_X * 2 - GAP * (COLS - 1)) / COLS);
 const CARD_H = Math.floor((H - TITLE_H - PAD_Y * 2 - GAP * (ROWS - 1)) / ROWS);
 
 function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: number) {
+  const isMissing = card.obtained === false;
+
+  if (isMissing) {
+    ctx.fillStyle = "#181818";
+    ctx.beginPath();
+    ctx.roundRect(x, y, CARD_W, CARD_H, 5);
+    ctx.fill();
+
+    ctx.strokeStyle = "#404040";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(x, y, CARD_W, CARD_H, 5);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    ctx.font = `bold ${Math.round(CARD_H * 0.24)}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("?", x + CARD_W / 2, y + CARD_H * 0.36);
+
+    ctx.fillStyle = "#FF6600";
+    ctx.font = `bold ${Math.round(CARD_H * 0.1)}px Arial`;
+    ctx.fillText("FALTANTE", x + CARD_W / 2, y + CARD_H * 0.62, CARD_W - 8);
+
+    const numberLabel = card.numero ? `#${card.numero}` : "SIN NUM";
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = `${Math.round(CARD_H * 0.08)}px Arial`;
+    ctx.fillText(numberLabel, x + CARD_W / 2, y + CARD_H * 0.76, CARD_W - 8);
+    return;
+  }
+
   const colors = RAREZA_COLORS[card.rareza] ?? DEFAULT_COLOR;
   const topH = Math.round(CARD_H * 0.45);
 
@@ -53,14 +84,14 @@ function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: numbe
   ctx.font = `bold ${Math.round(CARD_H * 0.28)}px Arial`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(String(card.numero), x + CARD_W / 2, y + topH / 2);
+  ctx.fillText(String(card.numero ?? "-"), x + CARD_W / 2, y + topH / 2);
 
   // Rareza abbreviation top-left
   ctx.fillStyle = "rgba(255,255,255,0.6)";
   ctx.font = `bold ${Math.round(CARD_H * 0.09)}px Arial`;
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
-  ctx.fillText(card.rareza.slice(0, 3).toUpperCase(), x + 4, y + 3);
+  ctx.fillText((card.rareza ?? "N/A").slice(0, 3).toUpperCase(), x + 4, y + 3);
 
   // Separator line
   ctx.strokeStyle = colors.bg;
@@ -71,7 +102,7 @@ function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: numbe
   ctx.stroke();
 
   // Player name (last word)
-  const fullName = card.nombre.trim().toUpperCase();
+  const fullName = (card.nombre ?? "").trim().toUpperCase();
   ctx.fillStyle = "#111111";
   ctx.font = `bold ${Math.round(CARD_H * 0.11)}px Arial`;
   ctx.textAlign = "center";
@@ -82,7 +113,7 @@ function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: numbe
   // Tipo
   ctx.fillStyle = colors.bg;
   ctx.font = `${Math.round(CARD_H * 0.085)}px Arial`;
-  ctx.fillText(card.tipo.toUpperCase(), x + CARD_W / 2, nameY + Math.round(CARD_H * 0.15), CARD_W - 6);
+  ctx.fillText((card.tipo ?? "DESCONOCIDO").toUpperCase(), x + CARD_W / 2, nameY + Math.round(CARD_H * 0.15), CARD_W - 6);
 
   // Temporada
   ctx.fillStyle = "#888";
