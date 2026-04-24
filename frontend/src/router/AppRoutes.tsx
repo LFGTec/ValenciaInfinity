@@ -20,7 +20,7 @@ import { NouMestellaPage } from "../pages/NouMestellaPage";
 
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
 import AdminLayout from "@/layouts/AdminLayout";
-import MatchRoomsPage from "@/pages/MatchRoomsPage.tsx";
+import { MatchRooms } from "@/pages/MatchRooms.tsx";
 
 export default function AppRoutes() {
   return (
@@ -43,7 +43,7 @@ export default function AppRoutes() {
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/fanzone" element={<FansZonePage />} />
-          <Route path="/match-rooms" element={<MatchRoomsPage />} />
+          <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
         </Route>
