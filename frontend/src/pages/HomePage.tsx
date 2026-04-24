@@ -21,6 +21,7 @@ import card4 from "../assets/CartaVerde.png";
 import avatar1 from "../assets/Avatar1.png";
 import avatar2 from "../assets/Avatar2.png";
 import avatar3 from "../assets/Avatar3.png";
+import { usePartidosVCF } from "@/hooks/usePartidosVCF";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
@@ -28,8 +29,49 @@ const fallbackImage =
 export default function HomePage() {
   const [ranking, setRanking] = useState<Ranking[]>([]);
   const [rankingLoading, setRankingLoading] = useState(true);
+  const [countdown, setCountdown] = useState({
+    dias: 0,
+    horas: 0,
+    minutos: 0,
+    segundos: 0,
+  });
   const navigate = useNavigate();
   const { noticias: news, cargando: newsLoading } = useNoticias();
+  const { proximos } = usePartidosVCF();
+
+  const partidoDestacado = proximos[0];
+
+  useEffect(() => {
+    if (!partidoDestacado) return;
+
+    const horaStr = partidoDestacado.hora.replace("h", "");
+    const [hh, mm] = horaStr.split(":").map(Number);
+    const fechaPartido = new Date(
+      partidoDestacado.anio,
+      partidoDestacado.mes,
+      partidoDestacado.dia,
+      hh,
+      mm
+    );
+
+    const calcular = () => {
+      const diff = fechaPartido.getTime() - Date.now();
+      if (diff <= 0) {
+        setCountdown({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
+        return;
+      }
+      setCountdown({
+        dias: Math.floor(diff / 86_400_000),
+        horas: Math.floor((diff % 86_400_000) / 3_600_000),
+        minutos: Math.floor((diff % 3_600_000) / 60_000),
+        segundos: Math.floor((diff % 60_000) / 1_000),
+      });
+    };
+
+    calcular();
+    const id = setInterval(calcular, 1000);
+    return () => clearInterval(id);
+  }, [partidoDestacado]);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -90,15 +132,15 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base md:text-lg mb-6 font-bold text-vcf-orange uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              VS REAL MADRID
+              {partidoDestacado ? `VS ${partidoDestacado.rival.toUpperCase()}` : "PRÓXIMO PARTIDO"}
             </p>
 
             <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
               {[
-                { v: "02", l: "DÍAS" },
-                { v: "14", l: "HORAS" },
-                { v: "35", l: "MIN" },
-                { v: "22", l: "SEG" },
+                { v: String(countdown.dias).padStart(2, "0"), l: "DÍAS" },
+                { v: String(countdown.horas).padStart(2, "0"), l: "HORAS" },
+                { v: String(countdown.minutos).padStart(2, "0"), l: "MIN" },
+                { v: String(countdown.segundos).padStart(2, "0"), l: "SEG" },
               ].map((t, i, arr) => (
                 <div key={i} className="flex items-center gap-2 md:gap-4">
                   <div className="text-center bg-black/60 backdrop-blur-sm border border-white/20 px-3 md:px-6 py-3 md:py-4 rounded-xl shadow-lg">
