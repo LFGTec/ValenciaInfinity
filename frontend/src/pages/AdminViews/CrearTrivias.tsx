@@ -27,6 +27,20 @@ export function CrearTrivias() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
 
+
+  useEffect(() => {
+  const cargarTrivias = async () => {
+    setLoading(true);
+
+    const data = await getTrivias();
+
+    setTrivias(data);
+    setLoading(false);
+  };
+
+  cargarTrivias();
+}, []);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -791,10 +805,15 @@ const handleSaveTrivia = async () => {
             </div>
           ))}
 
-          {trivias.length === 0 && (
-            <div className="p-8 text-center text-muted-foreground font-bold">
-              No hay trivias creadas todavía.
-            </div>
+          {trivias.length === 0 ? (
+            <p>No hay trivias creadas todavía.</p>
+          ) : (
+            trivias.map((trivia) => (
+              <div key={trivia.id}>
+                <h3>{trivia.title}</h3>
+                <p>{trivia.description}</p>
+              </div>
+            ))
           )}
         </div>
       </div>
