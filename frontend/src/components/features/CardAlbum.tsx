@@ -90,6 +90,19 @@ export function CardAlbum() {
 			</Canvas>
 
 			<div className="absolute top-0 left-0 right-0 z-20 px-4 pt-4 md:px-8 md:pt-6 pointer-events-none">
+				<div className="max-w-5xl mx-auto mb-3 bg-black/45 border border-white/10 backdrop-blur-sm rounded-lg px-4 py-3">
+					<div className="flex items-center justify-between mb-2">
+						<p className="text-xs text-white/70 uppercase tracking-wide">Progreso del album</p>
+						<p className="text-sm md:text-base font-black text-vcf-orange">{obtainedCards}/{totalCards} ({progress}%)</p>
+					</div>
+					<div className="w-full h-3 bg-white/15 rounded-full overflow-hidden border border-white/10">
+						<div
+							className="h-full rounded-full bg-gradient-to-r from-vcf-orange to-vcf-yellow transition-all duration-700 ease-out"
+							style={{ width: `${progress}%` }}
+						/>
+					</div>
+				</div>
+
 				<div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
 					<div className="bg-black/45 border border-white/10 backdrop-blur-sm rounded-lg px-4 py-3">
 						<p className="text-xs text-white/70 uppercase tracking-wide">Progreso</p>
