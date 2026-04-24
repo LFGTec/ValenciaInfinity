@@ -1,32 +1,45 @@
 import { useEffect, useState } from "react"
-import { getMapUsers } from "@/services/mapService"
+import {
+  getMapGeoData,
+  subscribeToMapUsers
+} from "@/services/mapService"
 
 export const useMapUsers = () => {
-  const [data, setData] = useState(null)
+  const [data, setData] = useState<GeoJSON.FeatureCollection | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = async () => {
+    try {
+      setLoading(true)
+      const geo = await getMapGeoData()
+      setData(geo)
+    } catch (err) {
+      console.error(err)
+      setError("Error cargando usuarios del mapa")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const load = async () => {
-      const users = await getMapUsers()
-
-      const geojson = {
-        type: "FeatureCollection",
-        features: users.map(u => ({
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [u.lng, u.lat]
-          },
-          properties: {
-            userId: u.user_id
-          }
-        }))
-      }
-
-      setData(geojson)
-    }
-
     load()
+
+    const channel = subscribeToMapUsers(() => {
+      load()
+    })
+
+    return () => {
+      if (channel) {
+        channel.unsubscribe()
+      }
+    }
   }, [])
 
-  return data
+  return {
+    data,
+    loading,
+    error,
+    reload: load
+  }
 }

@@ -1,14 +1,12 @@
-import { useRef, useEffect, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
-import { getMapUsers } from '@/services/mapService';
 import { useMapUsers } from '@/hooks/useMapUsers';
-import Map from "@/components/features/Map"
+import Map from "@/components/features/Map";
+import { useUserLocation } from '@/hooks/useUserLocations';
 
 
 export function VirtualWorld() {
-    const geoData = useMapUsers()
+    useUserLocation()
+    const { data, loading, error } = useMapUsers()
 
     return(
         <div className="max-w-[1600px] mx-auto px-4 py-6 bg-content">
@@ -24,7 +22,12 @@ export function VirtualWorld() {
             {/*Espacio para el Mapa*/}
 
             <div className="bg-card border-2 border-vcf-blue border-t-0 rounded-b-xl overflow-hidden shadow-2xl">
-                <Map data={geoData} />
+                {loading && <div className="p-6">Cargando mapa...</div>}
+                {error && <div className="p-6 text-red-500">{error}</div>}
+
+                {!loading && !error && (
+                    <Map data={data} />
+                )}
             </div>
 
         </div>
