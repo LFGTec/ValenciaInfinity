@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 const RSS_SOURCES = [
-  { proxy: "/rss-marca/rss/futbol/valencia.xml", name: "Marca" },
-  { proxy: "/rss-as/rss/tags/valencia_cf.xml", name: "AS" },
+  { key: "marca", name: "Marca" },
+  { key: "as", name: "AS" },
 ];
 
 export type Categoria = "TODAS" | "EQUIPO" | "FICHAJES" | "PARTIDOS" | "CANTERA" | "CLUB";
@@ -61,13 +64,20 @@ function getImage(item: Element): string | null {
   return match ? match[1] : null;
 }
 
-async function fetchRSS(source: { proxy: string; name: string }): Promise<Noticia[]> {
-  const res = await fetch(source.proxy);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
+async function fetchRSS(source: { key: string; name: string }): Promise<Noticia[]> {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/rss-proxy`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ source: source.key }),
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  const data = await res.json();
 
   const parser = new DOMParser();
-  const doc = parser.parseFromString(text, "application/xml");
+  const doc = parser.parseFromString(data.xml, "application/xml");
   const items = Array.from(doc.getElementsByTagName("item")).slice(0, 15);
 
   return items.map((item) => {
