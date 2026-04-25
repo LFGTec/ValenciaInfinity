@@ -101,7 +101,7 @@ export function FilaPartido({
       <div className="flex gap-2">
         {!jugado && (
           <button
-            onClick={() => navegar("/juego")}
+            onClick={() => navegar("/match-rooms")}
             className="px-4 py-2 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg text-base font-black hover:bg-[#e05516] transition-all shadow-md hover:scale-105"
           >
             ROOM

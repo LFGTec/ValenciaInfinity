@@ -51,7 +51,7 @@ export default function HomePage() {
       partidoDestacado.mes,
       partidoDestacado.dia,
       hh,
-      mm
+      mm,
     );
 
     const calcular = () => {
@@ -132,7 +132,9 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base md:text-lg mb-6 font-bold text-vcf-orange uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              {partidoDestacado ? `VS ${partidoDestacado.rival.toUpperCase()}` : "PRÓXIMO PARTIDO"}
+              {partidoDestacado
+                ? `VS ${partidoDestacado.rival.toUpperCase()}`
+                : "PRÓXIMO PARTIDO"}
             </p>
 
             <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
@@ -163,7 +165,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link
-                to="/game"
+                to="/match-rooms"
                 className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 text-sm md:text-base"
               >
                 <Video size={20} />
@@ -304,7 +306,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                to="/game"
+                to="/match-rooms"
                 className="inline-flex px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 items-center gap-2"
               >
                 <Video size={20} />
@@ -388,7 +390,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  to="/game"
+                  to="/juego"
                   className="block text-center w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
                 >
                   JUGAR AHORA

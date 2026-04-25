@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { partidosAtom } from "../stores/partidosStore";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 export interface Partido {
-  id: string; //atributos
+  id: string;
   dia: number;
   mes: number;
   anio: number;
@@ -30,66 +33,58 @@ export interface EstadisticasTemporada {
   jornada: number;
 }
 
-const API_KEY = import.meta.env.VITE_FOOTBALL_API_KEY; // api key
-const VCF_ID = 95; // id valencia
+const VCF_ID = 95;
 
 const MESES_CORTO = [
-  // meses corto
-  "ENE",
-  "FEB",
-  "MAR",
-  "ABR",
-  "MAY",
-  "JUN",
-  "JUL",
-  "AGO",
-  "SEP",
-  "OCT",
-  "NOV",
-  "DIC",
+  "ENE", "FEB", "MAR", "ABR", "MAY", "JUN",
+  "JUL", "AGO", "SEP", "OCT", "NOV", "DIC",
 ];
 
 const COMPETICION_MAP: Record<string, string> = {
-  // nombres cortos
   "Primera Division": "LA LIGA",
   "Copa del Rey": "COPA DEL REY",
   "UEFA Champions League": "CHAMPIONS",
 };
 
+async function footballFetch(path: string, params: Record<string, string>) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/football-proxy`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ path, params }),
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  return res.json();
+}
+
 function mapearPartido(match: any, estado: "JUGADO" | "PROXIMO"): Partido {
-  //funcion que adapta los datos de la api en el objeto partido
-  const fecha = new Date(match.utcDate); // fecha api
-  const esLocal = match.homeTeam.id === VCF_ID; // es local?
-  const rival = esLocal ? match.awayTeam : match.homeTeam; // rival
+  const fecha = new Date(match.utcDate);
+  const esLocal = match.homeTeam.id === VCF_ID;
+  const rival = esLocal ? match.awayTeam : match.homeTeam;
 
   const tieneResultado =
-    // ya jugado?
     match.score?.fullTime?.home !== null &&
     match.score?.fullTime?.away !== null;
 
   return {
-    id: String(match.id), // id string
+    id: String(match.id),
     dia: fecha.getDate(),
     mes: fecha.getMonth(),
     anio: fecha.getFullYear(),
-    mesTexto: MESES_CORTO[fecha.getMonth()], // mes texto
-    hora: `${String(fecha.getHours()).padStart(2, "0")}:${String(
-      fecha.getMinutes(),
-    ).padStart(2, "0")}h`, // formato hora
-    rival: rival.shortName ?? rival.name, // nombre rival
-    competicion:
-      COMPETICION_MAP[match.competition.name] ?? match.competition.name, // map liga
-    jornada: match.matchday ? `JOR. ${match.matchday}` : undefined, // jornada
+    mesTexto: MESES_CORTO[fecha.getMonth()],
+    hora: `${String(fecha.getHours()).padStart(2, "0")}:${String(fecha.getMinutes()).padStart(2, "0")}h`,
+    rival: rival.shortName ?? rival.name,
+    competicion: COMPETICION_MAP[match.competition.name] ?? match.competition.name,
+    jornada: match.matchday ? `JOR. ${match.matchday}` : undefined,
     casa: esLocal,
     escudoRival: rival.crest,
     codigoRival: rival.tla,
     estado,
     resultado: tieneResultado
-      ? {
-          local: match.score.fullTime.home,
-          visitante: match.score.fullTime.away,
-        }
-      : undefined, // si hay marcador
+      ? { local: match.score.fullTime.home, visitante: match.score.fullTime.away }
+      : undefined,
   };
 }
 
@@ -97,27 +92,16 @@ export function usePartidosVCF() {
   const [state, setState] = useAtom(partidosAtom);
 
   useEffect(() => {
-    if (state.fetched) return; // ya se cargó, no volver a pedir
+    if (state.fetched) return;
 
     async function fetchTodo() {
       try {
-        const headers = { "X-Auth-Token": API_KEY };
-        const base = `/api-football/v4/teams/${VCF_ID}/matches`;
-
-        const [resProximos, resJugados, resStats] = await Promise.all([
-          fetch(`${base}?status=SCHEDULED&competitions=2014&limit=5`, { headers }),
-          fetch(`${base}?status=FINISHED&competitions=2014&limit=10`, { headers }),
-          fetch(`${base}?status=FINISHED&competitions=2014`, { headers }),
-        ]);
-
-        if (!resProximos.ok) throw new Error(`Proximos: ${resProximos.status}`);
-        if (!resJugados.ok) throw new Error(`Jugados: ${resJugados.status}`);
-        if (!resStats.ok) throw new Error(`Stats: ${resStats.status}`);
+        const base = `/v4/teams/${VCF_ID}/matches`;
 
         const [dataProximos, dataJugados, dataStats] = await Promise.all([
-          resProximos.json(),
-          resJugados.json(),
-          resStats.json(),
+          footballFetch(base, { status: "SCHEDULED", competitions: "2014", limit: "5" }),
+          footballFetch(base, { status: "FINISHED", competitions: "2014", limit: "10" }),
+          footballFetch(base, { status: "FINISHED", competitions: "2014" }),
         ]);
 
         const matches = dataStats.matches as any[];

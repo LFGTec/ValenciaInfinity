@@ -150,7 +150,7 @@ export function MatchesPage() {
             </div>
             <div className="flex flex-col gap-3 min-w-[180px]">
               <button
-                onClick={() => navegar("/juego")}
+                onClick={() => navegar("/match-rooms")}
                 className="px-6 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-all shadow-md hover:scale-105 flex items-center gap-2 text-base"
               >
                 <Video size={18} /> MATCH ROOM
