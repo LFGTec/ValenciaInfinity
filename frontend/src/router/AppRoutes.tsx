@@ -10,7 +10,6 @@ import {News} from "../pages/News";
 import { FansZonePage } from "../pages/FansZonePage";
 import LogIn from "../pages/LogIn";
 import { UserProfile} from "../components/features/UserProfile"
-import NewsAdmin from "../pages/AdminViews/NewsAdmin.tsx";
 
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
@@ -54,8 +53,7 @@ export default function AppRoutes() {
       
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
-      <Route path="/admin/news" element={<NewsAdmin />} />
-            <Route path="/admin/cards" element={<ManageCards />} />
+        <Route path="/admin/cards" element={<ManageCards />} />
         <Route element={<ProtectedRoute adminOnly={true} />}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
