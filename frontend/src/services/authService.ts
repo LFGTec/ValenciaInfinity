@@ -141,6 +141,8 @@ export async function signInWithGoogle(
   userRole: UserRole
 ): Promise<{ error: string | null }> {
   try {
+    sessionStorage.setItem("auth_user_role", userRole);
+
     const redirectUrl = getOAuthRedirectUrl();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -157,7 +159,6 @@ export async function signInWithGoogle(
       console.error("❌ Google OAuth Error:", error);
       return { error: error.message };
     }
-    sessionStorage.setItem("auth_user_role", userRole);
 
     return { error: null };
   } catch (error) {
@@ -280,14 +281,8 @@ export async function exchangeCodeForSession(
     if (error) return { user: null, error: error.message };
     if (!data.user) return { user: null, error: "No user returned" };
 
-    // 🔴 LA PIEZA QUE FALTA: Buscar el perfil real en la tabla 'profiles'
-    const profile = await getUserProfile(data.user.id);
-    
-    if (profile) {
-      return { user: profile, error: null };
-    }
-
-    // Si no hay perfil, usamos el fallback de siempre
+    // No bloqueamos el callback esperando profiles: devolvemos la sesión base
+    // y dejamos que AuthProvider complete el perfil en segundo plano.
     const userRole = (sessionStorage.getItem("auth_user_role") as UserRole) || "fan";
     return {
       user: {
@@ -301,7 +296,8 @@ export async function exchangeCodeForSession(
       error: null,
     };
   } catch (error) {
-    return { user: null, error: "Code exchange failed" };
+    const message = error instanceof Error ? error.message : "Code exchange failed";
+    return { user: null, error: message };
   }
 }
 

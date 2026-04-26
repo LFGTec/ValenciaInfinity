@@ -22,6 +22,98 @@ const GAP = 8;
 const TITLE_H = 40;
 const CARD_W = Math.floor((W - PAD_X * 2 - GAP * (COLS - 1)) / COLS);
 const CARD_H = Math.floor((H - TITLE_H - PAD_Y * 2 - GAP * (ROWS - 1)) / ROWS);
+const COVER_IMAGE_PATH = "textures/book-cover.png";
+const BACK_IMAGE_PATH = "textures/book-back.png";
+
+function resolvePublicPath(path: string): string {
+  const base = import.meta.env.BASE_URL || "/";
+  return `${base}${path.replace(/^\/+/, "")}`;
+}
+
+function drawDefaultCover(ctx: CanvasRenderingContext2D) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, H);
+  gradient.addColorStop(0, "#1e1c1c");
+  gradient.addColorStop(1, "#2d2929");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+
+  // Orange accent stripes
+  ctx.fillStyle = "#FF6600";
+  ctx.fillRect(0, 0, W, 8);
+  ctx.fillRect(0, H - 8, W, 8);
+
+  // Big translucent VCF watermark
+  ctx.fillStyle = "#FF6600";
+  ctx.font = `900 220px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.globalAlpha = 0.12;
+  ctx.fillText("VCF", W / 2, H / 2);
+  ctx.globalAlpha = 1;
+
+  // Title
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold 52px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("VALENCIA CF", W / 2, H * 0.35);
+
+  // Subtitle
+  ctx.fillStyle = "#FF6600";
+  ctx.font = `bold 30px Arial`;
+  ctx.fillText("ÁLBUM OFICIAL", W / 2, H * 0.47);
+
+  // Caption
+  ctx.fillStyle = "#aaaaaa";
+  ctx.font = `20px Arial`;
+  ctx.fillText("Colección de Jugadores", W / 2, H * 0.57);
+}
+
+function drawDefaultBack(ctx: CanvasRenderingContext2D) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, H);
+  gradient.addColorStop(0, "#2d2929");
+  gradient.addColorStop(1, "#1e1c1c");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = "#FF6600";
+  ctx.fillRect(0, 0, W, 8);
+  ctx.fillRect(0, H - 8, W, 8);
+
+  ctx.fillStyle = "#FF6600";
+  ctx.font = `bold 28px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("VALENCIA CF", W / 2, H * 0.45);
+
+  ctx.fillStyle = "#555";
+  ctx.font = `16px Arial`;
+  ctx.fillText("Todos los derechos reservados", W / 2, H * 0.54);
+}
+
+function createImageTextureFromPublic(
+  imagePath: string,
+  fallbackDrawer: (ctx: CanvasRenderingContext2D) => void,
+): CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d")!;
+
+  // Draw fallback immediately so there is always a visible texture.
+  fallbackDrawer(ctx);
+  const texture = makeTexture(canvas);
+
+  const image = new Image();
+  image.onload = () => {
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(image, 0, 0, W, H);
+    texture.needsUpdate = true;
+  };
+  image.src = resolvePublicPath(imagePath);
+
+  return texture;
+}
 
 function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: number) {
   const isMissing = card.obtained === false;
@@ -55,7 +147,7 @@ function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: numbe
     return;
   }
 
-  const colors = RAREZA_COLORS[card.rareza] ?? DEFAULT_COLOR;
+  const colors = card.rareza ? (RAREZA_COLORS[card.rareza] ?? DEFAULT_COLOR) : DEFAULT_COLOR;
   const topH = Math.round(CARD_H * 0.45);
 
   ctx.shadowColor = "rgba(0,0,0,0.2)";
@@ -170,76 +262,9 @@ export function createCardTexture(cards: Card[], title = "VALENCIA CF"): CanvasT
 }
 
 export function createCoverTexture(): CanvasTexture {
-  const canvas = document.createElement("canvas");
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d")!;
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, H);
-  gradient.addColorStop(0, "#1e1c1c");
-  gradient.addColorStop(1, "#2d2929");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, W, H);
-
-  // Orange accent stripes
-  ctx.fillStyle = "#FF6600";
-  ctx.fillRect(0, 0, W, 8);
-  ctx.fillRect(0, H - 8, W, 8);
-
-  // Big translucent VCF watermark
-  ctx.fillStyle = "#FF6600";
-  ctx.font = `900 220px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.globalAlpha = 0.12;
-  ctx.fillText("VCF", W / 2, H / 2);
-  ctx.globalAlpha = 1;
-
-  // Title
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `bold 52px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("VALENCIA CF", W / 2, H * 0.35);
-
-  // Subtitle
-  ctx.fillStyle = "#FF6600";
-  ctx.font = `bold 30px Arial`;
-  ctx.fillText("ÁLBUM OFICIAL", W / 2, H * 0.47);
-
-  // Caption
-  ctx.fillStyle = "#aaaaaa";
-  ctx.font = `20px Arial`;
-  ctx.fillText("Colección de Jugadores", W / 2, H * 0.57);
-
-  return makeTexture(canvas);
+  return createImageTextureFromPublic(COVER_IMAGE_PATH, drawDefaultCover);
 }
 
 export function createBackTexture(): CanvasTexture {
-  const canvas = document.createElement("canvas");
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d")!;
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, H);
-  gradient.addColorStop(0, "#2d2929");
-  gradient.addColorStop(1, "#1e1c1c");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "#FF6600";
-  ctx.fillRect(0, 0, W, 8);
-  ctx.fillRect(0, H - 8, W, 8);
-
-  ctx.fillStyle = "#FF6600";
-  ctx.font = `bold 28px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("VALENCIA CF", W / 2, H * 0.45);
-
-  ctx.fillStyle = "#555";
-  ctx.font = `16px Arial`;
-  ctx.fillText("Todos los derechos reservados", W / 2, H * 0.54);
-
-  return makeTexture(canvas);
+  return createImageTextureFromPublic(BACK_IMAGE_PATH, drawDefaultBack);
 }
