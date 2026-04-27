@@ -20,7 +20,6 @@ export default function AdminLayout() {
   const adminNavItems = [
     { id: "home", label: "Dashboard", icon: Home, path: "/admin/dashboard" },
     { id: "activity", label: "Actividad", icon: TrendingUp, path: "/admin/activity" },
-    { id: "manage-news", label: "Noticias", icon: FileText, path: "/admin/news" },
     { id: "users", label: "Usuarios", icon: Users, path: "/admin/users" },
     { id: "manage-cards", label: "Cartas", icon: BookOpen, path: "/admin/cards" },
     { id: "manage-trivias", label: "Trivias", icon: Gamepad2, path: "/admin/trivias" },
