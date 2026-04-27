@@ -1,24 +1,18 @@
-import  { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { getRanking, type Ranking } from "@/services/rankingService";
-import { getNews } from "../services/newsService";
-import type { News } from "../services/newsService";
+import { useNoticias } from "@/hooks/useNoticias";
 import {
   Video,
   Clock,
   Users,
   ArrowRight,
-  Eye,
   Gamepad2,
   Ticket,
 } from "lucide-react";
 
 import stadiumImage from "../assets/EquipoVF.png";
-import valenciaVictoryImage from "../assets/Noticia1.png";
-import newsImage1 from "../assets/Noticia2.png";
-import newsImage2 from "../assets/Noticia3.png";
-import newsImage3 from "../assets/Noticia4.png";
-import newsImage5 from "../assets/Noticia5.png";
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
 import card1 from "../assets/CartaAmarilla.png";
 import card2 from "../assets/CartaAzul.png";
@@ -27,16 +21,70 @@ import card4 from "../assets/CartaVerde.png";
 import avatar1 from "../assets/Avatar1.png";
 import avatar2 from "../assets/Avatar2.png";
 import avatar3 from "../assets/Avatar3.png";
+import { usePartidosVCF } from "@/hooks/usePartidosVCF";
+
+const fallbackImage =
+  "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
 
 export default function HomePage() {
   //Guarda el ranking y las noticias en el estado para mostrarlos en la página
   const [ranking, setRanking] = useState<Ranking[]>([]);
   //Dice si el ranking esta cargando empieza con true pq al principio no se obtienen datos
   const [rankingLoading, setRankingLoading] = useState(true);
+  const [countdown, setCountdown] = useState({
+    dias: 0,
+    horas: 0,
+    minutos: 0,
+    segundos: 0,
+  });
+  const navigate = useNavigate();
+  const { noticias: news, cargando: newsLoading } = useNoticias();
+  const { proximos } = usePartidosVCF();
 
-  const [news, setNews] = useState<News[]>([]);
-  const [newsLoading, setNewsLoading] = useState(true);
-  //Cuando se abre la página se monta por primera vez y se ejecuta el useEffect, que llama a la función fetchRanking, que obtiene el ranking de la base de datos y lo guarda en el estado, y luego hace lo mismo con las noticias
+  const partidoDestacado = proximos[0];
+
+  useEffect(() => {
+    if (!partidoDestacado) return;
+
+    const horaStr = partidoDestacado.hora.replace("h", "");
+    const [hh, mm] = horaStr.split(":").map(Number);
+    const fechaPartido = new Date(
+      partidoDestacado.anio,
+      partidoDestacado.mes,
+      partidoDestacado.dia,
+      hh,
+      mm,
+    );
+
+    const calcular = () => {
+      const diff = fechaPartido.getTime() - Date.now();
+      if (diff <= 0) {
+        setCountdown({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
+        return;
+      }
+      setCountdown({
+        dias: Math.floor(diff / 86_400_000),
+        horas: Math.floor((diff % 86_400_000) / 3_600_000),
+        minutos: Math.floor((diff % 3_600_000) / 60_000),
+        segundos: Math.floor((diff % 60_000) / 1_000),
+      });
+    };
+
+    calcular();
+    const id = setInterval(calcular, 1000);
+    return () => clearInterval(id);
+  }, [partidoDestacado]);
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   useEffect(() => {
     const fetchRanking = async () => {
       try {
@@ -53,24 +101,6 @@ export default function HomePage() {
 
     fetchRanking();
   }, []);
-
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const fetchedNews = await getNews();
-        setNews(fetchedNews ?? []);
-      } catch (error) {
-        console.error("Error cargando noticias:", error);
-        setNews([]);
-      } finally {
-        setNewsLoading(false);
-      }
-    };
-
-    fetchNews();
-  }, []);
-  //Arreglo de imagenes de noticias para usar como fallback en caso de que alguna noticia no tenga imagen, o la imagen no cargue
-  const fallbackNewsImages = [newsImage1, newsImage2, newsImage3, newsImage5];
 
   return (
     <div className="bg-content">
@@ -105,15 +135,17 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base md:text-lg mb-6 font-bold text-vcf-orange uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              VS REAL MADRID
+              {partidoDestacado
+                ? `VS ${partidoDestacado.rival.toUpperCase()}`
+                : "PRÓXIMO PARTIDO"}
             </p>
 
             <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
               {[
-                { v: "02", l: "DÍAS" },
-                { v: "14", l: "HORAS" },
-                { v: "35", l: "MIN" },
-                { v: "22", l: "SEG" },
+                { v: String(countdown.dias).padStart(2, "0"), l: "DÍAS" },
+                { v: String(countdown.horas).padStart(2, "0"), l: "HORAS" },
+                { v: String(countdown.minutos).padStart(2, "0"), l: "MIN" },
+                { v: String(countdown.segundos).padStart(2, "0"), l: "SEG" },
               ].map((t, i, arr) => (
                 //Divide en t cada elementp, i el indice y arr el array complto
                 <div key={i} className="flex items-center gap-2 md:gap-4">
@@ -138,8 +170,7 @@ export default function HomePage() {
             
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link
-              /* crea el link que te lleva al matchroom */
-                to="/game"
+                to="/match-rooms"
                 className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 text-sm md:text-base"
               >
                 
@@ -185,77 +216,71 @@ export default function HomePage() {
               No hay noticias disponibles.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Noticia principal */}
-              <Link
-                to="/news"
-                className="lg:col-span-2 lg:row-span-2 group cursor-pointer"
-              >
-                <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
-                  <img
-                    src={news[0]?.Imagen || valenciaVictoryImage}
-                    //ORDENAR POR FECHA
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = valenciaVictoryImage;
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[220px] md:auto-rows-[240px]">
+              {news.slice(0, 6).map((item, i) => {
+                const isFeatured = i === 0;
+                return (
+                  <motion.div
+                    key={item.url}
+                    onClick={() => navigate("/news")}
+                    className={`relative rounded-[14px] overflow-hidden cursor-pointer group no-underline shadow-[0_4px_20px_rgba(0,0,0,0.18)] ${
+                      isFeatured ? "md:col-span-2 md:row-span-2" : ""
+                    }`}
+                    whileHover={{
+                      scale: 1.015,
+                      transition: {
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      },
                     }}
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-2xl md:text-3xl font-black mb-2 group-hover:text-vcf-yellow transition-colors">
-                      {news[0]?.titulo || "Sin título"}
-                    </h3>
-
-                    <p className="text-sm mb-3 opacity-90 line-clamp-3">
-                      {news[0]?.contenido || "Sin contenido disponible."}
-                    </p>
-
-                    <div className="flex items-center gap-4 text-xs">
-                      <span>{news[0]?.published_at || "Fecha no disponible"}</span>
-                      <span className="text-vcf-yellow">•</span>
-                      <span className="flex items-center gap-1">
-                        <Eye size={14} /> {news[0]?.vistas ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Noticias secundarias */}
-              {news.slice(1, 5).map((item, index) => (
-                <Link key={item.id} to="/news" className="group cursor-pointer">
-                  <div className="relative h-40 bg-muted rounded-lg overflow-hidden mb-3 shadow-md hover:shadow-lg transition-all">
+                  >
                     <img
-                      src={item.Imagen || fallbackNewsImages[index] || newsImage5}
+                      src={item.imagen || fallbackImage}
                       alt={item.titulo}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-cover transition-[transform,filter] duration-500 group-hover:scale-[1.05] group-hover:brightness-105"
                       onError={(e) => {
-                        e.currentTarget.src =
-                          fallbackNewsImages[index] || newsImage5;
+                        e.currentTarget.src = fallbackImage;
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-                  </div>
 
-                  <h3 className="font-black text-base mb-2 group-hover:text-vcf-orange transition-colors text-foreground">
-                    {item.titulo}
-                  </h3>
+                    {/* Shine sweep */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none overflow-hidden">
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-20deg]" />
+                    </div>
 
-                  <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                    {item.contenido}
-                  </p>
+                    {/* Dark gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
 
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{item.published_at || "Fecha no disponible"}</span>
-                    <span className="text-white">•</span>
-                    <span className="flex items-center gap-1">
-                      <Eye size={12} /> {item.vistas ?? 0}
+                    {/* Category badge */}
+                    <span className="absolute top-3 left-3 bg-[#ff671f] text-white px-3 py-[6px] rounded-md text-xs font-black uppercase z-[2] transition-[background,box-shadow,transform] duration-300 group-hover:bg-[#e55a18] group-hover:shadow-[0_4px_12px_rgba(255,103,31,0.55)] group-hover:scale-105">
+                      {item.categoria}
                     </span>
-                  </div>
-                </Link>
-              ))}
+
+                    {/* Bottom accent bar */}
+                    <div className="absolute bottom-0 left-0 h-[3px] w-0 bg-gradient-to-r from-[#ff671f] to-[#ffdf1b] group-hover:w-full transition-all duration-500 ease-out z-[3]" />
+
+                    {/* Text at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 z-[2]">
+                      <h2
+                        className={`font-black text-white leading-tight mb-2 transition-colors duration-300 group-hover:text-[#ff9a5c] ${isFeatured ? "text-xl md:text-2xl" : "text-sm md:text-base line-clamp-2"}`}
+                      >
+                        {item.titulo}
+                      </h2>
+                      {isFeatured && (
+                        <p className="text-sm text-white/75 mb-3 line-clamp-2 leading-relaxed">
+                          {item.descripcion}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-white/60 flex-wrap">
+                        <span>{formatDate(item.fechaPublicacion)}</span>
+                        <span className="text-[#ff671f]">•</span>
+                        <span className="text-[#4db8e8]">{item.fuente}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </section>
@@ -277,15 +302,17 @@ export default function HomePage() {
               </div>
 
               <h2 className="text-4xl font-black mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-                VIVE LOS PARTIDOS CON TUS <span className="text-vcf-orange">AMIGOS</span>
+                VIVE LOS PARTIDOS CON TUS{" "}
+                <span className="text-vcf-orange">AMIGOS</span>
               </h2>
 
               <p className="text-lg mb-6 opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                Crea tu Match Room y disfruta de la experiencia de ver el partido en tiempo real.
+                Crea tu Match Room y disfruta de la experiencia de ver el
+                partido en tiempo real.
               </p>
 
               <Link
-                to="/game"
+                to="/match-rooms"
                 className="inline-flex px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 items-center gap-2"
               >
                 <Video size={20} />
@@ -361,15 +388,17 @@ export default function HomePage() {
 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                   <span className="flex items-center gap-1">
-                    <Clock size={14} className="text-foreground" /> {challenge.time}
+                    <Clock size={14} className="text-foreground" />{" "}
+                    {challenge.time}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Users size={14} className="text-vcf-blue" /> {challenge.participants}
+                    <Users size={14} className="text-vcf-blue" />{" "}
+                    {challenge.participants}
                   </span>
                 </div>
 
                 <Link
-                  to="/game"
+                  to="/juego"
                   className="block text-center w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
                 >
                   JUGAR AHORA
@@ -384,7 +413,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-card rounded-xl p-8 shadow-lg border-2 border-vcf-orange">
             <div>
               <h2 className="text-4xl font-black mb-4 text-foreground">
-                COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE CARTAS
+                COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE
+                CARTAS
               </h2>
 
               <p className="text-lg text-muted-foreground mb-6">
@@ -393,8 +423,12 @@ export default function HomePage() {
 
               <div className="mb-6">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="font-black text-foreground">Tu Progreso</span>
-                  <span className="font-black text-vcf-orange">145/200 (72%)</span>
+                  <span className="font-black text-foreground">
+                    Tu Progreso
+                  </span>
+                  <span className="font-black text-vcf-orange">
+                    145/200 (72%)
+                  </span>
                 </div>
 
                 <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
@@ -470,30 +504,42 @@ export default function HomePage() {
               </div>
             ) : (
               <>
-              {/* Recorre el ranking y muestra los primeros 3 en un estilo destacado, y luego del 4 al 10 en un estilo de lista */}
-                <div className="grid grid-cols-3 gap-4 p-6 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange">
-                  {ranking.slice(0, 3).map((user, i) => {
-                    const colors = ["bg-gray-300", "bg-vcf-orange", "bg-gray-400"];
-                    const avatars = [avatar2, avatar1, avatar3];
+                <div className="grid grid-cols-3 gap-4 px-6 pt-6 pb-2 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange items-end">
+                  {[1, 0, 2].map((rankIndex) => {
+                    const user = ranking[rankIndex];
+                    if (!user) return null;
+                    const place = rankIndex + 1;
+                    const colors = [
+                      "bg-vcf-yellow",
+                      "bg-gray-300",
+                      "bg-amber-600",
+                    ];
+                    const avatars = [avatar1, avatar2, avatar3];
+                    const podiumMb = ["mb-8", "mb-4", "mb-0"];
+                    const badgeSize =
+                      rankIndex === 0
+                        ? "w-20 h-20 text-2xl"
+                        : "w-16 h-16 text-xl";
+                    const imgSize = rankIndex === 0 ? "w-16 h-16" : "w-12 h-12";
 
                     return (
                       <div
                         key={user.id}
-                        className={`text-center ${i === 0 ? "transform scale-110 -mt-4" : ""}`}
+                        className={`text-center ${podiumMb[rankIndex]}`}
                       >
                         <div
-                          className={`w-20 h-20 mx-auto rounded-full mb-3 flex items-center justify-center shadow-lg ${colors[i]} text-white`}
+                          className={`${badgeSize} mx-auto rounded-full mb-3 flex items-center justify-center shadow-lg ${colors[rankIndex]} text-white`}
                         >
-                          <span className="text-2xl font-black">{i + 1}</span>
+                          <span className="font-black">{place}</span>
                         </div>
 
                         <img
-                          src={avatars[i]}
+                          src={avatars[rankIndex]}
                           alt={user.fan_nombre}
-                          className="w-16 h-16 rounded-full mx-auto mb-2 shadow-md object-cover"
+                          className={`${imgSize} rounded-full mx-auto mb-2 shadow-md object-cover`}
                         />
 
-                        <div className="font-black mb-1 text-foreground">
+                        <div className="font-black mb-1 text-foreground text-sm">
                           {user.fan_nombre}
                         </div>
 
