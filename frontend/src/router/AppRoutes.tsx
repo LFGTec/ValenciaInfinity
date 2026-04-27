@@ -19,7 +19,9 @@ import { Juego } from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
 
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
-import AdminLayout from "@/layouts/AdminLayout";
+import  AdminLayout  from "@/layouts/AdminLayout"
+import { VirtualWorld } from "@/components/VirtualWorld.tsx";
+
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
 
 export default function AppRoutes() {
@@ -43,6 +45,9 @@ export default function AppRoutes() {
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/fanzone" element={<FansZonePage />} />
+          {/*Rutas dentro de FAN ZONE*/}
+          <Route path="/virtual-world" element={<VirtualWorld />} />
+
           <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
@@ -51,7 +56,6 @@ export default function AppRoutes() {
 
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
-        <Route path="/admin/news" element={<NewsAdmin />} />
         <Route path="/admin/cards" element={<ManageCards />} />
         <Route element={<ProtectedRoute adminOnly={true} />}>
           <Route
