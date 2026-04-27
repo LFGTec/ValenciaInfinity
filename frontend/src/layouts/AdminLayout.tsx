@@ -24,6 +24,7 @@ export default function AdminLayout() {
     { id: "users", label: "Usuarios", icon: Users, path: "/admin/users" },
     { id: "manage-cards", label: "Cartas", icon: BookOpen, path: "/admin/cards" },
     { id: "manage-trivias", label: "Trivias", icon: Gamepad2, path: "/admin/trivias" },
+    { id: "manage-timeline", label: "Línea de Tiempo", icon: Calendar, path: "/admin/timeline" },
     { id: "manage-calendar", label: "Calendario", icon: Calendar, path: "/admin/calendar" },
     { id: "winners", label: "Ganadores", icon: Trophy, path: "/admin/winners" },
     { id: "settings", label: "Ajustes", icon: Settings, path: "/admin/settings" },

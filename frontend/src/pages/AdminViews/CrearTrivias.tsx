@@ -14,8 +14,11 @@ import {
   deleteExpiredTrivias,
   createTriviaQuestions,
   uploadTriviaImage,
+  getQuestionsByTriviaId,
+  updateTrivia,
   type Trivia,
 } from "../../services/triviasService";
+import { supabase } from "@/services/supabaseClient";
 
 export function CrearTrivias() {
   const [view, setView] = useState<"list" | "create" | "edit">("list");
@@ -26,6 +29,7 @@ export function CrearTrivias() {
   const [now, setNow] = useState(Date.now());
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [editingTriviaId, setEditingTriviaId] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -58,7 +62,7 @@ export function CrearTrivias() {
       id: "1",
       question: "",
       options: ["", "", "", ""],
-      correctAnswer: 0,
+      correct_answer: 0,
     },
   ]);
 
@@ -140,26 +144,20 @@ useEffect(() => {
   };
 
   const resetForm = () => {
-    setEditingId(null);
     setFormData({
       title: "",
       description: "",
       category: "",
-      difficulty: "medium",
+      difficulty: "easy",
       durationValue: 10,
       durationUnit: "minutes",
-      reward: 50,
+      reward: 0,
       image: "",
     });
+
+    setQuestions([]);
     setImagePreview("");
-    setQuestions([
-      {
-        id: "1",
-        question: "",
-        options: ["", "", "", ""],
-        correctAnswer: 0,
-      },
-    ]);
+    setEditingId(null);
   };
 
   const handleAddQuestion = () => {
@@ -169,7 +167,7 @@ useEffect(() => {
         id: String(questions.length + 1),
         question: "",
         options: ["", "", "", ""],
-        correctAnswer: 0,
+        correct_answer: 0,
       },
     ]);
   };
@@ -185,8 +183,8 @@ useEffect(() => {
       newQuestions[index].question = value;
     }
 
-    if (field === "correctAnswer") {
-      newQuestions[index].correctAnswer = value;
+    if (field === "correct_answer") {
+      newQuestions[index].correct_answer = value;
     }
 
     setQuestions(newQuestions);
@@ -205,7 +203,6 @@ useEffect(() => {
 
 const handleSaveTrivia = async () => {
   try {
-    console.log("1. Iniciando guardado...");
     setLoading(true);
 
     if (
@@ -214,24 +211,26 @@ const handleSaveTrivia = async () => {
       !formData.category ||
       formData.durationValue <= 0
     ) {
-      setMessage("Completa los campos obligatorios");
+      alert("Completa los campos obligatorios");
       return;
     }
 
-    let imageUrl = "";
+    let imageUrl = formData.image || "";
 
     if (imageFile) {
       const uploadedUrl = await uploadTriviaImage(imageFile);
 
+      console.log("URL subida:", uploadedUrl);
+
       if (!uploadedUrl) {
-        setMessage("Error subiendo la imagen");
+        alert("No se pudo subir la imagen");
         return;
       }
 
       imageUrl = uploadedUrl;
     }
 
-    const nuevaTrivia = {
+    const triviaData = {
       title: formData.title,
       description: formData.description,
       category: formData.category,
@@ -243,45 +242,68 @@ const handleSaveTrivia = async () => {
       image_url: imageUrl,
     };
 
-    console.log("2. Creando trivia...", nuevaTrivia);
+if (view === "edit" && editingId !== null) {
+  await updateTrivia(editingId, triviaData);
 
-    const triviaCreada = await createTrivia(nuevaTrivia);
+  const { error: deleteQuestionsError } = await supabase
+    .from("trivia_questions")
+    .delete()
+    .eq("trivia_id", editingId);
 
-    console.log("3. Trivia creada:", triviaCreada);
+  if (deleteQuestionsError) {
+    console.error("Error eliminando preguntas anteriores:", deleteQuestionsError);
+    alert("Se actualizó la trivia, pero no se pudieron borrar las preguntas anteriores");
+    return;
+  }
 
-    if (!triviaCreada) {
-      setMessage("Error creando trivia");
-      return;
-    }
+  const preguntasActualizadas = questions.map((q) => ({
+    trivia_id: editingId,
+    question: q.question,
+    options: q.options,
+    correct_answer: q.correct_answer,
+  }));
 
-    const preguntasParaSupabase = questions.map((q) => ({
-      trivia_id: triviaCreada.id,
-      question: q.question,
-      options: q.options,
-      correct_answer: q.correctAnswer,
-    }));
+  const preguntasCreadas = await createTriviaQuestions(preguntasActualizadas);
 
-    console.log("Preguntas que se van a guardar:", preguntasParaSupabase);
+  if (!preguntasCreadas) {
+    alert("Se actualizó la trivia, pero no se pudieron guardar las preguntas nuevas");
+    return;
+  }
 
-    const preguntasOk = await createTriviaQuestions(preguntasParaSupabase);
+  alert("Trivia actualizada correctamente");
+} else {
+  const triviaCreada = await createTrivia(triviaData);
 
-    console.log("4. Creando preguntas...", preguntasParaSupabase);
-    console.log("5. Preguntas creadas:", preguntasOk);
+  if (!triviaCreada) {
+    alert("No se pudo crear la trivia");
+    return;
+  }
 
-    if (!preguntasOk) {
-      setMessage("La trivia se creó, pero fallaron las preguntas");
-      return;
-    }
+  const preguntasParaSupabase = questions.map((q) => ({
+    trivia_id: triviaCreada.id,
+    question: q.question,
+    options: q.options,
+    correct_answer: q.correct_answer,
+  }));
 
-    setTrivias((prev) => [triviaCreada, ...prev]);
-    setMessage("Trivia creada correctamente");
-    resetForm();
+  const preguntasCreadas = await createTriviaQuestions(preguntasParaSupabase);
+
+  if (!preguntasCreadas) {
+    alert("La trivia se creó, pero las preguntas no se guardaron");
+    return;
+  }
+
+  alert("Trivia creada correctamente");
+}
+
+    setEditingId(null);
     setView("list");
+    resetForm();
+    await loadTrivias();
   } catch (error) {
-    console.error("ERROR EN HANDLE SAVE:", error);
-    setMessage("Error al guardar la trivia");
+    console.error("Error guardando trivia:", error);
+    alert("No se pudo guardar la trivia");
   } finally {
-    console.log("6. Terminando loading");
     setLoading(false);
   }
 };
@@ -298,7 +320,7 @@ const handleSaveTrivia = async () => {
     setMessage("Trivia eliminada");
   };
 
-  const handleEditTrivia = (trivia: Trivia) => {
+  const handleEditTrivia = async (trivia: Trivia) => {
     setEditingId(trivia.id);
 
     setFormData({
@@ -312,9 +334,18 @@ const handleSaveTrivia = async () => {
       image: trivia.image_url || "",
     });
 
-    if (trivia.image_url) {
-      setImagePreview(trivia.image_url);
-    }
+    setImagePreview(trivia.image_url || "");
+
+    const preguntas = await getQuestionsByTriviaId(trivia.id);
+
+      setQuestions(
+        preguntas.map((q) => ({
+          id: q.id,
+          question: q.question,
+          options: q.options,
+          correct_answer: q.correct_answer,
+        }))
+      );
 
     setView("edit");
   };
@@ -587,11 +618,11 @@ const handleSaveTrivia = async () => {
                       <input
                         type="radio"
                         name={`correct-${qIndex}`}
-                        checked={q.correctAnswer === oIndex}
+                        checked={q.correct_answer === oIndex}
                         onChange={() =>
                           handleQuestionChange(
                             qIndex,
-                            "correctAnswer",
+                            "correct_answer",
                             oIndex
                           )
                         }
@@ -805,7 +836,7 @@ const handleSaveTrivia = async () => {
             </div>
           ))}
 
-          {trivias.length === 0 ? (
+          {/* {trivias.length === 0 ? (
             <p>No hay trivias creadas todavía.</p>
           ) : (
             trivias.map((trivia) => (
@@ -814,7 +845,7 @@ const handleSaveTrivia = async () => {
                 <p>{trivia.description}</p>
               </div>
             ))
-          )}
+          )} */}
         </div>
       </div>
     </div>

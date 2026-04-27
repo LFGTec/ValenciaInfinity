@@ -20,6 +20,7 @@ import { ManageCards } from "@/pages/AdminViews/ManageCards";
 import  AdminLayout  from "@/layouts/AdminLayout"
 import { TriviasQuizzes } from  "../components/features/TriviasQuizzes"
 import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
+import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
 
 
 export default function AppRoutes() {
@@ -54,6 +55,7 @@ export default function AppRoutes() {
       <Route path="/admin/news" element={<NewsAdmin />} />
             <Route path="/admin/cards" element={<ManageCards />} />
       <Route path="/admin/trivias" element={<CrearTrivias/>} />
+      <Route path="/admin/timeline" element={<TimelineAdmin />} />
         <Route element={<ProtectedRoute adminOnly={true} />}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>

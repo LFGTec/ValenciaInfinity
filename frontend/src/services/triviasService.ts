@@ -152,3 +152,19 @@ export const uploadTriviaImage = async (file: File): Promise<string | null> => {
 
   return data.publicUrl;
 };
+
+export const updateTrivia = async (id: string, triviaData: Partial<Trivia>) => {
+  const { data, error } = await supabase
+    .from("trivias")
+    .update(triviaData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error actualizando trivia:", error);
+    throw error;
+  }
+
+  return data;
+};
