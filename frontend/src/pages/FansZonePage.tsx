@@ -5,9 +5,6 @@ import {
   Shirt, ShoppingBag, Crown, Sparkles
 } from 'lucide-react';
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
-
-import { CardAlbum } from "../components/features/CardAlbum";
-
 export function FansZonePage() {
   const [showRewind, setShowRewind] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('rostros');
@@ -56,10 +53,6 @@ export function FansZonePage() {
         ))}
       </div>
      </div>
-    <div>
-      <CardAlbum />
-      </div>
-    
 
 
   );
