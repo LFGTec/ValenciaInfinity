@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { getRanking, type Ranking } from "@/services/rankingService";
 import { useNoticias } from "@/hooks/useNoticias";
 import {
@@ -12,11 +13,6 @@ import {
 } from "lucide-react";
 
 import stadiumImage from "../assets/EquipoVF.png";
-import valenciaVictoryImage from "../assets/Noticia1.png";
-import newsImage1 from "../assets/Noticia2.png";
-import newsImage2 from "../assets/Noticia3.png";
-import newsImage3 from "../assets/Noticia4.png";
-import newsImage5 from "../assets/Noticia5.png";
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
 import card1 from "../assets/CartaAmarilla.png";
 import card2 from "../assets/CartaAzul.png";
@@ -25,12 +21,67 @@ import card4 from "../assets/CartaVerde.png";
 import avatar1 from "../assets/Avatar1.png";
 import avatar2 from "../assets/Avatar2.png";
 import avatar3 from "../assets/Avatar3.png";
+import { usePartidosVCF } from "@/hooks/usePartidosVCF";
+
+const fallbackImage =
+  "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
 
 export default function HomePage() {
   const [ranking, setRanking] = useState<Ranking[]>([]);
   const [rankingLoading, setRankingLoading] = useState(true);
-
+  const [countdown, setCountdown] = useState({
+    dias: 0,
+    horas: 0,
+    minutos: 0,
+    segundos: 0,
+  });
+  const navigate = useNavigate();
   const { noticias: news, cargando: newsLoading } = useNoticias();
+  const { proximos } = usePartidosVCF();
+
+  const partidoDestacado = proximos[0];
+
+  useEffect(() => {
+    if (!partidoDestacado) return;
+
+    const horaStr = partidoDestacado.hora.replace("h", "");
+    const [hh, mm] = horaStr.split(":").map(Number);
+    const fechaPartido = new Date(
+      partidoDestacado.anio,
+      partidoDestacado.mes,
+      partidoDestacado.dia,
+      hh,
+      mm,
+    );
+
+    const calcular = () => {
+      const diff = fechaPartido.getTime() - Date.now();
+      if (diff <= 0) {
+        setCountdown({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
+        return;
+      }
+      setCountdown({
+        dias: Math.floor(diff / 86_400_000),
+        horas: Math.floor((diff % 86_400_000) / 3_600_000),
+        minutos: Math.floor((diff % 3_600_000) / 60_000),
+        segundos: Math.floor((diff % 60_000) / 1_000),
+      });
+    };
+
+    calcular();
+    const id = setInterval(calcular, 1000);
+    return () => clearInterval(id);
+  }, [partidoDestacado]);
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   useEffect(() => {
     const fetchRanking = async () => {
@@ -47,18 +98,6 @@ export default function HomePage() {
 
     fetchRanking();
   }, []);
-
-  const fallbackNewsImages = [newsImage1, newsImage2, newsImage3, newsImage5];
-
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
 
   return (
     <div className="bg-content">
@@ -93,15 +132,17 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base md:text-lg mb-6 font-bold text-vcf-orange uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              VS REAL MADRID
+              {partidoDestacado
+                ? `VS ${partidoDestacado.rival.toUpperCase()}`
+                : "PRÓXIMO PARTIDO"}
             </p>
 
             <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
               {[
-                { v: "02", l: "DÍAS" },
-                { v: "14", l: "HORAS" },
-                { v: "35", l: "MIN" },
-                { v: "22", l: "SEG" },
+                { v: String(countdown.dias).padStart(2, "0"), l: "DÍAS" },
+                { v: String(countdown.horas).padStart(2, "0"), l: "HORAS" },
+                { v: String(countdown.minutos).padStart(2, "0"), l: "MIN" },
+                { v: String(countdown.segundos).padStart(2, "0"), l: "SEG" },
               ].map((t, i, arr) => (
                 <div key={i} className="flex items-center gap-2 md:gap-4">
                   <div className="text-center bg-black/60 backdrop-blur-sm border border-white/20 px-3 md:px-6 py-3 md:py-4 rounded-xl shadow-lg">
@@ -124,7 +165,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link
-                to="/game"
+                to="/match-rooms"
                 className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 text-sm md:text-base"
               >
                 <Video size={20} />
@@ -169,84 +210,71 @@ export default function HomePage() {
               No hay noticias disponibles.
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Noticia principal */}
-              <a
-                href={news[0]?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="lg:col-span-2 group cursor-pointer"
-              >
-                <div className="relative h-full min-h-[350px] bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all">
-                  <img
-                    src={news[0]?.imagen || valenciaVictoryImage}
-                    alt={news[0]?.titulo || "Noticia principal"}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = valenciaVictoryImage;
-                    }}
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <span className="inline-block bg-vcf-orange text-white px-3 py-1 rounded text-xs font-black mb-2 uppercase">
-                      {news[0]?.categoria}
-                    </span>
-                    <h3 className="text-2xl md:text-3xl font-black mb-2 group-hover:text-vcf-yellow transition-colors">
-                      {news[0]?.titulo || "Sin título"}
-                    </h3>
-
-                    <p className="text-sm mb-3 opacity-90 line-clamp-3">
-                      {news[0]?.descripcion || ""}
-                    </p>
-
-                    <div className="flex items-center gap-4 text-xs">
-                      <span>{formatDate(news[0]?.fechaPublicacion)}</span>
-                      <span className="text-vcf-yellow">•</span>
-                      <span className="text-[#00a3e0]">{news[0]?.fuente}</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Noticias secundarias */}
-              <div className="flex flex-col gap-4">
-                {news.slice(1, 3).map((item, index) => (
-                  <a
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[220px] md:auto-rows-[240px]">
+              {news.slice(0, 6).map((item, i) => {
+                const isFeatured = i === 0;
+                return (
+                  <motion.div
                     key={item.url}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 group cursor-pointer"
+                    onClick={() => navigate("/news")}
+                    className={`relative rounded-[14px] overflow-hidden cursor-pointer group no-underline shadow-[0_4px_20px_rgba(0,0,0,0.18)] ${
+                      isFeatured ? "md:col-span-2 md:row-span-2" : ""
+                    }`}
+                    whileHover={{
+                      scale: 1.015,
+                      transition: {
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      },
+                    }}
                   >
-                    <div className="relative h-[188px] md:h-[192px] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
-                      <img
-                        src={item.imagen || fallbackNewsImages[index] || newsImage5}
-                        alt={item.titulo}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.src = fallbackNewsImages[index] || newsImage5;
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                      <span className="absolute top-2 left-2 bg-vcf-orange text-white px-2 py-1 rounded text-xs font-black uppercase">
-                        {item.categoria}
-                      </span>
-                      <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                        <h3 className="font-black text-sm leading-tight group-hover:text-vcf-yellow transition-colors line-clamp-2">
-                          {item.titulo}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs mt-1 opacity-80">
-                          <span>{formatDate(item.fechaPublicacion)}</span>
-                          <span className="text-vcf-orange">•</span>
-                          <span className="text-[#00a3e0]">{item.fuente}</span>
-                        </div>
+                    <img
+                      src={item.imagen || fallbackImage}
+                      alt={item.titulo}
+                      className="absolute inset-0 w-full h-full object-cover transition-[transform,filter] duration-500 group-hover:scale-[1.05] group-hover:brightness-105"
+                      onError={(e) => {
+                        e.currentTarget.src = fallbackImage;
+                      }}
+                    />
+
+                    {/* Shine sweep */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none overflow-hidden">
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-20deg]" />
+                    </div>
+
+                    {/* Dark gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+
+                    {/* Category badge */}
+                    <span className="absolute top-3 left-3 bg-[#ff671f] text-white px-3 py-[6px] rounded-md text-xs font-black uppercase z-[2] transition-[background,box-shadow,transform] duration-300 group-hover:bg-[#e55a18] group-hover:shadow-[0_4px_12px_rgba(255,103,31,0.55)] group-hover:scale-105">
+                      {item.categoria}
+                    </span>
+
+                    {/* Bottom accent bar */}
+                    <div className="absolute bottom-0 left-0 h-[3px] w-0 bg-gradient-to-r from-[#ff671f] to-[#ffdf1b] group-hover:w-full transition-all duration-500 ease-out z-[3]" />
+
+                    {/* Text at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 z-[2]">
+                      <h2
+                        className={`font-black text-white leading-tight mb-2 transition-colors duration-300 group-hover:text-[#ff9a5c] ${isFeatured ? "text-xl md:text-2xl" : "text-sm md:text-base line-clamp-2"}`}
+                      >
+                        {item.titulo}
+                      </h2>
+                      {isFeatured && (
+                        <p className="text-sm text-white/75 mb-3 line-clamp-2 leading-relaxed">
+                          {item.descripcion}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-white/60 flex-wrap">
+                        <span>{formatDate(item.fechaPublicacion)}</span>
+                        <span className="text-[#ff671f]">•</span>
+                        <span className="text-[#4db8e8]">{item.fuente}</span>
                       </div>
                     </div>
-                  </a>
-                ))}
-              </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </section>
@@ -278,7 +306,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                to="/game"
+                to="/match-rooms"
                 className="inline-flex px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 items-center gap-2"
               >
                 <Video size={20} />
@@ -362,7 +390,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  to="/game"
+                  to="/juego"
                   className="block text-center w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
                 >
                   JUGAR AHORA

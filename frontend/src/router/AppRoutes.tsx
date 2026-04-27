@@ -4,23 +4,25 @@ import ProtectedRoute from "./ProtectedRoute";
 
 // Páginas
 import HomePage from "../pages/HomePage";
-import { TeamPage }from "../pages/TeamPage";
+import { TeamPage } from "../pages/TeamPage";
 import { MatchesPage } from "../pages/MatchesPage";
-import {News} from "../pages/News";
+import { News } from "../pages/News";
 import { FansZonePage } from "../pages/FansZonePage";
 import LogIn from "../pages/LogIn";
-import { UserProfile} from "../components/features/UserProfile"
+import { UserProfile } from "../components/features/UserProfile";
+import NewsAdmin from "../pages/AdminViews/NewsAdmin.tsx";
 
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
-import {Juego} from "../pages/Juego";
+import { Juego } from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
 
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
 import  AdminLayout  from "@/layouts/AdminLayout"
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 
+import { MatchRooms } from "@/pages/MatchRooms.tsx";
 
 export default function AppRoutes() {
   return (
@@ -38,24 +40,28 @@ export default function AppRoutes() {
         <Route path="/team" element={<TeamPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/news" element={<News />} />
-        <Route path="/nou-mestalla" element={<NouMestellaPage/>} />
-        
+        <Route path="/nou-mestalla" element={<NouMestellaPage />} />
+
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/fanzone" element={<FansZonePage />} />
           {/*Rutas dentro de FAN ZONE*/}
           <Route path="/virtual-world" element={<VirtualWorld />} />
 
+          <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
         </Route>
       </Route>
-      
+
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
         <Route path="/admin/cards" element={<ManageCards />} />
         <Route element={<ProtectedRoute adminOnly={true} />}>
-            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route
+            path="/admin"
+            element={<Navigate to="/admin/dashboard" replace />}
+          />
         </Route>
       </Route>
     </Routes>
