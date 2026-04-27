@@ -31,12 +31,12 @@ export default function HomePage() {
   const [ranking, setRanking] = useState<Ranking[]>([]);
   //Dice si el ranking esta cargando empieza con true pq al principio no se obtienen datos
   const [rankingLoading, setRankingLoading] = useState(true);
-  const [countdown, setCountdown] = useState({
-    dias: 0,
-    horas: 0,
-    minutos: 0,
-    segundos: 0,
-  });
+  const [countdown, setCountdown] = useState<{
+    dias: number;
+    horas: number;
+    minutos: number;
+    segundos: number;
+  } | null>(null);
   const navigate = useNavigate();
   const { noticias: news, cargando: newsLoading } = useNoticias();
   const { proximos } = usePartidosVCF();
@@ -142,10 +142,10 @@ export default function HomePage() {
 
             <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
               {[
-                { v: String(countdown.dias).padStart(2, "0"), l: "DÍAS" },
-                { v: String(countdown.horas).padStart(2, "0"), l: "HORAS" },
-                { v: String(countdown.minutos).padStart(2, "0"), l: "MIN" },
-                { v: String(countdown.segundos).padStart(2, "0"), l: "SEG" },
+                { v: countdown ? String(countdown.dias).padStart(2, "0") : "--", l: "DÍAS" },
+                { v: countdown ? String(countdown.horas).padStart(2, "0") : "--", l: "HORAS" },
+                { v: countdown ? String(countdown.minutos).padStart(2, "0") : "--", l: "MIN" },
+                { v: countdown ? String(countdown.segundos).padStart(2, "0") : "--", l: "SEG" },
               ].map((t, i, arr) => (
                 //Divide en t cada elementp, i el indice y arr el array complto
                 <div key={i} className="flex items-center gap-2 md:gap-4">
