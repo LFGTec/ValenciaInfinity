@@ -17,9 +17,10 @@ import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import { Juego } from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
-
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
 import  AdminLayout  from "@/layouts/AdminLayout"
+import { TriviasQuizzes } from  "../components/features/TriviasQuizzes"
+import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
@@ -51,11 +52,13 @@ export default function AppRoutes() {
           <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
+          <Route path="/trivias" element={<TriviasQuizzes />} />
         </Route>
       </Route>
 
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
+      <Route path="/admin/trivias" element={<CrearTrivias/>} />
         <Route path="/admin/cards" element={<ManageCards />} />
         <Route element={<ProtectedRoute adminOnly={true} />}>
           <Route

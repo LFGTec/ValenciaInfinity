@@ -6,12 +6,17 @@ export type Ranking = {
   puntos: number;
   nivel: string;
 };
+//Agregar imagen del usuario
+//Modelo de ranking, con id, nombre del fan, puntos y nivel
 
 export const getRanking = async (): Promise<Ranking[]> => {
   const { data, error } = await supabase
     .from("ranking")
+    //va a la tabla de ranking
     .select("*")
+    //Trae todas las columnas3
     .order("puntos", { ascending: false });
+    //Ordena de mayor a menor
 
   if (error) {
     console.error("Error obteniendo ranking:", error);
@@ -20,3 +25,5 @@ export const getRanking = async (): Promise<Ranking[]> => {
 
   return data as Ranking[];
 };
+
+//Funcion que obtiene el ranking del Supabase y trae el ranking ordenado
