@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSetAtom } from "jotai";
-import { exchangeCodeForSession } from "../services/authService";
+import { exchangeCodeForSession, getUserProfile } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
+import { supabase } from "../services/supabaseClient";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -17,11 +18,16 @@ export default function AuthCallback() {
         const code = searchParams.get("code");
 
         if (!code) {
-          console.error("❌ [AuthCallback] No authorization code found");
-          setError("No authorization code found");
-          setTimeout(() => {
-            navigate("/login?error=no_code", { replace: true });
-          }, 2000);
+          // No OAuth code — check if there's already an active session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const profile = await getUserProfile(session.user.id);
+            if (profile) setUser(profile);
+            const role = profile?.role ?? session.user.user_metadata?.role ?? "fan";
+            navigate(role?.toLowerCase() === "admin" ? "/admin/cards" : "/home", { replace: true });
+          } else {
+            navigate("/login", { replace: true });
+          }
           return;
         }
 

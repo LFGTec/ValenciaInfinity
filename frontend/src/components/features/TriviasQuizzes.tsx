@@ -20,6 +20,7 @@ export function TriviasQuizzes() {
   const [activeTab, setActiveTab] = useState<"active" | "leaderboard">("active");
   const [activeTrivias, setActiveTrivias] = useState<Trivia[]>([]);
   const [loading, setLoading] = useState(true);
+  const [, setTick] = useState(0);
 
   const [selectedTrivia, setSelectedTrivia] = useState<Trivia | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<TriviaQuestion[]>([]);
@@ -40,6 +41,11 @@ export function TriviasQuizzes() {
     };
 
     fetchTrivias();
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
   }, []);
 
   const difficultyColors = {
