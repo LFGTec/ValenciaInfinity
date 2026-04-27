@@ -10,7 +10,7 @@ import { News } from "../pages/News";
 import { FansZonePage } from "../pages/FansZonePage";
 import LogIn from "../pages/LogIn";
 import { UserProfile } from "../components/features/UserProfile";
-import NewsAdmin from "../pages/AdminViews/NewsAdmin.tsx";
+
 
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
