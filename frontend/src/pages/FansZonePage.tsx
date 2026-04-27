@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
 
+import { CardAlbum } from "../components/features/CardAlbum";
 
 export function FansZonePage() {
   const [showRewind, setShowRewind] = useState(false);
@@ -20,6 +21,7 @@ export function FansZonePage() {
   const [jerseyName, setJerseyName] = useState('');
   
   return (
+    
      <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
       <div className="mb-8">
         <h1 className="text-5xl font-black mb-4 text-foreground">ZONA <span className="text-vcf-orange">FAN</span></h1>
@@ -54,7 +56,9 @@ export function FansZonePage() {
         ))}
       </div>
      </div>
-
+    <div>
+      <CardAlbum />
+      </div>
     
 
 
