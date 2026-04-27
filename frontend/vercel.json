@@ -1,6 +1,9 @@
 
 {
-"rewrites": [
-{ "source": "/(.*)", "destination": "/index.html" }
-]
+  "rewrites": [
+    { "source": "/rss-marca/(.*)", "destination": "https://e00-marca.uecdn.es/$1" },
+    { "source": "/rss-as/(.*)", "destination": "https://as.com/$1" },
+    { "source": "/api-football/(.*)", "destination": "https://api.football-data.org/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

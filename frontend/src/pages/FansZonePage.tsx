@@ -5,10 +5,20 @@ import {
   Shirt, ShoppingBag, Crown, Sparkles
 } from 'lucide-react';
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
-
-
 export function FansZonePage() {
+  const [showRewind, setShowRewind] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('rostros');
+  
+  // Avatar customization states
+  const [skinTone, setSkinTone] = useState(2);
+  const [hairStyle, setHairStyle] = useState('corto');
+  const [hairColor, setHairColor] = useState(2);
+  const [jersey, setJersey] = useState('local');
+  const [jerseyNumber, setJerseyNumber] = useState('7');
+  const [jerseyName, setJerseyName] = useState('');
+  
   return (
+    
      <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
       <div className="mb-8">
         <h1 className="text-5xl font-black mb-4 text-foreground">ZONA <span className="text-vcf-orange">FAN</span></h1>
@@ -43,8 +53,6 @@ export function FansZonePage() {
         ))}
       </div>
      </div>
-
-    
 
 
   );

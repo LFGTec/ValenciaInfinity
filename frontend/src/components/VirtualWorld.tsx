@@ -25,7 +25,7 @@ export function VirtualWorld() {
                 {loading && <div className="p-6">Cargando mapa...</div>}
                 {error && <div className="p-6 text-red-500">{error}</div>}
 
-                {!loading && !error && (
+                {false && !loading && !error && (
                     <Map data={data} />
                 )}
             </div>
