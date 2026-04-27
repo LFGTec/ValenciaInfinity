@@ -27,7 +27,9 @@ const fallbackImage =
   "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
 
 export default function HomePage() {
+  //Guarda el ranking y las noticias en el estado para mostrarlos en la página
   const [ranking, setRanking] = useState<Ranking[]>([]);
+  //Dice si el ranking esta cargando empieza con true pq al principio no se obtienen datos
   const [rankingLoading, setRankingLoading] = useState(true);
   const [countdown, setCountdown] = useState({
     dias: 0,
@@ -51,7 +53,7 @@ export default function HomePage() {
       partidoDestacado.mes,
       partidoDestacado.dia,
       hh,
-      mm
+      mm,
     );
 
     const calcular = () => {
@@ -88,6 +90,7 @@ export default function HomePage() {
       try {
         const fetchedData = await getRanking();
         setRanking(fetchedData ?? []);
+        //Si no se obtienen datos, se guarda un array vacío para evitar errores al renderizar
       } catch (error) {
         console.error("Error cargando ranking:", error);
         setRanking([]);
@@ -132,7 +135,9 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base md:text-lg mb-6 font-bold text-vcf-orange uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              {partidoDestacado ? `VS ${partidoDestacado.rival.toUpperCase()}` : "PRÓXIMO PARTIDO"}
+              {partidoDestacado
+                ? `VS ${partidoDestacado.rival.toUpperCase()}`
+                : "PRÓXIMO PARTIDO"}
             </p>
 
             <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
@@ -142,6 +147,7 @@ export default function HomePage() {
                 { v: String(countdown.minutos).padStart(2, "0"), l: "MIN" },
                 { v: String(countdown.segundos).padStart(2, "0"), l: "SEG" },
               ].map((t, i, arr) => (
+                //Divide en t cada elementp, i el indice y arr el array complto
                 <div key={i} className="flex items-center gap-2 md:gap-4">
                   <div className="text-center bg-black/60 backdrop-blur-sm border border-white/20 px-3 md:px-6 py-3 md:py-4 rounded-xl shadow-lg">
                     <div className="text-2xl md:text-3xl font-black text-[#ff671f] drop-shadow-md">
@@ -156,16 +162,18 @@ export default function HomePage() {
                     <div className="text-xl md:text-2xl font-black text-vcf-yellow drop-shadow-md">
                       :
                     </div>
+                    //Muestra : si no es el último elemento
                   )}
                 </div>
               ))}
             </div>
-
+            
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link
-                to="/game"
+                to="/match-rooms"
                 className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 text-sm md:text-base"
               >
+                
                 <Video size={20} />
                 <span>CREAR MATCH ROOM</span>
               </Link>
@@ -304,7 +312,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                to="/game"
+                to="/match-rooms"
                 className="inline-flex px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 items-center gap-2"
               >
                 <Video size={20} />
@@ -328,7 +336,7 @@ export default function HomePage() {
               VER TODOS <ArrowRight size={16} />
             </Link>
           </div>
-
+          {/* Arreglo de desafios*/}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               {
@@ -355,9 +363,11 @@ export default function HomePage() {
                 color: "from-white to-white",
                 iconColor: "text-[#ff671f]",
               },
+              //Recorre el arreglo y por cada desafio crea una tarjeta
             ].map((challenge, i) => (
               <div
                 key={i}
+                //Crea una carta con fondo, borde, padding, hover, cursor pointer, y un group
                 className="bg-card border-2 border-border rounded-lg p-6 hover:border-vcf-orange hover:shadow-xl transition-all cursor-pointer group"
               >
                 <div className="flex items-start justify-between mb-4">
@@ -388,7 +398,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  to="/game"
+                  to="/juego"
                   className="block text-center w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
                 >
                   JUGAR AHORA
@@ -447,6 +457,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-3 gap-4">
+              {/* Recorre el arreglo de imagenes de cartas */}
               {[card1, card2, card3, card4, card1, card2].map((cardImg, i) => (
                 <Link
                   key={i}
@@ -539,7 +550,7 @@ export default function HomePage() {
                     );
                   })}
                 </div>
-
+                {/* Lista del 4 al 10 en el raking */}
                 <div className="divide-y divide-border">
                   {ranking.slice(3, 10).map((user, i) => (
                     <div

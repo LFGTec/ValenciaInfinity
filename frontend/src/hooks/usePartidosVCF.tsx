@@ -1,7 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { partidosAtom } from "../stores/partidosStore";
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export interface Partido {
-  id: string; //atributos
+  id: string;
   dia: number;
   mes: number;
   anio: number;
@@ -28,140 +33,86 @@ export interface EstadisticasTemporada {
   jornada: number;
 }
 
-const API_KEY = import.meta.env.VITE_FOOTBALL_API_KEY; // api key
-const VCF_ID = 95; // id valencia
+const VCF_ID = 95;
 
 const MESES_CORTO = [
-  // meses corto
-  "ENE",
-  "FEB",
-  "MAR",
-  "ABR",
-  "MAY",
-  "JUN",
-  "JUL",
-  "AGO",
-  "SEP",
-  "OCT",
-  "NOV",
-  "DIC",
+  "ENE", "FEB", "MAR", "ABR", "MAY", "JUN",
+  "JUL", "AGO", "SEP", "OCT", "NOV", "DIC",
 ];
 
 const COMPETICION_MAP: Record<string, string> = {
-  // nombres cortos
   "Primera Division": "LA LIGA",
   "Copa del Rey": "COPA DEL REY",
   "UEFA Champions League": "CHAMPIONS",
 };
 
+async function footballFetch(path: string, params: Record<string, string>) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/football-proxy`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ path, params }),
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  return res.json();
+}
+
 function mapearPartido(match: any, estado: "JUGADO" | "PROXIMO"): Partido {
-  //funcion que adapta los datos de la api en el objeto partido
-  const fecha = new Date(match.utcDate); // fecha api
-  const esLocal = match.homeTeam.id === VCF_ID; // es local?
-  const rival = esLocal ? match.awayTeam : match.homeTeam; // rival
+  const fecha = new Date(match.utcDate);
+  const esLocal = match.homeTeam.id === VCF_ID;
+  const rival = esLocal ? match.awayTeam : match.homeTeam;
 
   const tieneResultado =
-    // ya jugado?
     match.score?.fullTime?.home !== null &&
     match.score?.fullTime?.away !== null;
 
   return {
-    id: String(match.id), // id string
+    id: String(match.id),
     dia: fecha.getDate(),
     mes: fecha.getMonth(),
     anio: fecha.getFullYear(),
-    mesTexto: MESES_CORTO[fecha.getMonth()], // mes texto
-    hora: `${String(fecha.getHours()).padStart(2, "0")}:${String(
-      fecha.getMinutes(),
-    ).padStart(2, "0")}h`, // formato hora
-    rival: rival.shortName ?? rival.name, // nombre rival
-    competicion:
-      COMPETICION_MAP[match.competition.name] ?? match.competition.name, // map liga
-    jornada: match.matchday ? `JOR. ${match.matchday}` : undefined, // jornada
+    mesTexto: MESES_CORTO[fecha.getMonth()],
+    hora: `${String(fecha.getHours()).padStart(2, "0")}:${String(fecha.getMinutes()).padStart(2, "0")}h`,
+    rival: rival.shortName ?? rival.name,
+    competicion: COMPETICION_MAP[match.competition.name] ?? match.competition.name,
+    jornada: match.matchday ? `JOR. ${match.matchday}` : undefined,
     casa: esLocal,
     escudoRival: rival.crest,
     codigoRival: rival.tla,
     estado,
     resultado: tieneResultado
-      ? {
-          local: match.score.fullTime.home,
-          visitante: match.score.fullTime.away,
-        }
-      : undefined, // si hay marcador
+      ? { local: match.score.fullTime.home, visitante: match.score.fullTime.away }
+      : undefined,
   };
 }
 
 export function usePartidosVCF() {
-  const [proximos, setProximos] = useState<Partido[]>([]); // futuros
-  const [jugados, setJugados] = useState<Partido[]>([]); // pasados
-  const [estadisticas, setEstadisticas] =
-    useState<EstadisticasTemporada | null>(null); // stats
-  const [cargando, setCargando] = useState(true); // loading
-  const [error, setError] = useState<string | null>(null); // error
+  const [state, setState] = useAtom(partidosAtom);
 
   useEffect(() => {
+    if (state.fetched) return;
+
     async function fetchTodo() {
       try {
-        const headers = { "X-Auth-Token": API_KEY }; // auth
-        const base = `/api-football/v4/teams/${VCF_ID}/matches`; // url base
+        const base = `/v4/teams/${VCF_ID}/matches`;
 
-        // 3 requests al mismo tiempo
-        const [resProximos, resJugados, resStats] = await Promise.all([
-          fetch(`${base}?status=SCHEDULED&competitions=2014&limit=5`, {
-            headers,
-          }),
-          fetch(`${base}?status=FINISHED&competitions=2014&limit=10`, {
-            headers,
-          }),
-          fetch(`${base}?status=FINISHED&competitions=2014`, { headers }),
-        ]);
-
-        // validar errores
-        if (!resProximos.ok) throw new Error(`Proximos: ${resProximos.status}`);
-        if (!resJugados.ok) throw new Error(`Jugados: ${resJugados.status}`);
-        if (!resStats.ok) throw new Error(`Stats: ${resStats.status}`);
-
-        // convertir a json
         const [dataProximos, dataJugados, dataStats] = await Promise.all([
-          resProximos.json(),
-          resJugados.json(),
-          resStats.json(),
+          footballFetch(base, { status: "SCHEDULED", competitions: "2014", limit: "5" }),
+          footballFetch(base, { status: "FINISHED", competitions: "2014", limit: "10" }),
+          footballFetch(base, { status: "FINISHED", competitions: "2014" }),
         ]);
 
-        // guardar proximos
-        setProximos(
-          dataProximos.matches.map((m: any) => mapearPartido(m, "PROXIMO")),
-        );
-
-        // guardar jugados
-        setJugados(
-          dataJugados.matches
-            .reverse() // ordenar
-            .map((m: any) => mapearPartido(m, "JUGADO")),
-        );
-
-        // calcular stats
         const matches = dataStats.matches as any[];
-
-        let ganados = 0,
-          empatados = 0,
-          perdidos = 0;
-        let golesAFavor = 0,
-          golesEnContra = 0;
+        let ganados = 0, empatados = 0, perdidos = 0;
+        let golesAFavor = 0, golesEnContra = 0;
 
         matches.forEach((m: any) => {
           const esLocal = m.homeTeam.id === VCF_ID;
+          golesAFavor += esLocal ? m.score.fullTime.home : m.score.fullTime.away;
+          golesEnContra += esLocal ? m.score.fullTime.away : m.score.fullTime.home;
 
-          // goles
-          golesAFavor += esLocal
-            ? m.score.fullTime.home
-            : m.score.fullTime.away;
-
-          golesEnContra += esLocal
-            ? m.score.fullTime.away
-            : m.score.fullTime.home;
-
-          // resultado
           if (m.score.winner === "DRAW") {
             empatados++;
           } else if (
@@ -176,26 +127,36 @@ export function usePartidosVCF() {
 
         const ultimaJornada = matches[matches.length - 1]?.matchday ?? 0;
 
-        // guardar stats
-        setEstadisticas({
-          jugados: matches.length,
-          ganados,
-          empatados,
-          perdidos,
-          puntos: ganados * 3 + empatados,
-          golesAFavor,
-          golesEnContra,
-          jornada: ultimaJornada,
+        setState({
+          proximos: dataProximos.matches.map((m: any) => mapearPartido(m, "PROXIMO")),
+          jugados: dataJugados.matches.reverse().map((m: any) => mapearPartido(m, "JUGADO")),
+          estadisticas: {
+            jugados: matches.length,
+            ganados,
+            empatados,
+            perdidos,
+            puntos: ganados * 3 + empatados,
+            golesAFavor,
+            golesEnContra,
+            jornada: ultimaJornada,
+          },
+          cargando: false,
+          error: null,
+          fetched: true,
         });
       } catch (err: any) {
-        setError(err.message); // guardar error
-      } finally {
-        setCargando(false); // quitar loading
+        setState((prev) => ({ ...prev, error: err.message, cargando: false, fetched: true }));
       }
     }
 
-    fetchTodo(); // ejecutar
-  }, []);
+    fetchTodo();
+  }, [state.fetched, setState]);
 
-  return { proximos, jugados, estadisticas, cargando, error }; // return hook
+  return {
+    proximos: state.proximos,
+    jugados: state.jugados,
+    estadisticas: state.estadisticas,
+    cargando: state.cargando,
+    error: state.error,
+  };
 }

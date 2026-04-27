@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetAtom } from "jotai";
-import { exchangeCodeForSession } from "../services/authService";
+import { exchangeCodeForSession, getUserProfile } from "../services/authService";
 import { setUserAtom } from "../stores/authStore";
+import { supabase } from "../services/supabaseClient";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -23,13 +24,16 @@ export default function AuthCallback() {
         const code = new URLSearchParams(window.location.search).get("code");
 
         if (!code) {
-          throw new Error("No se encontró el código de autorización en la URL");
-        }
-
-        const processedCodeKey = "auth_callback_processed_code";
-        const lastProcessedCode = sessionStorage.getItem(processedCodeKey);
-
-        if (lastProcessedCode === code) {
+          // No OAuth code — check if there's already an active session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const profile = await getUserProfile(session.user.id);
+            if (profile) setUser(profile);
+            const role = profile?.role ?? session.user.user_metadata?.role ?? "fan";
+            navigate(role?.toLowerCase() === "admin" ? "/admin/cards" : "/home", { replace: true });
+          } else {
+            navigate("/login", { replace: true });
+          }
           return;
         }
 

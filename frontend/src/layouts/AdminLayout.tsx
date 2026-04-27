@@ -20,10 +20,10 @@ export default function AdminLayout() {
   const adminNavItems = [
     { id: "home", label: "Dashboard", icon: Home, path: "/admin/dashboard" },
     { id: "activity", label: "Actividad", icon: TrendingUp, path: "/admin/activity" },
-    { id: "manage-news", label: "Noticias", icon: FileText, path: "/admin/news" },
     { id: "users", label: "Usuarios", icon: Users, path: "/admin/users" },
     { id: "manage-cards", label: "Cartas", icon: BookOpen, path: "/admin/cards" },
     { id: "manage-trivias", label: "Trivias", icon: Gamepad2, path: "/admin/trivias" },
+    { id: "manage-timeline", label: "Línea de Tiempo", icon: Calendar, path: "/admin/timeline" },
     { id: "manage-calendar", label: "Calendario", icon: Calendar, path: "/admin/calendar" },
     { id: "winners", label: "Ganadores", icon: Trophy, path: "/admin/winners" },
     { id: "settings", label: "Ajustes", icon: Settings, path: "/admin/settings" },
