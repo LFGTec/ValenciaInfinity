@@ -3,27 +3,20 @@ import { useSetAtom } from "jotai";
 import { supabase } from "../services/supabaseClient";
 import { finishLoadingAtom } from "../stores/authStore";
 import type { User } from "../services/authService";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { getUserProfile } from "../services/authService";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const finishLoading = useSetAtom(finishLoadingAtom);
 
-  // 🔥 Mapper con profile real
-  const mapUser = async (
-    user: SupabaseUser | null
-  ): Promise<User | null> => {
+  const mapUser = async (user: SupabaseUser | null): Promise<User | null> => {
     if (!user) return null;
-
     try {
       const profile = await getUserProfile(user.id);
-
       if (profile) return profile;
     } catch (error) {
       console.warn("⚠️ Error fetching profile, using fallback", error);
     }
-
-    // 🔹 fallback (metadata)
     return {
       id: user.id,
       email: user.email ?? "",
@@ -36,36 +29,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    // Contador para descartar resultados de llamadas async obsoletas
+    let latestCallId = 0;
 
-    // 🔹 1. Restaurar sesión al cargar
-    const init = async () => {
-      const { data } = await supabase.auth.getSession();
-
-      if (mounted) {
-        const mappedUser = await mapUser(data.session?.user ?? null);
+    const applySession = async (session: Session | null) => {
+      const callId = ++latestCallId;
+      const mappedUser = await mapUser(session?.user ?? null);
+      if (mounted && callId === latestCallId) {
         finishLoading(mappedUser);
       }
     };
 
-    init();
-
-    // 🔹 2. Escuchar cambios de auth
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("AUTH EVENT:", event);
-
         if (!mounted) return;
 
-        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-          const mappedUser = await mapUser(session?.user ?? null);
-          finishLoading(mappedUser);
+        if (
+          event === "INITIAL_SESSION" ||
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED"
+        ) {
+          applySession(session);
         }
 
         if (event === "SIGNED_OUT") {
+          latestCallId++; // cancela cualquier update async pendiente
           finishLoading(null);
         }
-
-        // ❌ ignoramos INITIAL_SESSION
       }
     );
 

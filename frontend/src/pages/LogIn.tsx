@@ -114,24 +114,20 @@ export default function LogInn() {
     }
 
     if (user) {
-      // Store remember me preference
       if (rememberMe) {
         localStorage.setItem("remembered_email", email);
-        setUser(user);
-        setIsLoading(false);
-
-        if (user.role?.toLowerCase() === 'admin') {
-          navigate("/admin/cards", { replace: true });
-        } else {
-          navigate("/home", { replace: true });
-        }
       } else {
         localStorage.removeItem("remembered_email");
       }
 
       setUser(user);
       setIsLoading(false);
-      navigate("/home", { replace: true });
+
+      if (user.role?.toLowerCase() === 'admin') {
+        navigate("/admin/cards", { replace: true });
+      } else {
+        navigate("/home", { replace: true });
+      }
     }
   };
 
