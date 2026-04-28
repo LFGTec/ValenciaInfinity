@@ -3,7 +3,6 @@ import { supabase } from "./supabaseClient";
 export interface Card {
   id?: string;
   nombre: string;
-  rareza: string ;
   tipo: string;
   temporada: number;
   numero: number;
@@ -11,6 +10,18 @@ export interface Card {
   obtained?: boolean;
   quantity?: number;
   is_deleted: boolean;
+  rareza: Category;
+
+  category_id: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  label: string;
+  color: string;
+  border_color: string;
+  text_color: string;
 }
 
 export const getCards = async (): Promise<Card[]> => {
