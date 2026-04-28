@@ -1,49 +1,36 @@
 import { useState } from "react";
-import { Users, Share2, Settings, Check } from "lucide-react";
-import type { MatchRoom, Player } from "./types";
+import { motion } from "framer-motion";
+import { Users, Share2, Check } from "lucide-react";
+import type { RoomDB } from "@/services/matchRoomsService";
+import { useLiveMatch } from "@/hooks/useLiveMatch";
+import { useRoomPresence } from "@/hooks/useRoomPresence";
+import { useRoomChat } from "@/hooks/useRoomChat";
 import { LiveScoreBoard } from "./LiveScoreBoard";
 import { EventsTimeline } from "./EventsTimeline";
 import { MatchStatsPanel } from "./MatchStatsPanel";
 import { TeamLineup } from "./TeamLineup";
 import { RoomChat } from "./RoomChat";
 
-const valenciaPlayers: Player[] = [
-  { num: 1, name: "Mamardashvili", pos: "POR" },
-  { num: 2, name: "Foulquier", pos: "DEF" },
-  { num: 15, name: "Cenk Ozkacar", pos: "DEF" },
-  { num: 24, name: "Mosquera", pos: "DEF" },
-  { num: 21, name: "Gaya", pos: "DEF" },
-  { num: 18, name: "Pepelu", pos: "MED", hasCard: true },
-  { num: 6, name: "Guillamon", pos: "MED" },
-  { num: 10, name: "Fran Perez", pos: "DEL", scored: true },
-  { num: 16, name: "Diego Lopez", pos: "DEL" },
-  { num: 9, name: "Hugo Duro", pos: "DEL", scored: true },
-  { num: 22, name: "Yaremchuk", pos: "DEL", hasCard: true },
-];
-
-const madridPlayers: Player[] = [
-  { num: 1, name: "Courtois", pos: "POR" },
-  { num: 2, name: "Carvajal", pos: "DEF" },
-  { num: 3, name: "Militao", pos: "DEF" },
-  { num: 4, name: "Alaba", pos: "DEF" },
-  { num: 23, name: "Mendy", pos: "DEF" },
-  { num: 10, name: "Modric", pos: "MED", subbed: true },
-  { num: 8, name: "Kroos", pos: "MED" },
-  { num: 15, name: "Valverde", pos: "MED" },
-  { num: 11, name: "Rodrygo", pos: "DEL" },
-  { num: 9, name: "Benzema", pos: "DEL" },
-  { num: 20, name: "Vinicius Jr", pos: "DEL", scored: true },
-];
-
 interface RoomViewProps {
-  room: MatchRoom;
+  room: RoomDB;
+  user: { id: string; username: string };
   onLeave: () => void;
 }
 
-export function RoomView({ room, onLeave }: RoomViewProps) {
+export function RoomView({ room, user, onLeave }: RoomViewProps) {
   const [showCopied, setShowCopied] = useState(false);
 
+  const { liveMatch } = useLiveMatch(room.match_id);
+  const { count: spectatorCount } = useRoomPresence(room.id, user);
+  const { messages, sendEmoji } = useRoomChat(room.id);
+
+  const isLive = liveMatch?.status === "IN_PLAY" || liveMatch?.status === "PAUSED";
+
   const copyInviteLink = () => {
+    const url = room.invite_code
+      ? `${window.location.origin}/match-rooms?code=${room.invite_code}`
+      : `${window.location.origin}/match-rooms`;
+    navigator.clipboard.writeText(url);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
@@ -55,42 +42,43 @@ export function RoomView({ room, onLeave }: RoomViewProps) {
         <div className="max-w-[1400px] mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button
+              <motion.button
                 onClick={onLeave}
-                className="px-4 py-2 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
+                className="px-4 py-2 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-bold"
+                whileHover={{ scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 SALIR
-              </button>
+              </motion.button>
               <div>
                 <div className="flex items-center gap-3">
                   <h2 className="text-2xl font-black text-foreground">{room.name}</h2>
-                  {room.isLive && (
+                  {isLive && (
                     <span className="bg-vcf-red text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-md">
                       EN VIVO
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">{room.match}</p>
+                <p className="text-sm text-muted-foreground">{room.match_label}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-foreground bg-vcf-blue/20 px-3 py-2 rounded-lg">
                 <Users size={20} className="text-vcf-blue" />
-                <span className="font-bold">
-                  {room.participants}/{room.maxParticipants}
-                </span>
+                <span className="font-bold">{spectatorCount} en vivo</span>
               </div>
-              <button
+              <motion.button
                 onClick={copyInviteLink}
-                className="px-4 py-2 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105 flex items-center gap-2"
+                className="px-4 py-2 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-bold flex items-center gap-2"
+                whileHover={{ scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 {showCopied ? <Check size={18} /> : <Share2 size={18} />}
                 {showCopied ? "COPIADO" : "INVITAR"}
-              </button>
-              <button className="p-2 text-foreground hover:bg-muted rounded-lg transition-colors">
-                <Settings size={20} />
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -100,17 +88,38 @@ export function RoomView({ room, onLeave }: RoomViewProps) {
       <div className="max-w-[1600px] mx-auto px-4 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-3 space-y-4">
-            <LiveScoreBoard />
-            <EventsTimeline />
-            <MatchStatsPanel />
+            <LiveScoreBoard liveMatch={liveMatch} />
+            <EventsTimeline
+              events={liveMatch?.events ?? []}
+              homeTeam={liveMatch?.home_team ?? ""}
+            />
+            <MatchStatsPanel
+              stats={liveMatch?.stats ?? {}}
+              homeTeam={liveMatch?.home_team ?? "Local"}
+              awayTeam={liveMatch?.away_team ?? "Visitante"}
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TeamLineup teamName="VALENCIA CF" players={valenciaPlayers} variant="home" />
-              <TeamLineup teamName="REAL MADRID" players={madridPlayers} variant="away" />
+              <TeamLineup
+                teamName={liveMatch?.home_team ?? "Local"}
+                players={liveMatch?.lineups.home ?? []}
+                events={liveMatch?.events ?? []}
+                variant="home"
+              />
+              <TeamLineup
+                teamName={liveMatch?.away_team ?? "Visitante"}
+                players={liveMatch?.lineups.away ?? []}
+                events={liveMatch?.events ?? []}
+                variant="away"
+              />
             </div>
           </div>
 
           <div className="lg:col-span-1">
-            <RoomChat participants={room.participants} />
+            <RoomChat
+              messages={messages}
+              spectatorCount={spectatorCount}
+              onSendEmoji={(emoji) => sendEmoji(emoji, user)}
+            />
           </div>
         </div>
       </div>

@@ -1,46 +1,75 @@
-const stats = [
-  { stat: "Posesion", home: 58, away: 42, homeColor: "bg-vcf-orange", awayColor: "bg-gray-400" },
-  { stat: "Tiros totales", home: 12, away: 8, homeColor: "bg-vcf-blue", awayColor: "bg-gray-400" },
-  { stat: "Tiros a puerta", home: 8, away: 5, homeColor: "bg-vcf-yellow", awayColor: "bg-gray-400" },
-  { stat: "Corners", home: 6, away: 3, homeColor: "bg-vcf-red", awayColor: "bg-gray-400" },
-  { stat: "Faltas", home: 9, away: 11, homeColor: "bg-purple-600", awayColor: "bg-gray-400" },
-  { stat: "Tarjetas amarillas", home: 2, away: 1, homeColor: "bg-yellow-500", awayColor: "bg-gray-400" },
+interface StatRow {
+  label: string;
+  home: number;
+  away: number;
+  homeColor: string;
+}
+
+const STAT_CONFIG: { key: string; label: string; homeColor: string }[] = [
+  { key: "possession", label: "Posesión (%)", homeColor: "bg-vcf-orange" },
+  { key: "totalShots", label: "Tiros totales", homeColor: "bg-vcf-blue" },
+  { key: "shotsOnTarget", label: "Tiros a puerta", homeColor: "bg-vcf-yellow" },
+  { key: "corners", label: "Corners", homeColor: "bg-vcf-red" },
+  { key: "fouls", label: "Faltas", homeColor: "bg-purple-600" },
+  { key: "yellowCards", label: "Tarjetas amarillas", homeColor: "bg-yellow-500" },
 ];
 
-export function MatchStatsPanel() {
+interface MatchStatsPanelProps {
+  stats: Record<string, unknown>;
+  homeTeam: string;
+  awayTeam: string;
+}
+
+export function MatchStatsPanel({ stats, homeTeam, awayTeam }: MatchStatsPanelProps) {
+  const rows: StatRow[] = STAT_CONFIG.flatMap(({ key, label, homeColor }) => {
+    const entry = stats[key] as { home?: number; away?: number } | undefined;
+    if (!entry || entry.home == null || entry.away == null) return [];
+    return [{ label, home: entry.home, away: entry.away, homeColor }];
+  });
+
   return (
     <div className="bg-card border-2 border-border rounded-lg p-6 shadow-lg">
-      <h3 className="text-lg font-black text-foreground mb-6">
-        ESTADISTICAS <span className="text-vcf-blue">EN VIVO</span>
+      <h3 className="text-lg font-black text-foreground mb-4">
+        ESTADÍSTICAS <span className="text-vcf-blue">EN VIVO</span>
       </h3>
-      <div className="space-y-5">
-        {stats.map((item, i) => (
-          <div key={i}>
-            <div className="flex justify-between text-sm mb-2">
-              <span className="font-bold text-foreground">{item.home}</span>
-              <span className="font-bold text-foreground">{item.stat}</span>
-              <span className="font-bold text-foreground">{item.away}</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${item.homeColor} shadow-inner`}
-                  style={{ width: `${(item.home / (item.home + item.away)) * 100}%` }}
-                />
-              </div>
-              <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${item.awayColor} shadow-inner`}
-                  style={{
-                    width: `${(item.away / (item.home + item.away)) * 100}%`,
-                    marginLeft: "auto",
-                  }}
-                />
-              </div>
-            </div>
+
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          Las estadísticas estarán disponibles durante el partido
+        </p>
+      ) : (
+        <>
+          <div className="flex justify-between text-xs font-black text-muted-foreground mb-4">
+            <span>{homeTeam}</span>
+            <span>{awayTeam}</span>
           </div>
-        ))}
-      </div>
+          <div className="space-y-5">
+            {rows.map((item) => (
+              <div key={item.label}>
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="font-bold text-foreground">{item.home}</span>
+                  <span className="font-bold text-foreground">{item.label}</span>
+                  <span className="font-bold text-foreground">{item.away}</span>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${item.homeColor}`}
+                      style={{ width: `${(item.home / (item.home + item.away)) * 100}%` }}
+                    />
+                  </div>
+                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gray-400"
+                      style={{ width: `${(item.away / (item.home + item.away)) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
