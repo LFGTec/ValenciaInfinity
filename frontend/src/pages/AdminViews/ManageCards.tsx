@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
-import type { Card, } from "../../services/cardsService"
-import { getCards, addCard } from "../../services/cardsService"
+import { useState } from "react";
 import {
   Plus,
   Search,
@@ -11,23 +9,38 @@ import {
   Sparkles,
   Gem,
   Award,
+  Trash2,
 } from "lucide-react";
 import { Toast } from "@/components/ui.disabled/Toast";
+import { useCards } from "../../hooks/useCards";
 
 export function ManageCards(){
+    const {
+        cards,
+        loading,
+        createCard,
+        deleteCards,
+    } = useCards();
 
     const [showForm, setShowForm] = useState(false);
-    const [cards, setCards] = useState<Card[]>([]);
-    const [loading, setLoading] = useState(true);
     const [filterCategory, setFilterCategory] = useState<string>("Todas");
     const [searchTerm, setSearchTerm] = useState("");
+
     const [toast, setToast] = useState<{
         message: string;
         type: "success" | "error";
     } | null>(null);
 
+    const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean;
+    cardId: string | null;
+    cardName: string | null;
+    }>({
+    open: false,
+    cardId: null,
+    cardName: null,
+    });
 
-    console.log(loading)
     const categories = [
         {
         id: "Todas",
@@ -81,90 +94,92 @@ export function ManageCards(){
         return cat?.icon || Star;
     };
 
-    // Form
+    // 🧾 Form state
     const [formData, setForm] = useState({
-    nombre: "",
-    rareza: "",
-    tipo: "",
-    temporada: "" as any,
-    numero: "" as any,
-    });
-
-    const [fileUpload, setFile] = useState<File | null>(null);
-    
-
-    useEffect(() => {
-        const fetchCards = async () => {
-          const data = await getCards();
-          setCards(data);
-          setLoading(false);
-        };
-    
-        fetchCards();
-    }, []);
-
-
-    const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); 
-
-    // Validación
-    if (!formData.nombre.trim()) {
-      setToast({
-        message: "El nombre de la carta es obligatorio",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!formData.numero || parseInt(formData.numero) <= 0) {
-      setToast({
-        message: "El valor de la carta debe ser mayor a 0",
-        type: "error",
-      });
-      return;
-    }
-
-    try {
-        await addCard(
-        formData.nombre,
-        formData.rareza,
-        formData.tipo,
-        formData.temporada,
-        formData.numero,
-        fileUpload || undefined
-        );
-
-        const newCards = await getCards();
-        setCards(newCards);
-
-        setForm({
         nombre: "",
         rareza: "",
         tipo: "",
-        temporada: 0,
-        numero: 0,
+        temporada: "" as any,
+        numero: "" as any,
+    });
+
+    const [fileUpload, setFile] = useState<File | null>(null);
+
+    // ➕ CREATE CARD
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!formData.nombre.trim()) {
+        setToast({ message: "Nombre obligatorio", type: "error" });
+        return;
+        }
+
+        try {
+        await createCard(
+            formData.nombre,
+            formData.rareza,
+            formData.tipo,
+            formData.temporada,
+            formData.numero,
+            fileUpload || undefined
+        );
+
+        setForm({
+            nombre: "",
+            rareza: "",
+            tipo: "",
+            temporada: "",
+            numero: "",
         });
+
         setFile(null);
         setShowForm(false);
 
         setToast({
-        message: `Carta "${formData.nombre}" creada exitosamente`,
+            message: `Carta "${formData.nombre}" creada exitosamente`,
+            type: "success",
+        });
+        } catch {
+        setToast({
+            message: "Error al crear la carta",
+            type: "error",
+        });
+        }
+    };
+
+    const confirmDeleteCard = async () => {
+    if (!confirmDelete.cardId) return;
+
+    try {
+        await deleteCards(confirmDelete.cardId);
+
+        setToast({
+        message: `Carta "${confirmDelete.cardName}" eliminada exitosamente`,
         type: "success",
         });
-    } catch (error) {
+    } catch {
         setToast({
-        message: `Error al guardar la carta`,
+        message: "Error al eliminar la carta",
         type: "error",
+        });
+    } finally {
+        setConfirmDelete({
+        open: false,
+        cardId: null,
+        cardName: null,
         });
     }
     };
 
+    // 🔎 FILTERED LIST
     const filteredCards = cards.filter((card) => {
         const matchesCategory =
         filterCategory === "Todas" || card.rareza === filterCategory;
+
         const matchesSearch = card.nombre
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
+
         return matchesCategory && matchesSearch;
     });
 
@@ -236,7 +251,7 @@ export function ManageCards(){
                         const CategoryIcon = getCategoryIcon(card.rareza);
                         return (
                         <div
-                            key={card.uid}
+                            key={card.id}
                             className="bg-card border-2 border-border rounded-lg overflow-hidden hover:border-vcf-orange transition-all hover:shadow-xl"
                         >
                             {/* Imagen */}
@@ -280,8 +295,17 @@ export function ManageCards(){
                                 Editar
                                 </button>
 
-                                <button className="px-3 py-2 bg-black text-white rounded-lg font-bold hover:bg-gray-900 transition-all">
-                                Eliminar
+                                <button
+                                onClick={() =>
+                                    setConfirmDelete({
+                                    open: true,
+                                    cardId: card.id || null,
+                                    cardName: card.nombre,
+                                    })
+                                }
+                                className="px-3 py-2 bg-black border-2 border-black text-white rounded-lg font-bold hover:bg-gray-900 hover:border-gray-900 transition-all flex items-center justify-center"
+                                >
+                                <Trash2 size={16} />
                                 </button>
                             </div>
                             </div>
@@ -494,6 +518,45 @@ export function ManageCards(){
                 type={toast.type}
                 onClose={() => setToast(null)}
                 />
+            )}
+
+            {confirmDelete.open && (
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+                <div className="bg-card p-6 rounded-lg border-2 border-border max-w-sm w-full">
+                <h2 className="text-xl font-black mb-4">
+                    ¿Eliminar carta?
+                </h2>
+
+                <p className="text-muted-foreground mb-6">
+                    Estás a punto de eliminar{" "}
+                    <span className="font-bold">
+                    "{confirmDelete.cardName}"
+                    </span>
+                </p>
+
+                <div className="flex gap-3">
+                    <button
+                    onClick={() =>
+                        setConfirmDelete({
+                        open: false,
+                        cardId: null,
+                        cardName: null,
+                        })
+                    }
+                    className="flex-1 px-4 py-2 bg-muted rounded-lg font-bold"
+                    >
+                    Cancelar
+                    </button>
+
+                    <button
+                    onClick={confirmDeleteCard}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700"
+                    >
+                    Eliminar
+                    </button>
+                </div>
+                </div>
+            </div>
             )}
         </div>
     );

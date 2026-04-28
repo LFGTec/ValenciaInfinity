@@ -3,19 +3,21 @@ import { supabase } from "./supabaseClient";
 export interface Card {
   id?: string;
   nombre: string;
-  rareza: string | null;
-  tipo: string | null;
-  temporada: number | null;
-  numero: number | null;
+  rareza: string ;
+  tipo: string;
+  temporada: number;
+  numero: number;
   image_url?: string;
   obtained?: boolean;
   quantity?: number;
+  is_deleted: boolean;
 }
 
 export const getCards = async (): Promise<Card[]> => {
   const { data, error } = await supabase
     .from("Cards")
-    .select("*");
+    .select("*")
+    .eq("is_deleted", false);
 
   if (error) {
     console.error("Error al obtener las cartas:", error);
@@ -62,14 +64,13 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
   });
 };
 
-
 export async function addCard(
   nombre: string,
   rareza: string,
   tipo: string,
   temporada: number,
   numero: number,
-  file?: File 
+  file?: File
 ) {
   try {
     let image_url = null;
@@ -77,21 +78,21 @@ export async function addCard(
     if (file) {
       const fileName = `${Date.now()}-${file.name}`;
 
-      const {  error } = await supabase.storage
+      const { error } = await supabase.storage
         .from("imagenesCartas")
         .upload(fileName, file);
 
       if (error) throw error;
 
-      const { data: publicUrlData } = supabase.storage
+      const { data } = supabase.storage
         .from("imagenesCartas")
         .getPublicUrl(fileName);
 
-      image_url = publicUrlData.publicUrl;
+      image_url = data.publicUrl;
     }
 
     const { data, error } = await supabase
-      .from("Cards")
+      .from("cards")
       .insert([
         {
           nombre,
@@ -100,6 +101,7 @@ export async function addCard(
           temporada,
           numero,
           image_url,
+          is_deleted: false,
         },
       ])
       .select();
@@ -112,3 +114,19 @@ export async function addCard(
     throw error;
   }
 }
+
+export const deleteCard = async (id: string) => {
+  console.log("DELETE ID:", id);
+
+  const { data, error } = await supabase
+    .from("Cards")
+    .update({ is_deleted: true })
+    .eq("id", id)
+    .select();
+
+  console.log("SUPABASE RESPONSE:", { data, error });
+
+  if (error) throw error;
+
+  return data;
+};
