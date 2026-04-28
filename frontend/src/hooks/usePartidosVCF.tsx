@@ -1,32 +1,9 @@
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { partidosAtom, type PartidosState } from "../stores/partidosStore";
+import { partidosAtom } from "../stores/partidosStore";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const CACHE_KEY = "vcf_partidos_cache";
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutos
-
-type CachePayload = Pick<PartidosState, "proximos" | "jugados" | "estadisticas">;
-
-function getCached(): CachePayload | null {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const { data, timestamp } = JSON.parse(raw);
-    if (Date.now() - timestamp > CACHE_TTL) return null;
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-function setCache(data: CachePayload) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-  } catch {}
-}
 
 export interface Partido {
   id: string;
@@ -118,26 +95,20 @@ export function usePartidosVCF() {
     if (state.fetched) return;
 
     async function fetchTodo() {
-      const cached = getCached();
-      if (cached) {
-        setState({ ...cached, cargando: false, error: null, fetched: true });
-        return;
-      }
-
       try {
         const base = `/v4/teams/${VCF_ID}/matches`;
 
-        // 2 requests en lugar de 3: los jugados sirven tanto para display como para stats
-        const [dataProximos, dataJugados] = await Promise.all([
+        const [dataProximos, dataJugados, dataStats] = await Promise.all([
           footballFetch(base, { status: "SCHEDULED", competitions: "2014", limit: "5" }),
+          footballFetch(base, { status: "FINISHED", competitions: "2014", limit: "10" }),
           footballFetch(base, { status: "FINISHED", competitions: "2014" }),
         ]);
 
-        const allJugados = dataJugados.matches as any[];
+        const matches = dataStats.matches as any[];
         let ganados = 0, empatados = 0, perdidos = 0;
         let golesAFavor = 0, golesEnContra = 0;
 
-        allJugados.forEach((m: any) => {
+        matches.forEach((m: any) => {
           const esLocal = m.homeTeam.id === VCF_ID;
           golesAFavor += esLocal ? m.score.fullTime.home : m.score.fullTime.away;
           golesEnContra += esLocal ? m.score.fullTime.away : m.score.fullTime.home;
@@ -154,14 +125,13 @@ export function usePartidosVCF() {
           }
         });
 
-        const ultimaJornada = allJugados[allJugados.length - 1]?.matchday ?? 0;
-        const jugadosRecientes = allJugados.slice(-10).reverse();
+        const ultimaJornada = matches[matches.length - 1]?.matchday ?? 0;
 
-        const payload: CachePayload = {
+        setState({
           proximos: dataProximos.matches.map((m: any) => mapearPartido(m, "PROXIMO")),
-          jugados: jugadosRecientes.map((m: any) => mapearPartido(m, "JUGADO")),
+          jugados: dataJugados.matches.reverse().map((m: any) => mapearPartido(m, "JUGADO")),
           estadisticas: {
-            jugados: allJugados.length,
+            jugados: matches.length,
             ganados,
             empatados,
             perdidos,
@@ -170,10 +140,10 @@ export function usePartidosVCF() {
             golesEnContra,
             jornada: ultimaJornada,
           },
-        };
-
-        setCache(payload);
-        setState({ ...payload, cargando: false, error: null, fetched: true });
+          cargando: false,
+          error: null,
+          fetched: true,
+        });
       } catch (err: any) {
         setState((prev) => ({ ...prev, error: err.message, cargando: false, fetched: true }));
       }
