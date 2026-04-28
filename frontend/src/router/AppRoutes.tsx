@@ -25,7 +25,6 @@ import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
-import Album from "@/pages/Album";
 
 export default function AppRoutes() {
   return (
@@ -51,7 +50,6 @@ export default function AppRoutes() {
           {/*Rutas dentro de FAN ZONE*/}
           <Route path="/virtual-world" element={<VirtualWorld />} />
 
-          <Route path="/album" element={<Album />} />
           <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
