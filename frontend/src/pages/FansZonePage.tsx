@@ -7,6 +7,9 @@ import {
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
 
 
+import { AvatarSection } from "../components/features/avatar/AvatarSection";
+
+
 export function FansZonePage() {
   const [showRewind, setShowRewind] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('rostros');
@@ -52,6 +55,9 @@ export function FansZonePage() {
           </NavLink>
 
         ))}
+      </div>
+       <div className="mt-10">
+        <AvatarSection />
       </div>
      </div>
 
