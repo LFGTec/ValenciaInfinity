@@ -1,46 +1,85 @@
-const stats = [
-  { stat: "Posesion", home: 58, away: 42, homeColor: "bg-vcf-orange", awayColor: "bg-gray-400" },
-  { stat: "Tiros totales", home: 12, away: 8, homeColor: "bg-vcf-blue", awayColor: "bg-gray-400" },
-  { stat: "Tiros a puerta", home: 8, away: 5, homeColor: "bg-vcf-yellow", awayColor: "bg-gray-400" },
-  { stat: "Corners", home: 6, away: 3, homeColor: "bg-vcf-red", awayColor: "bg-gray-400" },
-  { stat: "Faltas", home: 9, away: 11, homeColor: "bg-purple-600", awayColor: "bg-gray-400" },
-  { stat: "Tarjetas amarillas", home: 2, away: 1, homeColor: "bg-yellow-500", awayColor: "bg-gray-400" },
+interface StatRow {
+  label: string;
+  home: number;
+  away: number;
+  homeColor: string;
+}
+
+const STAT_CONFIG: { key: string; label: string; homeColor: string }[] = [
+  { key: "possession", label: "Posesión", homeColor: "bg-vcf-orange" },
+  { key: "totalShots", label: "Tiros totales", homeColor: "bg-vcf-blue" },
+  { key: "shotsOnTarget", label: "A puerta", homeColor: "bg-vcf-yellow" },
+  { key: "corners", label: "Corners", homeColor: "bg-emerald-500" },
+  { key: "fouls", label: "Faltas", homeColor: "bg-purple-500" },
+  { key: "yellowCards", label: "Amarillas", homeColor: "bg-yellow-400" },
 ];
 
-export function MatchStatsPanel() {
+interface MatchStatsPanelProps {
+  stats: Record<string, unknown>;
+  homeTeam: string;
+  awayTeam: string;
+}
+
+export function MatchStatsPanel({ stats, homeTeam, awayTeam }: MatchStatsPanelProps) {
+  const rows: StatRow[] = STAT_CONFIG.flatMap(({ key, label, homeColor }) => {
+    const entry = stats[key] as { home?: number; away?: number } | undefined;
+    if (!entry || entry.home == null || entry.away == null) return [];
+    return [{ label, home: entry.home, away: entry.away, homeColor }];
+  });
+
   return (
-    <div className="bg-card border-2 border-border rounded-lg p-6 shadow-lg">
-      <h3 className="text-lg font-black text-foreground mb-6">
-        ESTADISTICAS <span className="text-vcf-blue">EN VIVO</span>
+    <div className="bg-card border border-border rounded-2xl p-5 shadow-lg">
+      <h3 className="text-sm font-black text-foreground mb-5 flex items-center gap-2">
+        <span className="w-1 h-4 bg-vcf-blue rounded-full" />
+        ESTADÍSTICAS EN VIVO
       </h3>
-      <div className="space-y-5">
-        {stats.map((item, i) => (
-          <div key={i}>
-            <div className="flex justify-between text-sm mb-2">
-              <span className="font-bold text-foreground">{item.home}</span>
-              <span className="font-bold text-foreground">{item.stat}</span>
-              <span className="font-bold text-foreground">{item.away}</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${item.homeColor} shadow-inner`}
-                  style={{ width: `${(item.home / (item.home + item.away)) * 100}%` }}
-                />
-              </div>
-              <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${item.awayColor} shadow-inner`}
-                  style={{
-                    width: `${(item.away / (item.home + item.away)) * 100}%`,
-                    marginLeft: "auto",
-                  }}
-                />
-              </div>
-            </div>
+
+      {rows.length === 0 ? (
+        <div className="flex flex-col items-center py-8 gap-2">
+          <span className="text-3xl opacity-30">📊</span>
+          <p className="text-xs text-muted-foreground font-bold text-center">
+            Las estadísticas estarán disponibles durante el partido
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Team headers */}
+          <div className="flex justify-between items-center mb-4 px-1">
+            <span className="text-xs font-black text-vcf-orange truncate max-w-[45%]">{homeTeam}</span>
+            <span className="text-[10px] font-bold text-muted-foreground/50">vs</span>
+            <span className="text-xs font-black text-muted-foreground truncate max-w-[45%] text-right">{awayTeam}</span>
           </div>
-        ))}
-      </div>
+
+          <div className="space-y-4">
+            {rows.map((item) => {
+              const total = item.home + item.away || 1;
+              const homeWidth = (item.home / total) * 100;
+              const awayWidth = (item.away / total) * 100;
+
+              return (
+                <div key={item.label}>
+                  <div className="flex justify-between items-center mb-1.5 px-0.5">
+                    <span className="text-sm font-black text-foreground tabular-nums">{item.home}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground tracking-wider">{item.label}</span>
+                    <span className="text-sm font-black text-foreground tabular-nums">{item.away}</span>
+                  </div>
+                  {/* Single center-meeting bar */}
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden flex">
+                    <div
+                      className={`h-full ${item.homeColor} rounded-l-full transition-all duration-700`}
+                      style={{ width: `${homeWidth}%` }}
+                    />
+                    <div
+                      className="h-full bg-gray-500/50 rounded-r-full ml-auto transition-all duration-700"
+                      style={{ width: `${awayWidth}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }

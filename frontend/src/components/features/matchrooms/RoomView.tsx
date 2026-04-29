@@ -1,118 +1,241 @@
 import { useState } from "react";
-import { Users, Share2, Settings, Check } from "lucide-react";
-import type { MatchRoom, Player } from "./types";
+import { motion } from "framer-motion";
+import {
+  Users, Share2, Check, ArrowLeft,
+  Clock, BarChart2, List, MessageCircle,
+} from "lucide-react";
+import type { RoomDB } from "@/services/matchRoomsService";
+import { useLiveMatch } from "@/hooks/useLiveMatch";
+import { useRoomPresence } from "@/hooks/useRoomPresence";
+import { useRoomChat } from "@/hooks/useRoomChat";
 import { LiveScoreBoard } from "./LiveScoreBoard";
 import { EventsTimeline } from "./EventsTimeline";
 import { MatchStatsPanel } from "./MatchStatsPanel";
 import { TeamLineup } from "./TeamLineup";
 import { RoomChat } from "./RoomChat";
 
-const valenciaPlayers: Player[] = [
-  { num: 1, name: "Mamardashvili", pos: "POR" },
-  { num: 2, name: "Foulquier", pos: "DEF" },
-  { num: 15, name: "Cenk Ozkacar", pos: "DEF" },
-  { num: 24, name: "Mosquera", pos: "DEF" },
-  { num: 21, name: "Gaya", pos: "DEF" },
-  { num: 18, name: "Pepelu", pos: "MED", hasCard: true },
-  { num: 6, name: "Guillamon", pos: "MED" },
-  { num: 10, name: "Fran Perez", pos: "DEL", scored: true },
-  { num: 16, name: "Diego Lopez", pos: "DEL" },
-  { num: 9, name: "Hugo Duro", pos: "DEL", scored: true },
-  { num: 22, name: "Yaremchuk", pos: "DEL", hasCard: true },
-];
-
-const madridPlayers: Player[] = [
-  { num: 1, name: "Courtois", pos: "POR" },
-  { num: 2, name: "Carvajal", pos: "DEF" },
-  { num: 3, name: "Militao", pos: "DEF" },
-  { num: 4, name: "Alaba", pos: "DEF" },
-  { num: 23, name: "Mendy", pos: "DEF" },
-  { num: 10, name: "Modric", pos: "MED", subbed: true },
-  { num: 8, name: "Kroos", pos: "MED" },
-  { num: 15, name: "Valverde", pos: "MED" },
-  { num: 11, name: "Rodrygo", pos: "DEL" },
-  { num: 9, name: "Benzema", pos: "DEL" },
-  { num: 20, name: "Vinicius Jr", pos: "DEL", scored: true },
-];
+type Tab = "events" | "stats" | "lineups" | "chat";
 
 interface RoomViewProps {
-  room: MatchRoom;
+  room: RoomDB;
+  user: { id: string; username: string };
   onLeave: () => void;
 }
 
-export function RoomView({ room, onLeave }: RoomViewProps) {
+export function RoomView({ room, user, onLeave }: RoomViewProps) {
   const [showCopied, setShowCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("events");
+
+  const { liveMatch } = useLiveMatch(room.match_id);
+  const { count: spectatorCount } = useRoomPresence(room.id, user);
+  const { messages, sendEmoji } = useRoomChat(room.id);
+
+  const isLive = liveMatch?.status === "IN_PLAY" || liveMatch?.status === "PAUSED";
 
   const copyInviteLink = () => {
+    const url = room.invite_code
+      ? `${window.location.origin}/match-rooms?code=${room.invite_code}`
+      : `${window.location.origin}/match-rooms`;
+    navigator.clipboard.writeText(url);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
 
+  // On desktop "chat" tab doesn't exist — fall back to events
+  const desktopTab: Exclude<Tab, "chat"> =
+    activeTab === "chat" ? "events" : activeTab;
+
+  const matchContent = (tab: Tab) => {
+    if (tab === "events") return (
+      <EventsTimeline
+        events={liveMatch?.events ?? []}
+        homeTeam={liveMatch?.home_team ?? ""}
+      />
+    );
+    if (tab === "stats") return (
+      <MatchStatsPanel
+        stats={liveMatch?.stats ?? {}}
+        homeTeam={liveMatch?.home_team ?? "Local"}
+        awayTeam={liveMatch?.away_team ?? "Visitante"}
+      />
+    );
+    if (tab === "lineups") return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <TeamLineup
+          teamName={liveMatch?.home_team ?? "Local"}
+          players={liveMatch?.lineups.home ?? []}
+          events={liveMatch?.events ?? []}
+          variant="home"
+        />
+        <TeamLineup
+          teamName={liveMatch?.away_team ?? "Visitante"}
+          players={liveMatch?.lineups.away ?? []}
+          events={liveMatch?.events ?? []}
+          variant="away"
+        />
+      </div>
+    );
+    return null;
+  };
+
   return (
-    <div className="min-h-screen bg-content">
-      {/* Header */}
-      <div className="bg-card border-b-2 border-vcf-orange">
-        <div className="max-w-[1400px] mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
+    <div className="h-[calc(100vh-90px)] overflow-hidden flex flex-col bg-content">
+
+      {/* ── Header ── */}
+      <div className="flex-shrink-0 bg-card/95 backdrop-blur-sm border-b border-border z-30">
+        <div className="h-0.5 bg-gradient-to-r from-vcf-orange via-vcf-yellow to-vcf-orange" />
+        <div className="px-3 sm:px-4 py-2">
+          <div className="flex items-center justify-between gap-2">
+
+            {/* Left */}
+            <div className="flex items-center gap-2 min-w-0">
+              <motion.button
                 onClick={onLeave}
-                className="px-4 py-2 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-vcf-orange/50 hover:bg-vcf-orange/5 transition-colors font-bold flex-shrink-0"
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                SALIR
-              </button>
-              <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-black text-foreground">{room.name}</h2>
-                  {room.isLive && (
-                    <span className="bg-vcf-red text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-md">
+                <ArrowLeft size={14} />
+                <span className="hidden sm:inline text-xs">Salir</span>
+              </motion.button>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-black text-foreground truncate">{room.name}</h2>
+                  {isLive && (
+                    <span className="flex-shrink-0 bg-red-500/10 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-wider animate-pulse">
                       EN VIVO
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">{room.match}</p>
+                <p className="text-[10px] text-muted-foreground truncate hidden sm:block">{room.match_label}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-foreground bg-vcf-blue/20 px-3 py-2 rounded-lg">
-                <Users size={20} className="text-vcf-blue" />
-                <span className="font-bold">
-                  {room.participants}/{room.maxParticipants}
-                </span>
+            {/* Right */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <div className="flex items-center gap-1 px-2 py-1.5 bg-muted/60 rounded-lg">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                <Users size={11} className="text-muted-foreground" />
+                <span className="font-bold text-xs text-foreground">{spectatorCount}</span>
               </div>
-              <button
+              <motion.button
                 onClick={copyInviteLink}
-                className="px-4 py-2 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105 flex items-center gap-2"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-vcf-orange text-white rounded-xl font-bold text-xs shadow-md shadow-vcf-orange/20"
+                whileHover={{ scale: 1.04, backgroundColor: "#e05516" }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                {showCopied ? <Check size={18} /> : <Share2 size={18} />}
-                {showCopied ? "COPIADO" : "INVITAR"}
-              </button>
-              <button className="p-2 text-foreground hover:bg-muted rounded-lg transition-colors">
-                <Settings size={20} />
-              </button>
+                {showCopied ? <Check size={13} /> : <Share2 size={13} />}
+                <span className="hidden sm:inline">{showCopied ? "¡Copiado!" : "Invitar"}</span>
+              </motion.button>
             </div>
+
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-[1600px] mx-auto px-4 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-3 space-y-4">
-            <LiveScoreBoard />
-            <EventsTimeline />
-            <MatchStatsPanel />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TeamLineup teamName="VALENCIA CF" players={valenciaPlayers} variant="home" />
-              <TeamLineup teamName="REAL MADRID" players={madridPlayers} variant="away" />
+      {/* ── Content ── */}
+      <div className="flex-1 overflow-hidden p-2 sm:p-3 lg:p-3">
+
+        {/* ── MOBILE / TABLET (< lg): scoreboard + 4 tabs including chat ── */}
+        <div className="lg:hidden h-full flex flex-col gap-2">
+          <div className="flex-shrink-0">
+            <LiveScoreBoard liveMatch={liveMatch} />
+          </div>
+
+          <div className="flex-1 min-h-0 bg-card border border-border rounded-2xl flex flex-col overflow-hidden shadow-lg">
+            {/* Tab bar */}
+            <div className="flex-shrink-0 flex border-b border-border">
+              {(
+                [
+                  { id: "events",  icon: <Clock size={12} />,          label: "Eventos"  },
+                  { id: "stats",   icon: <BarChart2 size={12} />,      label: "Stats"    },
+                  { id: "lineups", icon: <List size={12} />,           label: "Lineup"   },
+                  { id: "chat",    icon: <MessageCircle size={12} />,  label: "Chat"     },
+                ] as { id: Tab; icon: React.ReactNode; label: string }[]
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-1 py-2.5 text-[10px] sm:text-xs font-bold transition-colors border-b-2 ${
+                    activeTab === tab.id
+                      ? "text-vcf-orange border-vcf-orange"
+                      : "text-muted-foreground border-transparent hover:text-foreground"
+                  }`}
+                >
+                  {tab.icon}
+                  <span className="hidden xs:inline sm:inline">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Tab content — chat gets full height, others scroll */}
+            <div className={`flex-1 min-h-0 ${activeTab === "chat" ? "overflow-hidden" : "overflow-y-auto p-3"}`}>
+              {activeTab !== "chat" && matchContent(activeTab)}
+              {activeTab === "chat" && (
+                <RoomChat
+                  messages={messages}
+                  spectatorCount={spectatorCount}
+                  currentUserId={user.id}
+                  onSendEmoji={(emoji) => sendEmoji(emoji, user)}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── DESKTOP (>= lg): match panel fills space, chat fixed width ── */}
+        <div className="hidden lg:flex h-full gap-3">
+
+          {/* Left: scoreboard + tabs — takes all remaining space */}
+          <div className="flex-1 min-w-0 h-full flex flex-col gap-3">
+            <div className="flex-shrink-0">
+              <LiveScoreBoard liveMatch={liveMatch} />
+            </div>
+
+            <div className="flex-1 min-h-0 bg-card border border-border rounded-2xl flex flex-col overflow-hidden shadow-lg">
+              {/* Desktop tab bar */}
+              <div className="flex-shrink-0 flex border-b border-border px-2 pt-2 gap-1">
+                {(
+                  [
+                    { id: "events",  label: "Eventos",      icon: <Clock size={13} />      },
+                    { id: "stats",   label: "Estadísticas", icon: <BarChart2 size={13} />  },
+                    { id: "lineups", label: "Alineaciones", icon: <List size={13} />       },
+                  ] as { id: Exclude<Tab, "chat">; label: string; icon: React.ReactNode }[]
+                ).map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-xs font-bold transition-colors ${
+                      desktopTab === tab.id
+                        ? "bg-vcf-orange/10 text-vcf-orange border-b-2 border-vcf-orange"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4">
+                {matchContent(desktopTab)}
+              </div>
             </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <RoomChat participants={room.participants} />
+          {/* Right: chat — fixed width */}
+          <div className="w-72 xl:w-80 flex-shrink-0 h-full">
+            <RoomChat
+              messages={messages}
+              spectatorCount={spectatorCount}
+              currentUserId={user.id}
+              onSendEmoji={(emoji) => sendEmoji(emoji, user)}
+            />
           </div>
         </div>
+
       </div>
     </div>
   );
