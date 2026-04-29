@@ -353,6 +353,50 @@ export async function requestPasswordReset(
   }
 }
 
+export async function updateProfile(
+  userId: string,
+  updates: { full_name?: string; avatar_url?: string }
+): Promise<{ error: string | null }> {
+  try {
+    const { error } = await supabase.from("profiles").update(updates).eq("id", userId);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Update failed";
+    return { error: message };
+  }
+}
+
+export async function uploadAvatar(
+  userId: string,
+  file: File
+): Promise<{ url: string | null; error: string | null }> {
+  try {
+    const ext = file.name.split(".").pop();
+    const path = `${userId}/avatar.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true });
+    if (uploadError) {
+      const msg = uploadError.message.toLowerCase().includes("bucket")
+        ? "El bucket 'avatars' no existe en Supabase Storage. Créalo desde el dashboard."
+        : uploadError.message;
+      return { url: null, error: msg };
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    const url = `${data.publicUrl}?t=${Date.now()}`;
+
+    const { error: updateError } = await updateProfile(userId, { avatar_url: url });
+    if (updateError) return { url: null, error: updateError };
+
+    return { url, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Upload failed";
+    return { url: null, error: message };
+  }
+}
+
 export async function updatePassword(
   newPassword: string,
   currentPassword?: string

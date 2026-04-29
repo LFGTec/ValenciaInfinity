@@ -13,7 +13,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return null;
     try {
       const profile = await getUserProfile(user.id);
-      if (profile) return profile;
+      if (profile) {
+        return {
+          ...profile,
+          avatar_url: profile.avatar_url ?? user.user_metadata?.avatar_url,
+          user_metadata: user.user_metadata,
+        };
+      }
     } catch (error) {
       console.warn("⚠️ Error fetching profile, using fallback", error);
     }
