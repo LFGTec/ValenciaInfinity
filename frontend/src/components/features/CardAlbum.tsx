@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useSetAtom } from "jotai";
+import { useParams } from "react-router-dom";
 import { AlbumUI, pageAtom } from "../UI";
 import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
@@ -19,12 +20,15 @@ export function CardAlbum({ userId }: Props) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Usar userId del parámetro si existe, sino usar el del usuario autenticado
+	const targetUserId = userId || user?.id;
+
 	useEffect(() => {
 		setPage(0);
 	}, [setPage]);
 
 	useEffect(() => {
-		if (!user?.id) {
+		if (!targetUserId) {
 			setCards([]);
 			setLoading(false);
 			return;
@@ -52,7 +56,7 @@ export function CardAlbum({ userId }: Props) {
 		};
 
 		loadAlbum();
-	}, [user?.id]);
+	}, [targetUserId]);
 
 	const totalCards = cards.length;
 	const obtainedCards = useMemo(
