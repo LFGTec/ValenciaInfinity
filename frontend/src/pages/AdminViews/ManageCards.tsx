@@ -13,18 +13,16 @@ import {
 } from "lucide-react";
 import { Toast } from "@/components/ui.disabled/Toast";
 import { useCards } from "../../hooks/useCards";
+import { iconMap } from "@/utils/IconMap";
+import { colorMap } from "@/utils/colorMap";
+import type { Card } from "../../services/cardsService";
 
 export function ManageCards(){
-    const {
-        cards,
-        loading,
-        createCard,
-        deleteCards,
-    } = useCards();
-
     const [showForm, setShowForm] = useState(false);
-    const [filterCategory, setFilterCategory] = useState<string>("Todas");
+    const [filterCategory, setFilterCategory] = useState<string>("ALL");
     const [searchTerm, setSearchTerm] = useState("");
+    const [editingCard, setEditingCard] = useState<Card | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [toast, setToast] = useState<{
         message: string;
@@ -41,125 +39,133 @@ export function ManageCards(){
     cardName: null,
     });
 
-    const categories = [
-        {
-        id: "Todas",
+    const {
+    cards,
+    categories,
+    loading,
+    createCard,
+    removeCard,
+    editCard,
+    } = useCards();
+
+    const allCategories = [
+    {
+        id: "ALL",
         label: "Todas",
         color: "bg-black",
-        borderColor: "border-black",
-        icon: Filter,
-        textColor: "text-black",
-        },
-        {
-        id: "Comun",
-        label: "Común",
-        color: "bg-gray-400",
-        borderColor: "border-gray-400",
-        icon: Star,
-        textColor: "text-gray-400",
-        },
-        {
-        id: "Raro",
-        label: "Raro",
-        color: "bg-[#CD7F32]",
-        borderColor: "border-[#CD7F32]",
-        icon: Sparkles,
-        textColor: "text-[#CD7F32]",
-        },
-        {
-        id: "Epica",
-        label: "Épico",
-        color: "bg-purple-600",
-        borderColor: "border-purple-600",
-        icon: Gem,
-        textColor: "text-purple-600",
-        },
-        {
-        id: "Legendario",
-        label: "Legendario",
-        color: "bg-[#FFD700]",
-        borderColor: "border-[#FFD700]",
-        icon: Award,
-        textColor: "text-[#FFD700]",
-        },
+        icon: "Filter",
+    },
+    ...categories,
     ];
 
-    const getCategoryColor = (category: string) => {
-        const cat = categories.find((c) => c.id === category);
-        return cat?.color || "bg-gray-400";
-    };
-
-    const getCategoryIcon = (category: string) => {
-        const cat = categories.find((c) => c.id === category);
-        return cat?.icon || Star;
-    };
-
-    // 🧾 Form state
     const [formData, setForm] = useState({
-        nombre: "",
-        rareza: "",
-        tipo: "",
-        temporada: "" as any,
-        numero: "" as any,
+    nombre: "",
+    tipo: "",
+    temporada: "" as any,
+    numero: "" as any,
+    category_id: "", 
     });
+
+    const resetForm = () => {
+    setForm({
+        nombre: "",
+        tipo: "",
+        temporada: "",
+        numero: "",
+        category_id: "",
+    });
+
+    setFile(null);
+    setImagePreview(null);
+    };
 
     const [fileUpload, setFile] = useState<File | null>(null);
 
-    // ➕ CREATE CARD
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        if (!formData.nombre.trim()) {
+    if (!formData.nombre.trim()) {
         setToast({ message: "Nombre obligatorio", type: "error" });
         return;
-        }
+    }
 
-        try {
+    try {
+        if (editingCard) {
+        await editCard(
+          editingCard.id,
+          formData.nombre,
+          formData.tipo,
+          Number(formData.temporada),
+          Number(formData.numero),
+          formData.category_id,
+          editingCard.image_url || null,
+          fileUpload || undefined
+        );
+
+        setToast({
+            message: "Carta actualizada",
+            type: "success",
+        });
+        } else {
         await createCard(
             formData.nombre,
-            formData.rareza,
             formData.tipo,
-            formData.temporada,
-            formData.numero,
+            Number(formData.temporada),
+            Number(formData.numero),
+            formData.category_id,
             fileUpload || undefined
         );
 
-        setForm({
-            nombre: "",
-            rareza: "",
-            tipo: "",
-            temporada: "",
-            numero: "",
-        });
-
-        setFile(null);
-        setShowForm(false);
-
         setToast({
-            message: `Carta "${formData.nombre}" creada exitosamente`,
+            message: "Carta creada",
             type: "success",
         });
-        } catch {
-        setToast({
-            message: "Error al crear la carta",
-            type: "error",
-        });
         }
+
+        // reset
+        resetForm();
+        setEditingCard(null);
+        setShowForm(false);
+    } catch {
+        setToast({
+        message: "Error al guardar",
+        type: "error",
+        });
+    }
     };
 
+    const handleEdit = (card: Card) => {
+    setEditingCard(card);
+
+    setForm({
+        nombre: card.nombre,
+        tipo: card.tipo || "",
+        temporada: card.temporada || "",
+        numero: card.numero || "",
+        category_id: card.category_id,
+    });
+
+    setImagePreview(card.image_url || null); 
+    setFile(null);
+
+    setShowForm(true);
+    };
+    
+
+    // Eliminar carta
     const confirmDeleteCard = async () => {
     if (!confirmDelete.cardId) return;
 
     try {
-        await deleteCards(confirmDelete.cardId);
+        await removeCard(confirmDelete.cardId);
 
         setToast({
-        message: `Carta "${confirmDelete.cardName}" eliminada exitosamente`,
+        message: `Carta "${confirmDelete.cardName}" eliminada`,
         type: "success",
         });
     } catch {
         setToast({
-        message: "Error al eliminar la carta",
+        message: "Error al eliminar",
         type: "error",
         });
     } finally {
@@ -171,16 +177,17 @@ export function ManageCards(){
     }
     };
 
-    // 🔎 FILTERED LIST
+    // Filtrado y búsqueda
     const filteredCards = cards.filter((card) => {
-        const matchesCategory =
-        filterCategory === "Todas" || card.rareza === filterCategory;
+    const matchesCategory =
+        filterCategory === "ALL" ||
+        card.category_id === filterCategory;
 
-        const matchesSearch = card.nombre
+    const matchesSearch = card.nombre
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
-        return matchesCategory && matchesSearch;
+    return matchesCategory && matchesSearch;
     });
 
     return (
@@ -225,15 +232,15 @@ export function ManageCards(){
 
                     {/* Category Filters */}
                     <div className="flex flex-wrap gap-2 mt-4">
-                        {categories.map((cat) => {
-                        const Icon = cat.icon;
+                        {allCategories.map((cat) => {
+                        const Icon = iconMap[cat.icon || "Star"];
                         return (
                             <button
                             key={cat.id}
                             onClick={() => setFilterCategory(cat.id)}
                             className={`px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${
                                 filterCategory === cat.id
-                                ? `${cat.color} text-white shadow-lg`
+                                ? `${colorMap[cat.color] || "bg-gray-400"} text-white shadow-lg`
                                 : "bg-muted text-muted-foreground hover:bg-card border-2 border-border"
                             }`}
                             >
@@ -248,34 +255,33 @@ export function ManageCards(){
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredCards.map((card) => {
-                        const CategoryIcon = getCategoryIcon(card.rareza);
-                        return (
-                        <div
-                            key={card.id}
-                            className="bg-card border-2 border-border rounded-lg overflow-hidden hover:border-vcf-orange transition-all hover:shadow-xl"
-                        >
-                            {/* Imagen */}
-                            <div className="relative aspect-[2/3] bg-gradient-to-br from-vcf-orange/20 to-vcf-yellow/20">
+                    const CategoryIcon = iconMap[card.categories?.icon || "Star"];
+
+                    return (
+                        <div key={card.id} className="bg-card border-2 rounded-lg">
+                        
+                        {/* Imagen */}
+                        <div className="relative aspect-[2/3]">
                             <img
-                                src={card.image_url || "/placeholder.png"}
-                                alt={card.nombre}
-                                className="w-full h-full object-cover"
+                            src={card.image_url || "/placeholder.png"}
+                            alt={card.nombre}
+                            className="w-full h-full object-cover"
                             />
 
-                            {/* Rareza badge */}
+                            {/* Badge */}
                             <div
-                                className={`absolute top-2 right-2 ${getCategoryColor(card.rareza)} text-white px-3 py-1 rounded-full text-xs font-black flex items-center gap-1 shadow-lg`}
+                            className={`absolute top-2 right-2 ${
+                                colorMap[card.categories?.color || ""] || "bg-gray-400"
+                            } text-white px-3 py-1 rounded-full text-xs font-black flex items-center gap-1`}
                             >
-                                <CategoryIcon size={14} />
-                                {card.rareza.toUpperCase()}
+                            <CategoryIcon size={14} />
+                            {(card.categories?.label || card.rareza)?.toUpperCase()}
                             </div>
-                            </div>
+                        </div>
 
-                            {/* Info */}
-                            <div className="p-4">
-                            <h3 className="font-black text-lg text-foreground mb-2">
-                                {card.nombre}
-                            </h3>
+                        {/* Info */}
+                        <div className="p-4">
+                            <h3 className="font-black text-lg">{card.nombre}</h3>
 
                             <p className="text-sm text-muted-foreground mb-1">
                                 <span className="font-bold">Tipo:</span> {card.tipo}
@@ -289,28 +295,29 @@ export function ManageCards(){
                                 <span className="font-bold">Número:</span> {card.numero}
                             </p>
 
-                            {/* Acciones */}
-                            <div className="flex gap-2">
-                                <button className="flex-1 px-3 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all">
+                            {/* Actions */}
+                            <div className="flex gap-2 mt-3">
+                            <button className="flex-1 px-3 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all"
+                            onClick={() => {handleEdit(card)}}>
                                 Editar
-                                </button>
+                            </button>
 
-                                <button
+                            <button
                                 onClick={() =>
-                                    setConfirmDelete({
+                                setConfirmDelete({
                                     open: true,
-                                    cardId: card.id || null,
+                                    cardId: card.id,
                                     cardName: card.nombre,
-                                    })
+                                })
                                 }
                                 className="px-3 py-2 bg-black border-2 border-black text-white rounded-lg font-bold hover:bg-gray-900 hover:border-gray-900 transition-all flex items-center justify-center"
-                                >
+                            >
                                 <Trash2 size={16} />
-                                </button>
-                            </div>
+                            </button>
                             </div>
                         </div>
-                        );
+                        </div>
+                    );
                     })}
 
                     {/* Empty State */}
@@ -337,10 +344,10 @@ export function ManageCards(){
                     {/* Modal Header */}
                     <div className="sticky top-0 bg-card border-b-2 border-border p-6 flex items-center justify-between">
                     <h2 className="text-2xl font-black text-foreground">
-                        AGREGAR NUEVA <span className="text-vcf-orange">CARTA</span>
+                        {editingCard ? "EDITAR " : "AGREGAR NUEVA" } <span className="text-vcf-orange">CARTA</span>
                     </h2>
                     <button
-                        onClick={() => setShowForm(false)}
+                        onClick={() => {setShowForm(false);  setEditingCard(null); resetForm();}}
                         className="p-2 hover:bg-muted rounded-lg transition-colors"
                     >
                         <X size={24} className="text-foreground" />
@@ -396,7 +403,7 @@ export function ManageCards(){
                             const val = e.target.value;
                             setForm({ ...formData, temporada: val === "" ? "" : Number(val) });
                         }}
-                        placeholder="Ej. Jugador"
+                        placeholder="Ej. 2026"
                         className="w-full px-4 py-3 bg-muted border-2 border-transparent rounded-lg focus:border-vcf-orange outline-none transition-all text-foreground"
                         />
                     </div>
@@ -425,29 +432,45 @@ export function ManageCards(){
                             Rareza *
                         </label>
                         <div className="grid grid-cols-2 gap-3">
-                        {categories.slice(1).map((cat) => {
-                            const Icon = cat.icon;
-                            return (
+                        {categories.map((cat) => {
+                        const Icon = iconMap[cat.icon] || Star;
+
+                        return (
                             <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() =>
-                                setForm({ ...formData, rareza: cat.id })
-                                }
-                                className={`p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
-                                formData.rareza === cat.id
-                                    ? `${cat.color} border-transparent text-white shadow-lg`
-                                    : "bg-muted border-border text-muted-foreground hover:border-vcf-orange"
-                                }`}
+                            key={cat.id}
+                            type="button"
+                            onClick={() =>
+                                setForm({ ...formData, category_id: cat.id })
+                            }
+                            className={`p-4 rounded-lg border-2 flex items-center gap-3 ${
+                                formData.category_id === cat.id
+                                ? `${cat.color} text-white`
+                                : "bg-muted"
+                            }`}
                             >
-                                <Icon size={20} />
-                                <span className="font-bold">{cat.label}</span>
+                            <Icon size={20} />
+                            <span>{cat.label}</span>
                             </button>
-                            );
+                        );
                         })}
                         </div>
                     </div>
 
+                    {/* Si Editando, mostrar preview de imagen actual */}
+                    {imagePreview && (
+                        <div>
+                            <label className="block text-sm font-bold text-foreground mb-2">
+                                Imagen Actual
+                            </label>
+                            <div className="center mb-2">
+                                <img
+                                    src={imagePreview}
+                                    alt="preview"
+                                    className="w-32 h-48 object-cover rounded mb-2"
+                                />
+                            </div>
+                        </div>
+                    )}
                     {/* Image URL */}
                     <div>
                         <label className="block text-sm font-bold text-foreground mb-2">
@@ -495,7 +518,7 @@ export function ManageCards(){
                     <div className="flex gap-3 pt-4 border-t-2 border-border">
                         <button
                         type="button"
-                        onClick={() => setShowForm(false)}
+                        onClick={() =>{setShowForm(false);   setEditingCard(null); resetForm();}}
                         className="flex-1 px-6 py-3 bg-muted border-2 border-border text-foreground rounded-lg font-bold hover:bg-card transition-all"
                         >
                         CANCELAR
@@ -504,7 +527,7 @@ export function ManageCards(){
                         type="submit"
                         className="flex-1 px-6 py-3 bg-black border-2 border-black text-white rounded-lg font-bold hover:bg-gray-900 hover:border-gray-900 transition-all shadow-md hover:shadow-lg hover:scale-105"
                         >
-                        AGREGAR CARTA
+                        {editingCard ? "GUARDAR CAMBIOS" : "AGREGAR CARTA"}
                         </button>
                     </div>
                     </form>

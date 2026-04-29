@@ -3,49 +3,91 @@ import {
   getCards,
   addCard,
   deleteCard,
+  getCategories,
   type Card,
-} from "@/services/cardsService";
+  type Category,
+  updateCard, 
+} from "../services/cardsService";
 
 export const useCards = () => {
   const [cards, setCards] = useState<Card[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCards = async () => {
-    setLoading(true);
-    const data = await getCards();
-    setCards(data);
-    setLoading(false);
-  };
-
   useEffect(() => {
-    fetchCards();
+    const fetchData = async () => {
+      const [cardsData, categoriesData] = await Promise.all([
+        getCards(),
+        getCategories(),
+      ]);
+
+      setCards(cardsData);
+      setCategories(categoriesData);
+      setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
+ 
   const createCard = async (
     nombre: string,
-    rareza: string,
     tipo: string,
     temporada: number,
     numero: number,
+    category_id: string,
     file?: File
   ) => {
-    const result = await addCard(
+    const category = categories.find((c) => c.id === category_id);
+
+    const rareza = category?.name ?? null;
+
+    await addCard(
       nombre,
-      rareza,
       tipo,
       temporada,
       numero,
+      category_id,
+      rareza, 
       file
     );
 
-    // refresco simple (puedes optimizar luego)
-    await fetchCards();
-
-    return result;
+    const updatedCards = await getCards();
+    setCards(updatedCards);
   };
 
-  
-  const deleteCards = async (id: string) => {
+  const editCard = async (
+    id: string,
+    nombre: string,
+    tipo: string,
+    temporada: number,
+    numero: number,
+    category_id: string,
+    existing_image_url: string | null,
+    file?: File
+  ) => {
+    const category = categories.find((c) => c.id === category_id);
+
+    const rareza = category?.name || null;
+
+    await updateCard(
+      id,
+      nombre,
+      tipo,
+      temporada,
+      numero,
+      category_id,
+      rareza,
+      existing_image_url,
+      file
+    );
+
+
+    const updatedCards = await getCards();
+    setCards(updatedCards);
+  };
+
+  const removeCard = async (id: string) => {
     await deleteCard(id);
 
     setCards((prev) => prev.filter((c) => c.id !== id));
@@ -53,9 +95,10 @@ export const useCards = () => {
 
   return {
     cards,
+    categories,
     loading,
-    fetchCards,
     createCard,
-    deleteCards,
+    removeCard,
+    editCard,
   };
 };
