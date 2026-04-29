@@ -8,9 +8,13 @@ import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
 import { getAlbumCardsByUser, type Card } from "../../services/cardsService";
 
-export function CardAlbum() {
+type Props = {
+  userId?: string;
+};
+
+export function CardAlbum({ userId }: Props) {
 	const { user } = useAuth();
-	const { userId } = useParams<{ userId?: string }>();
+	const targetUserId = userId ?? user?.id;
 	const setPage = useSetAtom(pageAtom);
 	const [cards, setCards] = useState<Card[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -35,6 +39,12 @@ export function CardAlbum() {
 			setError(null);
 
 			try {
+				if (!targetUserId) {
+				setCards([]);
+				setLoading(false);
+				return;
+				}
+
 				const data = await getAlbumCardsByUser(targetUserId);
 				setCards(data);
 			} catch (err) {
