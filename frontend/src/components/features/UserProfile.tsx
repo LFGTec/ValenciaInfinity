@@ -1,24 +1,9 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import {
   User,
-  Mail,
-  Calendar,
-  MapPin,
-  Edit,
-  Save,
-  X,
-  Star,
-  Trophy,
-  BookOpen,
-  Gamepad2,
-  Video,
-  Award,
   TrendingUp,
   Shield,
   Lock,
-  Bell,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { usePrivacySettings } from "@/hooks/useUserPreferences";
 import { ToggleItem } from "@/components/ToggleItem"
@@ -29,7 +14,7 @@ export function UserProfile() {
   >("profile");
 
 
-  const { settings, toggleSetting, loading} = usePrivacySettings()
+  const { settings, toggleSetting, } = usePrivacySettings()
 
  
 

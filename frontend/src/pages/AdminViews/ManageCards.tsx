@@ -2,13 +2,9 @@ import { useState } from "react";
 import {
   Plus,
   Search,
-  Filter,
   X,
   Upload,
   Star,
-  Sparkles,
-  Gem,
-  Award,
   Trash2,
 } from "lucide-react";
 import { Toast } from "@/components/ui.disabled/Toast";
@@ -42,7 +38,6 @@ export function ManageCards(){
     const {
     cards,
     categories,
-    loading,
     createCard,
     removeCard,
     editCard,

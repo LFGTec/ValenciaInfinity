@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import {
   Gamepad2,
   TrendingUp,
@@ -29,7 +29,6 @@ export function CrearTrivias() {
   const [now, setNow] = useState(Date.now());
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
-  const [editingTriviaId, setEditingTriviaId] = useState<string | null>(null);
 
 
   useEffect(() => {
