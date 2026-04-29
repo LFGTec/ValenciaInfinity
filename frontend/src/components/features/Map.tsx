@@ -6,7 +6,6 @@ import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import type {
   UserFeatureCollection,
-  UserProperties
 } from "@/types/mapTypes"
 
 
@@ -96,6 +95,7 @@ export default function Map({ data, onUserClick }: Props) {
       map.on("click", "unclustered-point", (e) => {
         const feature = e.features?.[0]
         if (!feature) return
+        if (!feature.geometry || feature.geometry.type !== "Point") return
 
         const coords = feature.geometry.coordinates as [number, number]
         const props = feature.properties as any
@@ -117,7 +117,7 @@ export default function Map({ data, onUserClick }: Props) {
           .addTo(map)
       })
 
-      // 🔵 CLICK CLUSTER → ZOOM
+      
       map.on("click", "clusters", (e) => {
         const features = map.queryRenderedFeatures(e.point, {
           layers: ["clusters"]
@@ -125,8 +125,12 @@ export default function Map({ data, onUserClick }: Props) {
 
         const feature = features[0]
         if (!feature) return
+        if (!feature.geometry || feature.geometry.type !== "Point") return
 
-        const clusterId = feature.properties.cluster_id
+        const props = feature.properties
+        if (!props || typeof props !== "object") return
+
+        const clusterId = props.cluster_id
         const coords = feature.geometry.coordinates as [number, number]
 
         const source = map.getSource("users") as mapboxgl.GeoJSONSource
@@ -149,14 +153,14 @@ export default function Map({ data, onUserClick }: Props) {
             <ClusterPopup users={users} />
           )
 
-          // 🧠 esperar microtask para asegurar render
+          
           setTimeout(() => {
             new mapboxgl.Popup()
               .setLngLat(coords)
               .setDOMContent(container)
               .addTo(map)
           }, 0)
-          console.log("ClusterPopup render", users)
+          
         })
  
       })

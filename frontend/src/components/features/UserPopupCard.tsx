@@ -19,10 +19,13 @@ export default function UserPopupCard({ user }: Props) {
         padding: "8px 0",
         display: "flex",
         justifyContent: "space-between",
+        gap: 12,
         alignItems: "center"
       }}
     >
-      <span style={{ fontSize: 13 }}>{name}</span>
+      <span style={{ fontSize: 13, 
+        color:"#000000"
+      }}>{name}</span>
 
       {user.profile_public && (
         <a
