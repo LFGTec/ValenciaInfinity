@@ -25,6 +25,45 @@ export interface Card {
   categories?: Category; 
 }
 
+
+
+export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
+  const { data: catalog, error: catalogError } = await supabase
+    .from("Cards")
+    .select("*")
+    .order("temporada", { ascending: true })
+    .order("numero", { ascending: true });
+
+  if (catalogError) {
+    console.error("Error al obtener el catalogo de cartas:", catalogError);
+    return [];
+  }
+
+  const { data: userCards, error: userCardsError } = await supabase
+    .from("user_cards")
+    .select("card_id, quantity")
+    .eq("user_id", userId);
+
+  if (userCardsError) {
+    // Si la tabla no existe aun, mantenemos comportamiento seguro para no romper UI.
+    console.warn("No se pudo consultar user_cards:", userCardsError.message);
+  }
+
+  const quantityByCardId = new Map<string, number>();
+  for (const row of userCards ?? []) {
+    quantityByCardId.set(row.card_id, row.quantity ?? 0);
+  }
+
+  return (catalog as Card[]).map((card) => {
+    const quantity = card.id ? quantityByCardId.get(card.id) ?? 0 : 0;
+    return {
+      ...card,
+      quantity,
+      obtained: quantity > 0,
+    };
+  });
+};
+
 export const getCards = async (): Promise<Card[]> => {
   const { data, error } = await supabase
     .from("Cards")
