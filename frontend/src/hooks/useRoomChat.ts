@@ -6,6 +6,7 @@ export interface EmojiMessage {
   id: string;
   userId: string;
   username: string;
+  avatar_url?: string;
   emoji: string;
   sentAt: string;
 }
@@ -33,13 +34,14 @@ export function useRoomChat(roomId: string | null) {
     };
   }, [roomId]);
 
-  const sendEmoji = async (emoji: string, user: { id: string; username: string }) => {
+  const sendEmoji = async (emoji: string, user: { id: string; username: string; avatar_url?: string }) => {
     if (!channelRef.current) return;
 
     const message: EmojiMessage = {
       id: crypto.randomUUID(),
       userId: user.id,
       username: user.username,
+      avatar_url: user.avatar_url,
       emoji,
       sentAt: new Date().toISOString(),
     };

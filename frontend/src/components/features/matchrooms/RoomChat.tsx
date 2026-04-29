@@ -13,10 +13,11 @@ interface RoomChatProps {
   messages: EmojiMessage[];
   spectatorCount: number;
   currentUserId: string;
+  currentUserAvatarUrl?: string;
   onSendEmoji: (emoji: string) => void;
 }
 
-export function RoomChat({ messages, spectatorCount, currentUserId, onSendEmoji }: RoomChatProps) {
+export function RoomChat({ messages, spectatorCount, currentUserId, currentUserAvatarUrl, onSendEmoji }: RoomChatProps) {
   const messagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,15 +63,26 @@ export function RoomChat({ messages, spectatorCount, currentUserId, onSendEmoji 
               className={`flex items-end gap-1.5 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
             >
               {/* Avatar */}
-              <div
-                className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-white font-black text-[10px] ${
-                  isOwn
-                    ? "bg-gradient-to-br from-gray-500 to-gray-600"
-                    : "bg-gradient-to-br from-gray-600 to-gray-500"
-                }`}
-              >
-                {msg.username.slice(0, 1).toUpperCase()}
-              </div>
+              {(() => {
+                const avatarUrl = isOwn ? currentUserAvatarUrl : msg.avatar_url;
+                return avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={msg.username}
+                    className="w-6 h-6 rounded-full flex-shrink-0 object-cover border border-border"
+                  />
+                ) : (
+                  <div
+                    className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-white font-black text-[10px] ${
+                      isOwn
+                        ? "bg-gradient-to-br from-vcf-orange to-orange-600"
+                        : "bg-gradient-to-br from-gray-600 to-gray-500"
+                    }`}
+                  >
+                    {msg.username.slice(0, 1).toUpperCase()}
+                  </div>
+                );
+              })()}
 
               {/* Bubble */}
               <div className={`flex flex-col gap-0.5 max-w-[70%] ${isOwn ? "items-end" : "items-start"}`}>
