@@ -20,8 +20,7 @@ export function CardAlbum({ userId }: Props) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	// Usar userId del parámetro si existe, sino usar el del usuario autenticado
-	const targetUserId = userId || user?.id;
+	
 
 	useEffect(() => {
 		setPage(0);
