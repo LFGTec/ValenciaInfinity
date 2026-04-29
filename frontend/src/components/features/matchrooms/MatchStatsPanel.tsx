@@ -6,12 +6,12 @@ interface StatRow {
 }
 
 const STAT_CONFIG: { key: string; label: string; homeColor: string }[] = [
-  { key: "possession", label: "Posesión (%)", homeColor: "bg-vcf-orange" },
+  { key: "possession", label: "Posesión", homeColor: "bg-vcf-orange" },
   { key: "totalShots", label: "Tiros totales", homeColor: "bg-vcf-blue" },
-  { key: "shotsOnTarget", label: "Tiros a puerta", homeColor: "bg-vcf-yellow" },
-  { key: "corners", label: "Corners", homeColor: "bg-vcf-red" },
-  { key: "fouls", label: "Faltas", homeColor: "bg-purple-600" },
-  { key: "yellowCards", label: "Tarjetas amarillas", homeColor: "bg-yellow-500" },
+  { key: "shotsOnTarget", label: "A puerta", homeColor: "bg-vcf-yellow" },
+  { key: "corners", label: "Corners", homeColor: "bg-emerald-500" },
+  { key: "fouls", label: "Faltas", homeColor: "bg-purple-500" },
+  { key: "yellowCards", label: "Amarillas", homeColor: "bg-yellow-400" },
 ];
 
 interface MatchStatsPanelProps {
@@ -28,45 +28,55 @@ export function MatchStatsPanel({ stats, homeTeam, awayTeam }: MatchStatsPanelPr
   });
 
   return (
-    <div className="bg-card border-2 border-border rounded-lg p-6 shadow-lg">
-      <h3 className="text-lg font-black text-foreground mb-4">
-        ESTADÍSTICAS <span className="text-vcf-blue">EN VIVO</span>
+    <div className="bg-card border border-border rounded-2xl p-5 shadow-lg">
+      <h3 className="text-sm font-black text-foreground mb-5 flex items-center gap-2">
+        <span className="w-1 h-4 bg-vcf-blue rounded-full" />
+        ESTADÍSTICAS EN VIVO
       </h3>
 
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-4">
-          Las estadísticas estarán disponibles durante el partido
-        </p>
+        <div className="flex flex-col items-center py-8 gap-2">
+          <span className="text-3xl opacity-30">📊</span>
+          <p className="text-xs text-muted-foreground font-bold text-center">
+            Las estadísticas estarán disponibles durante el partido
+          </p>
+        </div>
       ) : (
         <>
-          <div className="flex justify-between text-xs font-black text-muted-foreground mb-4">
-            <span>{homeTeam}</span>
-            <span>{awayTeam}</span>
+          {/* Team headers */}
+          <div className="flex justify-between items-center mb-4 px-1">
+            <span className="text-xs font-black text-vcf-orange truncate max-w-[45%]">{homeTeam}</span>
+            <span className="text-[10px] font-bold text-muted-foreground/50">vs</span>
+            <span className="text-xs font-black text-muted-foreground truncate max-w-[45%] text-right">{awayTeam}</span>
           </div>
-          <div className="space-y-5">
-            {rows.map((item) => (
-              <div key={item.label}>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="font-bold text-foreground">{item.home}</span>
-                  <span className="font-bold text-foreground">{item.label}</span>
-                  <span className="font-bold text-foreground">{item.away}</span>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+
+          <div className="space-y-4">
+            {rows.map((item) => {
+              const total = item.home + item.away || 1;
+              const homeWidth = (item.home / total) * 100;
+              const awayWidth = (item.away / total) * 100;
+
+              return (
+                <div key={item.label}>
+                  <div className="flex justify-between items-center mb-1.5 px-0.5">
+                    <span className="text-sm font-black text-foreground tabular-nums">{item.home}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground tracking-wider">{item.label}</span>
+                    <span className="text-sm font-black text-foreground tabular-nums">{item.away}</span>
+                  </div>
+                  {/* Single center-meeting bar */}
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden flex">
                     <div
-                      className={`h-full ${item.homeColor}`}
-                      style={{ width: `${(item.home / (item.home + item.away)) * 100}%` }}
+                      className={`h-full ${item.homeColor} rounded-l-full transition-all duration-700`}
+                      style={{ width: `${homeWidth}%` }}
+                    />
+                    <div
+                      className="h-full bg-gray-500/50 rounded-r-full ml-auto transition-all duration-700"
+                      style={{ width: `${awayWidth}%` }}
                     />
                   </div>
-                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gray-400"
-                      style={{ width: `${(item.away / (item.home + item.away)) * 100}%` }}
-                    />
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}

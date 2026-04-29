@@ -44,6 +44,8 @@ export function useRoomChat(roomId: string | null) {
       sentAt: new Date().toISOString(),
     };
 
+    setMessages((prev) => [...prev.slice(-99), message]);
+
     await channelRef.current.send({
       type: "broadcast",
       event: "emoji",
