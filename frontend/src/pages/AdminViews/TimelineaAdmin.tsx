@@ -17,6 +17,7 @@ import {
   updateTimelineEvent,
   type TimelineEvent,
 } from "../../services/timelineService";
+import { Toast } from "@/components/ui.disabled/Toast";
 //import { TimelineCard } from "../../components/TimelineCard";
 
 export function TimelineAdmin() {
@@ -25,6 +26,11 @@ export function TimelineAdmin() {
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+      } | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -94,17 +100,17 @@ export function TimelineAdmin() {
 
   const handleSaveEvent = async () => {
     if (!formData.title.trim()) {
-      alert("El título del acontecimiento es obligatorio");
+      setToast({ message: "El título del acontecimiento es obligatorio", type: "error" });
       return;
     }
 
     if (!formData.date.trim()) {
-      alert("La fecha del acontecimiento es obligatoria");
+      setToast({ message: "La fecha del acontecimiento es obligatoria", type: "error" });
       return;
     }
 
     if (!formData.description.trim()) {
-      alert("La descripción del acontecimiento es obligatoria");
+      setToast({ message: "La descripción del acontecimiento es obligatoria", type: "error" });
       return;
     }
 
@@ -129,10 +135,10 @@ export function TimelineAdmin() {
 
       if (view === "edit" && editingEvent) {
         await updateTimelineEvent(editingEvent.id, eventPayload);
-        alert("Acontecimiento actualizado correctamente");
+        setToast({ message: "Acontecimiento actualizado correctamente", type: "success" });
       } else {
         await createTimelineEvent(eventPayload);
-        alert("Acontecimiento creado correctamente");
+        setToast({ message: "Acontecimiento creado correctamente", type: "success" });
       }
 
       await loadEvents();
@@ -141,33 +147,27 @@ export function TimelineAdmin() {
       setEditingEvent(null);
       setView("list");
     } catch (error) {
-      console.error("Error guardando acontecimiento:", error);
-      alert(
-        view === "edit"
-          ? "No se pudo actualizar el acontecimiento"
-          : "No se pudo crear el acontecimiento"
-      );
+      setToast({ message: "Error guardando el acontecimiento", type: "error" });
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteEvent = async (event: TimelineEvent) => {
-    const confirmDelete = window.confirm(
-      `¿Seguro que quieres eliminar "${event.title}"?`
-    );
+    // const confirmDelete = window.confirm(
+    //   `¿Seguro que quieres eliminar "${event.title}"?`
+    // );
 
-    if (!confirmDelete) return;
+    // if (!confirmDelete) return;
 
     try {
       await deleteTimelineEvent(event.id);
 
       setEvents((prev) => prev.filter((e) => e.id !== event.id));
 
-      alert(`"${event.title}" eliminado correctamente`);
+      setToast({ message: `"${event.title}" eliminado correctamente`, type: "success" });
     } catch (error) {
-      console.error("Error eliminando acontecimiento:", error);
-      alert("No se pudo eliminar el acontecimiento");
+      setToast({ message: "No se pudo eliminar el acontecimiento", type: "error" });
     }
   };
 
@@ -496,6 +496,13 @@ export function TimelineAdmin() {
           )}
         </div>
       </div>
+                  {toast && (
+                      <Toast
+                      message={toast.message}
+                      type={toast.type}
+                      onClose={() => setToast(null)}
+                      />
+                  )}
     </div>
   );
 }
