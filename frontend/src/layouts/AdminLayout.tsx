@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { 
-  Home, TrendingUp, FileText, Users, BookOpen, 
+  Home, TrendingUp, Users, BookOpen, 
   Gamepad2, Calendar, Trophy, Settings, Menu, LogOut, ChevronLeft
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";

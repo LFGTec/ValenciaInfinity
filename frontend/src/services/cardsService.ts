@@ -22,7 +22,9 @@ export interface Card {
   category_id: string;
   is_deleted: boolean;
 
-  categories?: Category; 
+  categories?: Category;
+  obtained?: boolean;
+  quantity?: number;
 }
 
 

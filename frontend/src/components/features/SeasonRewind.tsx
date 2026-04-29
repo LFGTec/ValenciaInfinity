@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronRight, ChevronLeft, X, Play, Star, Trophy, Flame,
-  Zap, Heart, Users, Target, Award, TrendingUp, Share2,
-  Volume2, VolumeX
+  ChevronRight, ChevronLeft, X, Play, Trophy,
+  Award,  Share2,
+  
 } from 'lucide-react';
 
 const STADIUM_IMG = "https://images.unsplash.com/photo-1765130729366-b54d7b2c8ea2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080";

@@ -1,23 +1,11 @@
-import React, { useState } from 'react';
 import {
-  Video, Star, Trophy, Award, TrendingUp, BookOpen, Gamepad2,
-  Share2, Globe, ArrowRight, Gift, Heart, Play, User, Palette, 
-  Shirt, ShoppingBag, Crown, Sparkles
+  Video, BookOpen, Gamepad2,
+  Share2, Globe, ArrowRight,  Heart
 } from 'lucide-react';
-import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
+import {NavLink} from "react-router-dom";
 
 
 export function FansZonePage() {
-  const [showRewind, setShowRewind] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('rostros');
-  
-  // Avatar customization states
-  const [skinTone, setSkinTone] = useState(2);
-  const [hairStyle, setHairStyle] = useState('corto');
-  const [hairColor, setHairColor] = useState(2);
-  const [jersey, setJersey] = useState('local');
-  const [jerseyNumber, setJerseyNumber] = useState('7');
-  const [jerseyName, setJerseyName] = useState('');
   
   return (
      <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
