@@ -51,6 +51,7 @@ export default function AppRoutes() {
           {/*Rutas dentro de FAN ZONE*/}
           <Route path="/virtual-world" element={<VirtualWorld />} />
           <Route path="/album" element={<CardAlbum />} />
+          <Route path="/album/:userId" element={<CardAlbum />} />
           <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
