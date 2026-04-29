@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getRanking, type Ranking } from "@/services/rankingService";
+import { getTrivias, type Trivia } from "@/services/triviasService";
 import { useNoticias } from "@/hooks/useNoticias";
 import {
   Video,
@@ -27,16 +28,19 @@ const fallbackImage =
   "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
 
 export default function HomePage() {
-  //Guarda el ranking y las noticias en el estado para mostrarlos en la página
   const [ranking, setRanking] = useState<Ranking[]>([]);
-  //Dice si el ranking esta cargando empieza con true pq al principio no se obtienen datos
   const [rankingLoading, setRankingLoading] = useState(true);
+
+  const [homeTrivias, setHomeTrivias] = useState<Trivia[]>([]);
+  const [triviasLoading, setTriviasLoading] = useState(true);
+
   const [countdown, setCountdown] = useState({
     dias: 0,
     horas: 0,
     minutos: 0,
     segundos: 0,
   });
+
   const navigate = useNavigate();
   const { noticias: news, cargando: newsLoading } = useNoticias();
   const { proximos } = usePartidosVCF();
@@ -48,20 +52,23 @@ export default function HomePage() {
 
     const horaStr = partidoDestacado.hora.replace("h", "");
     const [hh, mm] = horaStr.split(":").map(Number);
+
     const fechaPartido = new Date(
       partidoDestacado.anio,
       partidoDestacado.mes,
       partidoDestacado.dia,
       hh,
-      mm,
+      mm
     );
 
     const calcular = () => {
       const diff = fechaPartido.getTime() - Date.now();
+
       if (diff <= 0) {
         setCountdown({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
         return;
       }
+
       setCountdown({
         dias: Math.floor(diff / 86_400_000),
         horas: Math.floor((diff % 86_400_000) / 3_600_000),
@@ -71,26 +78,36 @@ export default function HomePage() {
     };
 
     calcular();
+
     const id = setInterval(calcular, 1000);
+
     return () => clearInterval(id);
   }, [partidoDestacado]);
 
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  useEffect(() => {
+    const fetchHomeTrivias = async () => {
+      try {
+        setTriviasLoading(true);
+
+        const data = await getTrivias();
+
+        setHomeTrivias(data.slice(0, 3));
+      } catch (error) {
+        console.error("Error cargando trivias:", error);
+        setHomeTrivias([]);
+      } finally {
+        setTriviasLoading(false);
+      }
+    };
+
+    fetchHomeTrivias();
+  }, []);
 
   useEffect(() => {
     const fetchRanking = async () => {
       try {
         const fetchedData = await getRanking();
         setRanking(fetchedData ?? []);
-        //Si no se obtienen datos, se guarda un array vacío para evitar errores al renderizar
       } catch (error) {
         console.error("Error cargando ranking:", error);
         setRanking([]);
@@ -101,6 +118,32 @@ export default function HomePage() {
 
     fetchRanking();
   }, []);
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+
+    if (isNaN(d.getTime())) return dateStr;
+
+    return d.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const getTriviaCountdown = (expiresAt: string) => {
+    const diff = new Date(expiresAt).getTime() - Date.now();
+
+    if (diff <= 0) return "Expirada";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
 
   return (
     <div className="bg-content">
@@ -147,12 +190,12 @@ export default function HomePage() {
                 { v: String(countdown.minutos).padStart(2, "0"), l: "MIN" },
                 { v: String(countdown.segundos).padStart(2, "0"), l: "SEG" },
               ].map((t, i, arr) => (
-                //Divide en t cada elementp, i el indice y arr el array complto
                 <div key={i} className="flex items-center gap-2 md:gap-4">
                   <div className="text-center bg-black/60 backdrop-blur-sm border border-white/20 px-3 md:px-6 py-3 md:py-4 rounded-xl shadow-lg">
                     <div className="text-2xl md:text-3xl font-black text-[#ff671f] drop-shadow-md">
                       {t.v}
                     </div>
+
                     <div className="text-xs text-white/80 font-bold tracking-widest mt-1">
                       {t.l}
                     </div>
@@ -162,18 +205,16 @@ export default function HomePage() {
                     <div className="text-xl md:text-2xl font-black text-vcf-yellow drop-shadow-md">
                       :
                     </div>
-                    //Muestra : si no es el último elemento
                   )}
                 </div>
               ))}
             </div>
-            
+
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link
                 to="/match-rooms"
                 className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 text-sm md:text-base"
               >
-                
                 <Video size={20} />
                 <span>CREAR MATCH ROOM</span>
               </Link>
@@ -219,6 +260,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[220px] md:auto-rows-[240px]">
               {news.slice(0, 6).map((item, i) => {
                 const isFeatured = i === 0;
+
                 return (
                   <motion.div
                     key={item.url}
@@ -244,34 +286,35 @@ export default function HomePage() {
                       }}
                     />
 
-                    {/* Shine sweep */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none overflow-hidden">
                       <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-20deg]" />
                     </div>
 
-                    {/* Dark gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
 
-                    {/* Category badge */}
                     <span className="absolute top-3 left-3 bg-[#ff671f] text-white px-3 py-[6px] rounded-md text-xs font-black uppercase z-[2] transition-[background,box-shadow,transform] duration-300 group-hover:bg-[#e55a18] group-hover:shadow-[0_4px_12px_rgba(255,103,31,0.55)] group-hover:scale-105">
                       {item.categoria}
                     </span>
 
-                    {/* Bottom accent bar */}
                     <div className="absolute bottom-0 left-0 h-[3px] w-0 bg-gradient-to-r from-[#ff671f] to-[#ffdf1b] group-hover:w-full transition-all duration-500 ease-out z-[3]" />
 
-                    {/* Text at bottom */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 z-[2]">
                       <h2
-                        className={`font-black text-white leading-tight mb-2 transition-colors duration-300 group-hover:text-[#ff9a5c] ${isFeatured ? "text-xl md:text-2xl" : "text-sm md:text-base line-clamp-2"}`}
+                        className={`font-black text-white leading-tight mb-2 transition-colors duration-300 group-hover:text-[#ff9a5c] ${
+                          isFeatured
+                            ? "text-xl md:text-2xl"
+                            : "text-sm md:text-base line-clamp-2"
+                        }`}
                       >
                         {item.titulo}
                       </h2>
+
                       {isFeatured && (
                         <p className="text-sm text-white/75 mb-3 line-clamp-2 leading-relaxed">
                           {item.descripcion}
                         </p>
                       )}
+
                       <div className="flex items-center gap-2 text-xs text-white/60 flex-wrap">
                         <span>{formatDate(item.fechaPublicacion)}</span>
                         <span className="text-[#ff671f]">•</span>
@@ -322,89 +365,78 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Trivias */}
+        {/* Desafíos activos */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl md:text-3xl font-black text-foreground">
-              DESAFÍOS <span className="text-foreground">ACTIVOS</span>
+              DESAFÍOS <span className="text-vcf-orange">ACTIVOS</span>
             </h2>
 
             <Link
-              to="/game"
-              className="flex items-center gap-2 text-sm font-bold text-vcf-blue hover:text-vcf-orange hover:gap-3 transition-all"
+              to="/juego"
+              className="flex items-center gap-2 text-sm font-bold text-vcf-orange hover:text-vcf-blue hover:gap-3 transition-all"
             >
               VER TODOS <ArrowRight size={16} />
             </Link>
           </div>
-          {/* Arreglo de desafios*/}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                title: "Quiz de la Semana",
-                reward: "+50 PTS",
-                time: "2 días",
-                participants: "856",
-                color: "from-vcf-orange to-vcf-yellow",
-                iconColor: "text-[#ff671f]",
-              },
-              {
-                title: "Predice el Resultado",
-                reward: "+100 PTS",
-                time: "1 día",
-                participants: "1,234",
-                color: "from-vcf-blue to-vcf-orange",
-                iconColor: "text-[#ff671f]",
-              },
-              {
-                title: "Trivia Histórica",
-                reward: "+75 PTS",
-                time: "5 días",
-                participants: "634",
-                color: "from-white to-white",
-                iconColor: "text-[#ff671f]",
-              },
-              //Recorre el arreglo y por cada desafio crea una tarjeta
-            ].map((challenge, i) => (
-              <div
-                key={i}
-                //Crea una carta con fondo, borde, padding, hover, cursor pointer, y un group
-                className="bg-card border-2 border-border rounded-lg p-6 hover:border-vcf-orange hover:shadow-xl transition-all cursor-pointer group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div
-                    className={`w-12 h-12 bg-gradient-to-br ${challenge.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}
-                  >
-                    <Gamepad2 size={24} className={challenge.iconColor} />
+            {triviasLoading && (
+              <p className="text-muted-foreground font-bold">
+                Cargando trivias...
+              </p>
+            )}
+
+            {!triviasLoading && homeTrivias.length === 0 && (
+              <p className="text-muted-foreground font-bold">
+                No hay trivias activas por ahora.
+              </p>
+            )}
+
+            {!triviasLoading &&
+              homeTrivias.map((trivia) => (
+                <div
+                  key={trivia.id}
+                  className="bg-card border-2 border-border rounded-lg p-6 hover:border-vcf-orange hover:shadow-xl transition-all cursor-pointer group"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                      <Gamepad2 size={24} className="text-[#ff671f]" />
+                    </div>
+
+                    <span className="bg-[#ff671f] text-white px-3 py-1 rounded-full text-xs font-black shadow-md">
+                      +{trivia.reward} PTS
+                    </span>
                   </div>
 
-                  <span className="bg-[#ff671f] text-white px-3 py-1 rounded-full text-xs font-black shadow-md">
-                    {challenge.reward}
-                  </span>
+                  <h3 className="font-black text-xl mb-2 group-hover:text-vcf-orange transition-colors text-foreground">
+                    {trivia.title}
+                  </h3>
+
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {trivia.description}
+                  </p>
+
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                    <span className="flex items-center gap-1">
+                      <Clock size={14} className="text-foreground" />
+                      {getTriviaCountdown(trivia.expires_at)}
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                      <Users size={14} className="text-vcf-blue" />
+                      {trivia.questions} preguntas
+                    </span>
+                  </div>
+
+                  <Link
+                    to="/trivias"
+                    className="block text-center w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
+                  >
+                    JUGAR AHORA
+                  </Link>
                 </div>
-
-                <h3 className="font-black text-xl mb-2 group-hover:text-vcf-orange transition-colors text-foreground">
-                  {challenge.title}
-                </h3>
-
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                  <span className="flex items-center gap-1">
-                    <Clock size={14} className="text-foreground" />{" "}
-                    {challenge.time}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users size={14} className="text-vcf-blue" />{" "}
-                    {challenge.participants}
-                  </span>
-                </div>
-
-                <Link
-                  to="/juego"
-                  className="block text-center w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
-                >
-                  JUGAR AHORA
-                </Link>
-              </div>
-            ))}
+              ))}
           </div>
         </section>
 
@@ -457,7 +489,6 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              {/* Recorre el arreglo de imagenes de cartas */}
               {[card1, card2, card3, card4, card1, card2].map((cardImg, i) => (
                 <Link
                   key={i}
@@ -507,7 +538,9 @@ export default function HomePage() {
                 <div className="grid grid-cols-3 gap-4 px-6 pt-6 pb-2 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange items-end">
                   {[1, 0, 2].map((rankIndex) => {
                     const user = ranking[rankIndex];
+
                     if (!user) return null;
+
                     const place = rankIndex + 1;
                     const colors = [
                       "bg-vcf-yellow",
@@ -550,7 +583,7 @@ export default function HomePage() {
                     );
                   })}
                 </div>
-                {/* Lista del 4 al 10 en el raking */}
+
                 <div className="divide-y divide-border">
                   {ranking.slice(3, 10).map((user, i) => (
                     <div
@@ -568,6 +601,7 @@ export default function HomePage() {
                           <div className="font-black text-foreground">
                             {user.fan_nombre}
                           </div>
+
                           <div className="text-sm text-muted-foreground">
                             Nivel {user.nivel}
                           </div>
