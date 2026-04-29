@@ -52,6 +52,7 @@ export default function AppRoutes() {
           <Route path="/virtual-world" element={<VirtualWorld />} />
 
           <Route path="/album" element={<Album />} />
+          <Route path="/album/:userId" element={<Album />} />
           <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
