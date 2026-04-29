@@ -2,11 +2,15 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapUsers } from '@/hooks/useMapUsers';
 import Map from "@/components/features/Map";
 import { useUserLocation } from '@/hooks/useUserLocations';
+import type { UserFeatureCollection } from '@/types/mapTypes';
 
 
 export function VirtualWorld() {
     useUserLocation()
+    
     const { data, loading, error } = useMapUsers()
+
+    const typedData = data as UserFeatureCollection | null
 
     return(
         <div className="max-w-[1600px] mx-auto px-4 py-6 bg-content">
@@ -21,12 +25,13 @@ export function VirtualWorld() {
 
             {/*Espacio para el Mapa*/}
 
-            <div className="bg-card border-2 border-vcf-blue border-t-0 rounded-b-xl overflow-hidden shadow-2xl">
+            <div className="bg-card border-2 border-vcf-blue rounded-t-xl rounded-b-xl overflow-hidden shadow-2xl">
+
                 {loading && <div className="p-6">Cargando mapa...</div>}
                 {error && <div className="p-6 text-red-500">{error}</div>}
 
-                {false && !loading && !error && (
-                    <Map data={data} />
+                {!loading && !error && (
+                    <Map data={typedData} />
                 )}
             </div>
 

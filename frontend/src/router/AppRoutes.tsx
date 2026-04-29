@@ -26,6 +26,7 @@ import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
 import { CardAlbum } from "@/components/features/CardAlbum";
+import Album from "@/pages/Album.tsx";
 
 export default function AppRoutes() {
   return (
@@ -50,7 +51,8 @@ export default function AppRoutes() {
           <Route path="/fanzone" element={<FansZonePage />} />
           {/*Rutas dentro de FAN ZONE*/}
           <Route path="/virtual-world" element={<VirtualWorld />} />
-          <Route path="/album" element={<CardAlbum />} />
+          <Route path="/album" element={<Album />} />
+          <Route path="/album/:userId" element={<Album />} />
           <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />

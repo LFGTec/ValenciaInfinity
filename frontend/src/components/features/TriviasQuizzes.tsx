@@ -3,7 +3,6 @@ import {
   Gamepad2,
   Clock,
   Trophy,
-  Star,
   CheckCircle,
   XCircle,
   Award,
@@ -17,10 +16,14 @@ import {
 } from "../../services/triviasService";
 
 export function TriviasQuizzes() {
-  const [activeTab, setActiveTab] = useState<"active" | "leaderboard">("active");
+  const [activeTab, setActiveTab] = useState<"active" | "leaderboard">(
+    "active"
+  );
   const [activeTrivias, setActiveTrivias] = useState<Trivia[]>([]);
   const [loading, setLoading] = useState(true);
   const [, setTick] = useState(0);
+
+  const [completedTriviaIds, setCompletedTriviaIds] = useState<string[]>([]);
 
   const [selectedTrivia, setSelectedTrivia] = useState<Trivia | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<TriviaQuestion[]>([]);
@@ -31,6 +34,14 @@ export function TriviasQuizzes() {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [quizComplete, setQuizComplete] = useState(false);
+
+  useEffect(() => {
+    const savedCompletedTrivias = localStorage.getItem("completedTrivias");
+
+    if (savedCompletedTrivias) {
+      setCompletedTriviaIds(JSON.parse(savedCompletedTrivias));
+    }
+  }, []);
 
   useEffect(() => {
     const fetchTrivias = async () => {
@@ -86,6 +97,10 @@ export function TriviasQuizzes() {
   };
 
   const handleStartTrivia = async (trivia: Trivia) => {
+    if (completedTriviaIds.includes(trivia.id)) {
+      return;
+    }
+
     setSelectedTrivia(trivia);
     setCurrentQuestion(0);
     setScore(0);
@@ -98,6 +113,19 @@ export function TriviasQuizzes() {
 
     setQuizQuestions(preguntas);
     setQuestionsLoading(false);
+  };
+
+  const saveCompletedTrivia = (triviaId: string) => {
+    if (completedTriviaIds.includes(triviaId)) return;
+
+    const updatedCompletedTrivias = [...completedTriviaIds, triviaId];
+
+    setCompletedTriviaIds(updatedCompletedTrivias);
+
+    localStorage.setItem(
+      "completedTrivias",
+      JSON.stringify(updatedCompletedTrivias)
+    );
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -118,6 +146,10 @@ export function TriviasQuizzes() {
         setSelectedAnswer(null);
         setShowResult(false);
       } else {
+        if (selectedTrivia) {
+          saveCompletedTrivia(selectedTrivia.id);
+        }
+
         setQuizComplete(true);
       }
     }, 2000);
@@ -154,27 +186,12 @@ export function TriviasQuizzes() {
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={resetQuiz}
-                className="flex-1 py-4 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-colors shadow-lg"
-              >
-                CONTINUAR
-              </button>
-
-              <button
-                onClick={() => {
-                  setQuizComplete(false);
-                  setCurrentQuestion(0);
-                  setScore(0);
-                  setSelectedAnswer(null);
-                  setShowResult(false);
-                }}
-                className="flex-1 py-4 bg-card border-2 border-vcf-orange text-vcf-orange rounded-lg font-bold hover:bg-vcf-orange hover:text-black transition-colors shadow-md"
-              >
-                REINTENTAR
-              </button>
-            </div>
+            <button
+              onClick={resetQuiz}
+              className="w-full py-4 bg-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-colors shadow-lg"
+            >
+              CONTINUAR
+            </button>
           </div>
         </div>
       </div>
@@ -198,9 +215,10 @@ export function TriviasQuizzes() {
           <p className="text-xl font-black text-foreground mb-4">
             Esta trivia todavía no tiene preguntas.
           </p>
+
           <button
             onClick={resetQuiz}
-            className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold"
+            className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-colors"
           >
             VOLVER
           </button>
@@ -219,7 +237,7 @@ export function TriviasQuizzes() {
           <div className="mb-6">
             <button
               onClick={resetQuiz}
-              className="px-4 py-2 bg-muted text-foreground border-2 border-border rounded-lg hover:bg-border transition-colors font-bold"
+              className="px-4 py-2 bg-black text-white border-2 border-black rounded-lg hover:bg-vcf-orange hover:border-vcf-orange transition-colors font-bold"
             >
               ← VOLVER A TRIVIAS
             </button>
@@ -231,6 +249,7 @@ export function TriviasQuizzes() {
                 <h2 className="text-2xl font-black text-foreground mb-1">
                   {selectedTrivia.title}
                 </h2>
+
                 <p className="text-muted-foreground">
                   Pregunta {currentQuestion + 1} de {quizQuestions.length}
                 </p>
@@ -240,6 +259,7 @@ export function TriviasQuizzes() {
                 <div className="text-3xl font-black text-vcf-orange">
                   {score}
                 </div>
+
                 <div className="text-sm text-muted-foreground font-bold">
                   Correctas
                 </div>
@@ -267,21 +287,21 @@ export function TriviasQuizzes() {
                   disabled={selectedAnswer !== null}
                   className={`w-full p-6 text-left rounded-lg border-2 font-bold transition-all ${
                     selectedAnswer === null
-                      ? "border-border hover:border-vcf-orange hover:bg-muted text-foreground"
+                      ? "border-border bg-card hover:border-vcf-orange hover:bg-muted text-foreground"
                       : selectedAnswer === index
                         ? index === currentQ.correct_answer
-                          ? "border-vcf-orange bg-vcf-orange/10 text-foreground"
-                          : "border-red-500 bg-red-500/10 text-foreground"
+                          ? "border-green-500 bg-green-100 text-black"
+                          : "border-red-500 bg-red-100 text-black"
                         : index === currentQ.correct_answer
-                          ? "border-vcf-orange bg-vcf-orange/10 text-foreground"
+                          ? "border-green-500 bg-green-100 text-black"
                           : "border-border bg-muted text-muted-foreground"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-4">
                     <span>{option}</span>
 
                     {showResult && index === currentQ.correct_answer && (
-                      <CheckCircle className="text-vcf-orange" size={24} />
+                      <CheckCircle className="text-green-600" size={24} />
                     )}
 
                     {showResult &&
@@ -297,7 +317,7 @@ export function TriviasQuizzes() {
 
           <button
             onClick={resetQuiz}
-            className="w-full py-4 bg-black text-white rounded-lg font-bold hover:bg-black/80 transition-colors shadow-lg"
+            className="w-full py-4 bg-red-600 text-white rounded-lg font-black hover:bg-red-700 transition-colors shadow-lg"
           >
             ABANDONAR QUIZ
           </button>
@@ -312,6 +332,7 @@ export function TriviasQuizzes() {
         <h1 className="text-5xl font-black mb-4 text-foreground">
           TRIVIAS & <span className="text-vcf-orange">QUIZZES</span>
         </h1>
+
         <p className="text-xl text-muted-foreground">
           Demuestra tus conocimientos y gana recompensas
         </p>
@@ -356,72 +377,100 @@ export function TriviasQuizzes() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {activeTrivias.map((trivia) => (
-              <div
-                key={trivia.id}
-                className="bg-card border-2 border-border rounded-xl p-8 hover:border-vcf-orange transition-all shadow-md hover:shadow-lg"
-              >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-vcf-orange rounded-lg flex items-center justify-center shadow-md">
-                      <Gamepad2 size={24} className="text-white" />
-                    </div>
+            {activeTrivias.map((trivia) => {
+              const isCompleted = completedTriviaIds.includes(trivia.id);
 
-                    <div>
-                      <h3 className="font-black text-xl mb-1 text-foreground">
-                        {trivia.title}
-                      </h3>
-
-                      <span className="inline-block bg-black text-white px-2 py-1 rounded text-sm font-black">
-                        {trivia.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span
-                    className={`${difficultyColors[trivia.difficulty]} text-white px-3 py-1 rounded-full text-sm font-black shadow-md`}
-                  >
-                    {difficultyLabels[trivia.difficulty]}
-                  </span>
-                </div>
-
-                <p className="text-base text-muted-foreground mb-6">
-                  {trivia.description}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center p-3 bg-muted rounded-lg shadow-sm">
-                    <div className="text-2xl font-black mb-1 text-black">
-                      {trivia.questions}
-                    </div>
-                    <div className="text-sm text-muted-foreground font-bold">
-                      Preguntas
-                    </div>
-                  </div>
-
-                  <div className="text-center p-3 bg-muted rounded-lg shadow-sm">
-                    <div className="text-2xl font-black mb-1 text-vcf-orange">
-                      +{trivia.reward}
-                    </div>
-                    <div className="text-sm text-muted-foreground font-bold">
-                      Puntos
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 text-base text-muted-foreground mb-6">
-                  <Clock size={16} className="text-vcf-orange" />
-                  <span>Termina en {getCountdown(trivia.expires_at)}</span>
-                </div>
-
-                <button
-                  onClick={() => handleStartTrivia(trivia)}
-                  className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#a86d12] hover:border-[#a86d12] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base w-full"
+              return (
+                <div
+                  key={trivia.id}
+                  className={`bg-card border-2 rounded-xl p-8 transition-all shadow-md ${
+                    isCompleted
+                      ? "border-green-500 opacity-80"
+                      : "border-border hover:border-vcf-orange hover:shadow-lg"
+                  }`}
                 >
-                  COMENZAR QUIZ
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-md ${
+                          isCompleted ? "bg-green-500" : "bg-vcf-orange"
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle size={24} className="text-white" />
+                        ) : (
+                          <Gamepad2 size={24} className="text-white" />
+                        )}
+                      </div>
+
+                      <div>
+                        <h3 className="font-black text-xl mb-1 text-foreground">
+                          {trivia.title}
+                        </h3>
+
+                        <span className="inline-block bg-black text-white px-2 py-1 rounded text-sm font-black">
+                          {trivia.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`${difficultyColors[trivia.difficulty]} text-white px-3 py-1 rounded-full text-sm font-black shadow-md`}
+                    >
+                      {difficultyLabels[trivia.difficulty]}
+                    </span>
+                  </div>
+
+                  <p className="text-base text-muted-foreground mb-6">
+                    {trivia.description}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="text-center p-3 bg-muted rounded-lg shadow-sm">
+                      <div className="text-2xl font-black mb-1 text-black">
+                        {trivia.questions}
+                      </div>
+
+                      <div className="text-sm text-muted-foreground font-bold">
+                        Preguntas
+                      </div>
+                    </div>
+
+                    <div className="text-center p-3 bg-muted rounded-lg shadow-sm">
+                      <div className="text-2xl font-black mb-1 text-vcf-orange">
+                        +{trivia.reward}
+                      </div>
+
+                      <div className="text-sm text-muted-foreground font-bold">
+                        Puntos
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-base text-muted-foreground mb-6">
+                    <Clock size={16} className="text-vcf-orange" />
+                    <span>Termina en {getCountdown(trivia.expires_at)}</span>
+                  </div>
+
+                  {isCompleted ? (
+                    <button
+                      disabled
+                      className="px-6 md:px-8 py-3 md:py-4 bg-gray-300 border-2 border-gray-300 text-gray-700 rounded-lg font-black cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base w-full"
+                    >
+                      <CheckCircle size={20} />
+                      QUIZ COMPLETADO
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleStartTrivia(trivia)}
+                      className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base w-full"
+                    >
+                      COMENZAR QUIZ
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </>
       )}
@@ -431,6 +480,7 @@ export function TriviasQuizzes() {
           <h2 className="text-3xl font-black mb-6 text-foreground">
             CLASIFICACIÓN
           </h2>
+
           <p className="text-muted-foreground font-bold">
             Aquí después puedes conectar tu ranking real.
           </p>

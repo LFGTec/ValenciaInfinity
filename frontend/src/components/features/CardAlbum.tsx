@@ -2,24 +2,33 @@
 import { useEffect, useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useSetAtom } from "jotai";
+import { useParams } from "react-router-dom";
 import { AlbumUI, pageAtom } from "../UI";
 import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
 import { getAlbumCardsByUser, type Card } from "../../services/cardsService";
 
-export function CardAlbum() {
+type Props = {
+  userId?: string;
+};
+
+export function CardAlbum({ userId }: Props) {
 	const { user } = useAuth();
+	const targetUserId = userId ?? user?.id;
 	const setPage = useSetAtom(pageAtom);
 	const [cards, setCards] = useState<Card[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Usar userId del parámetro si existe, sino usar el del usuario autenticado
+	const targetUserId = userId || user?.id;
 
 	useEffect(() => {
 		setPage(0);
 	}, [setPage]);
 
 	useEffect(() => {
-		if (!user?.id) {
+		if (!targetUserId) {
 			setCards([]);
 			setLoading(false);
 			return;
@@ -30,7 +39,13 @@ export function CardAlbum() {
 			setError(null);
 
 			try {
-				const data = await getAlbumCardsByUser(user.id);
+				if (!targetUserId) {
+				setCards([]);
+				setLoading(false);
+				return;
+				}
+
+				const data = await getAlbumCardsByUser(targetUserId);
 				setCards(data);
 			} catch (err) {
 				const message = err instanceof Error ? err.message : "No se pudo cargar el album";
@@ -41,7 +56,7 @@ export function CardAlbum() {
 		};
 
 		loadAlbum();
-	}, [user?.id]);
+	}, [targetUserId]);
 
 	const totalCards = cards.length;
 	const obtainedCards = useMemo(
