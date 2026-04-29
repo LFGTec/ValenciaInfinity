@@ -83,30 +83,36 @@ export default function MainLayout() {
               <div className="w-[120px] flex justify-end relative">
                 {isAuthenticated && user ? (
                   <div className="relative">
-                    <button 
+                    <button
                       onClick={() => setShowDropdown(!showDropdown)}
                       className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
                     >
-                      <img 
-                        src={user.user_metadata?.avatar_url || "https://via.placeholder.com/150"} 
-                        alt="User" 
-                        className="w-9 h-9 rounded-full border-2 border-vcf-orange object-cover"
-                      />
+                      {(user.avatar_url ?? user.user_metadata?.avatar_url) ? (
+                        <img
+                          src={user.avatar_url ?? user.user_metadata?.avatar_url}
+                          alt="User"
+                          referrerPolicy="no-referrer"
+                          className="w-9 h-9 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-vcf-orange flex items-center justify-center text-white font-black text-sm">
+                          {(user.full_name ?? user.email ?? "?")[0].toUpperCase()}
+                        </div>
+                      )}
                       <ChevronDown size={16} className={`text-white transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
                     </button>
 
                     {showDropdown && (
                       <div className="absolute right-0 mt-3 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-2 z-[100]">
                         <div className="px-4 py-3 border-b border-white/5">
-                          <p className="text-sm font-bold text-white truncate">{user.user_metadata?.full_name}</p> 
-                          <p className="text-xs text-gray-500 truncate">{user.email}</p> 
+                          <p className="text-sm font-bold text-white truncate">{user.full_name ?? user.user_metadata?.full_name}</p>
+                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         </div> 
                         <Link to="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"> 
                           <User size={16} /> Mi Perfil </Link> 
                         <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"> 
                           <Settings size={16} /> Configuración 
-                        </Link>
-                         
+                        </Link> 
                         <div className="border-t border-white/5 mt-1"> 
                           <button onClick={handleLogout} disabled={isSigningOut} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" > 
                             <LogOut size={16} /> 

@@ -22,7 +22,7 @@ export const getTimelineEvents = async (): Promise<TimelineEvent[]> => {
   const { data, error } = await supabase
     .from("timeline_events")
     .select("*")
-    .order("year", { ascending: true });
+    .order("date", { ascending: true });
 
   if (error) {
     console.error("Error obteniendo acontecimientos:", error);

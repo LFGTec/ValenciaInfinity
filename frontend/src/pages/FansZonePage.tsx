@@ -4,16 +4,14 @@ import {
 } from 'lucide-react';
 import { NavLink } from "react-router-dom";
 
-import { CardAlbum } from "../components/features/CardAlbum";
 
 export function FansZonePage() {
   return (
-    <>
-      <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
-        <div className="mb-8">
-          <h1 className="text-5xl font-black mb-4 text-foreground">ZONA <span className="text-vcf-orange">FAN</span></h1>
-          <p className="text-base text-muted-foreground">Tu espacio para interactuar y disfrutar</p>
-        </div>
+     <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+      <div className="mb-8">
+        <h1 className="text-5xl font-black mb-4 text-foreground">ZONA <span className="text-vcf-orange">FAN</span></h1>
+        <p className="text-base text-muted-foreground">Tu espacio para interactuar y disfrutar</p>
+      </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {[
@@ -41,7 +39,10 @@ export function FansZonePage() {
           ))}
         </div>
       </div>
-      <CardAlbum />
-    </>
+     </div>
+
+    
+
+
   );
 }

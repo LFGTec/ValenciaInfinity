@@ -20,21 +20,6 @@ export interface AuthSession {
   error: string | null;
 }
 
-function getOAuthRedirectUrl(): string {
-  const configured = import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined;
-  if (configured && configured.trim().length > 0) {
-    try {
-      const parsed = new URL(configured.trim());
-      if (parsed.pathname.endsWith("/auth/callback")) {
-        return parsed.toString();
-      }
-    } catch {
-      // Fallback a origin si la variable no es una URL valida.
-    }
-  }
-  return `${window.location.origin}/auth/callback`;
-}
-
 /**
  * Sign up with email and password
  */
@@ -141,9 +126,7 @@ export async function signInWithGoogle(
   userRole: UserRole
 ): Promise<{ error: string | null }> {
   try {
-    sessionStorage.setItem("auth_user_role", userRole);
-
-    const redirectUrl = getOAuthRedirectUrl();
+    const redirectUrl = `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -159,6 +142,7 @@ export async function signInWithGoogle(
       console.error("❌ Google OAuth Error:", error);
       return { error: error.message };
     }
+    sessionStorage.setItem("auth_user_role", userRole);
 
     return { error: null };
   } catch (error) {
@@ -281,8 +265,14 @@ export async function exchangeCodeForSession(
     if (error) return { user: null, error: error.message };
     if (!data.user) return { user: null, error: "No user returned" };
 
-    // No bloqueamos el callback esperando profiles: devolvemos la sesión base
-    // y dejamos que AuthProvider complete el perfil en segundo plano.
+    // 🔴 LA PIEZA QUE FALTA: Buscar el perfil real en la tabla 'profiles'
+    const profile = await getUserProfile(data.user.id);
+    
+    if (profile) {
+      return { user: profile, error: null };
+    }
+
+    // Si no hay perfil, usamos el fallback de siempre
     const userRole = (sessionStorage.getItem("auth_user_role") as UserRole) || "fan";
     return {
       user: {
@@ -296,8 +286,7 @@ export async function exchangeCodeForSession(
       error: null,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Code exchange failed";
-    return { user: null, error: message };
+    return { user: null, error: "Code exchange failed" };
   }
 }
 
@@ -347,7 +336,7 @@ export async function requestPasswordReset(
   email: string
 ): Promise<{ error: string | null }> {
   try {
-    const redirectUrl = getOAuthRedirectUrl().replace("/auth/callback", "/reset-password");
+    const redirectUrl = `${window.location.origin}/reset-password`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     });
@@ -361,6 +350,50 @@ export async function requestPasswordReset(
     const message =
       error instanceof Error ? error.message : "Password reset request failed";
     return { error: message };
+  }
+}
+
+export async function updateProfile(
+  userId: string,
+  updates: { full_name?: string; avatar_url?: string }
+): Promise<{ error: string | null }> {
+  try {
+    const { error } = await supabase.from("profiles").update(updates).eq("id", userId);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Update failed";
+    return { error: message };
+  }
+}
+
+export async function uploadAvatar(
+  userId: string,
+  file: File
+): Promise<{ url: string | null; error: string | null }> {
+  try {
+    const ext = file.name.split(".").pop();
+    const path = `${userId}/avatar.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true });
+    if (uploadError) {
+      const msg = uploadError.message.toLowerCase().includes("bucket")
+        ? "El bucket 'avatars' no existe en Supabase Storage. Créalo desde el dashboard."
+        : uploadError.message;
+      return { url: null, error: msg };
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    const url = `${data.publicUrl}?t=${Date.now()}`;
+
+    const { error: updateError } = await updateProfile(userId, { avatar_url: url });
+    if (updateError) return { url: null, error: updateError };
+
+    return { url, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Upload failed";
+    return { url: null, error: message };
   }
 }
 
