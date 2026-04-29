@@ -37,7 +37,7 @@ export default function AuthCallback() {
           return;
         }
 
-        sessionStorage.setItem(processedCodeKey, code);
+        //sessionStorage.setItem(processedCodeKey, code);
 
         const { user, error: exchangeError } = await exchangeCodeForSession(code);
 

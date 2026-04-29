@@ -1,4 +1,7 @@
 import { useEffect, useRef } from "react"
+import ReactDOM from 'react-dom/client'
+import UserPopupCard from "@/components/features/UserPopupCard"
+import ClusterPopup from "@/components/ClusterPopUp"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import type {
@@ -40,9 +43,9 @@ export default function Map({ data, onUserClick }: Props) {
           type: "FeatureCollection",
           features: []
         },
-        cluster: true,          // 🔥 activa clustering
-        clusterMaxZoom: 14,      // hasta qué zoom agrupa
-        clusterRadius: 50       // tamaño del cluster
+        cluster: true,          
+        clusterMaxZoom: 14,      
+        clusterRadius: 50       
       })
       
 
@@ -52,7 +55,7 @@ export default function Map({ data, onUserClick }: Props) {
         source: "users",
         filter: ["has", "point_count"],
         paint: {
-          "circle-color": "#d18817",
+          "circle-color": "#ff671f",
           "circle-radius": [
             "interpolate",
             ["linear"],
@@ -72,6 +75,9 @@ export default function Map({ data, onUserClick }: Props) {
         layout: {
           "text-field": "{point_count_abbreviated}",
           "text-size": 12
+        },
+        paint: {
+          "text-color": "#ffffff"
         }
       })
 
@@ -87,30 +93,27 @@ export default function Map({ data, onUserClick }: Props) {
         }
       })
 
-      // 👤 CLICK USER
       map.on("click", "unclustered-point", (e) => {
         const feature = e.features?.[0]
-        if (!feature || feature.geometry.type !== "Point") return
+        if (!feature) return
 
         const coords = feature.geometry.coordinates as [number, number]
-        const props = feature.properties as UserProperties
+        const props = feature.properties as any
 
-        if (!props?.userId) return
-
-        if (onUserClick) {
-          onUserClick(props.userId)
-          return
+        const user = {
+          userId: props.userId,
+          username: props.username,
+          profile_public: props.profile_public
         }
+
+        const container = document.createElement("div")
+        const root = ReactDOM.createRoot(container)
+
+        root.render(<UserPopupCard user={user} />)
 
         new mapboxgl.Popup()
           .setLngLat(coords)
-          .setHTML(`
-            <div>
-              <strong>${props.username}</strong><br/>
-              <a href="/profile/${props.userId}">Ver perfil</a><br/>
-              <a href="/album/${props.userId}">Ver álbum</a>
-            </div>
-          `)
+          .setDOMContent(container)
           .addTo(map)
       })
 
@@ -121,21 +124,41 @@ export default function Map({ data, onUserClick }: Props) {
         })
 
         const feature = features[0]
-        if (!feature || feature.geometry.type !== "Point") return
+        if (!feature) return
 
         const clusterId = feature.properties.cluster_id
         const coords = feature.geometry.coordinates as [number, number]
 
         const source = map.getSource("users") as mapboxgl.GeoJSONSource
 
-        source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-          if (err || zoom == null) return
+        source.getClusterLeaves(clusterId, 100, 0, (err, leaves) => {
+          if (err || !leaves) return
 
-          map.easeTo({
-            center: coords,
-            zoom
-          })
+          const users = leaves.map((leaf: any) => ({
+            userId: leaf.properties.userId,
+            username: leaf.properties.username,
+            profile_public: leaf.properties.profile_public
+          }))
+
+          const container = document.createElement("div")
+
+          // 🔥 IMPORTANTE: render síncrono seguro
+          const root = ReactDOM.createRoot(container)
+
+          root.render(
+            <ClusterPopup users={users} />
+          )
+
+          // 🧠 esperar microtask para asegurar render
+          setTimeout(() => {
+            new mapboxgl.Popup()
+              .setLngLat(coords)
+              .setDOMContent(container)
+              .addTo(map)
+          }, 0)
+          console.log("ClusterPopup render", users)
         })
+ 
       })
       
       // CURSOR
