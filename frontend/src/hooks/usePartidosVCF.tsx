@@ -5,6 +5,36 @@ import { partidosAtom } from "../stores/partidosStore";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+const CACHE_KEY = "vcf_partidos_v1";
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutos
+
+interface CacheEntry {
+  proximos: Partido[];
+  jugados: Partido[];
+  estadisticas: EstadisticasTemporada;
+  ts: number;
+}
+
+function leerCache(): CacheEntry | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const entry: CacheEntry = JSON.parse(raw);
+    if (Date.now() - entry.ts > CACHE_TTL) return null;
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function guardarCache(data: Omit<CacheEntry, "ts">) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ...data, ts: Date.now() }));
+  } catch {
+    // ignore — quota exceeded u otros errores de storage
+  }
+}
+
 export interface Partido {
   id: string;
   dia: number;
@@ -94,6 +124,20 @@ export function usePartidosVCF() {
   useEffect(() => {
     if (state.fetched) return;
 
+    // Intentar usar caché antes de llamar a la API
+    const cached = leerCache();
+    if (cached) {
+      setState({
+        proximos: cached.proximos,
+        jugados: cached.jugados,
+        estadisticas: cached.estadisticas,
+        cargando: false,
+        error: null,
+        fetched: true,
+      });
+      return;
+    }
+
     async function fetchTodo() {
       try {
         const base = `/v4/teams/${VCF_ID}/matches`;
@@ -127,19 +171,25 @@ export function usePartidosVCF() {
 
         const ultimaJornada = matches[matches.length - 1]?.matchday ?? 0;
 
+        const proximos = dataProximos.matches.map((m: any) => mapearPartido(m, "PROXIMO"));
+        const jugados = dataJugados.matches.reverse().map((m: any) => mapearPartido(m, "JUGADO"));
+        const estadisticas: EstadisticasTemporada = {
+          jugados: matches.length,
+          ganados,
+          empatados,
+          perdidos,
+          puntos: ganados * 3 + empatados,
+          golesAFavor,
+          golesEnContra,
+          jornada: ultimaJornada,
+        };
+
+        guardarCache({ proximos, jugados, estadisticas });
+
         setState({
-          proximos: dataProximos.matches.map((m: any) => mapearPartido(m, "PROXIMO")),
-          jugados: dataJugados.matches.reverse().map((m: any) => mapearPartido(m, "JUGADO")),
-          estadisticas: {
-            jugados: matches.length,
-            ganados,
-            empatados,
-            perdidos,
-            puntos: ganados * 3 + empatados,
-            golesAFavor,
-            golesEnContra,
-            jornada: ultimaJornada,
-          },
+          proximos,
+          jugados,
+          estadisticas,
           cargando: false,
           error: null,
           fetched: true,

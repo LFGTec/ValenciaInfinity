@@ -3,6 +3,34 @@ import { useState, useEffect } from "react";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+const CACHE_KEY = "vcf_noticias_v1";
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutos
+
+interface CacheEntry {
+  noticias: Noticia[];
+  ts: number;
+}
+
+function leerCache(): Noticia[] | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const entry: CacheEntry = JSON.parse(raw);
+    if (Date.now() - entry.ts > CACHE_TTL) return null;
+    return entry.noticias;
+  } catch {
+    return null;
+  }
+}
+
+function guardarCache(noticias: Noticia[]) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ noticias, ts: Date.now() }));
+  } catch {
+    // ignore — quota exceeded u otros errores de storage
+  }
+}
+
 const RSS_SOURCES = [
   { key: "marca", name: "Marca" },
   { key: "as", name: "AS" },
@@ -103,6 +131,13 @@ export function useNoticias() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const cached = leerCache();
+    if (cached) {
+      setNoticias(cached);
+      setCargando(false);
+      return;
+    }
+
     async function obtenerNoticias() {
       try {
         setCargando(true);
@@ -122,6 +157,7 @@ export function useNoticias() {
             new Date(a.fechaPublicacion).getTime()
         );
 
+        guardarCache(todas);
         setNoticias(todas);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido");
