@@ -36,6 +36,16 @@ export function CrearTrivias() {
     type: "success" | "error";
   } | null>(null);
 
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean;
+    triviaId: string | null;
+    triviaTitle: string | null;
+  }>({
+    open: false,
+    triviaId: null,
+    triviaTitle: null,
+  });
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -220,9 +230,7 @@ export function CrearTrivias() {
       }
 
       const hasEmptyQuestion = questions.some(
-        (q) =>
-          !q.question.trim() ||
-          q.options.some((option) => !option.trim())
+        (q) => !q.question.trim() || q.options.some((option) => !option.trim())
       );
 
       if (hasEmptyQuestion) {
@@ -356,23 +364,48 @@ export function CrearTrivias() {
     }
   };
 
-  const handleDeleteTrivia = async (id: string) => {
-    const success = await deleteTrivia(id);
+  const handleDeleteTrivia = (trivia: Trivia) => {
+    setConfirmDelete({
+      open: true,
+      triviaId: trivia.id,
+      triviaTitle: trivia.title,
+    });
+  };
 
-    if (!success) {
+  const confirmDeleteTrivia = async () => {
+    if (!confirmDelete.triviaId) return;
+
+    try {
+      const success = await deleteTrivia(confirmDelete.triviaId);
+
+      if (!success) {
+        setToast({
+          message: "Error al eliminar la trivia",
+          type: "error",
+        });
+        return;
+      }
+
+      setTrivias((prev) =>
+        prev.filter((trivia) => trivia.id !== confirmDelete.triviaId)
+      );
+
       setToast({
-        message: "Error al eliminar",
+        message: `Trivia "${confirmDelete.triviaTitle}" eliminada`,
+        type: "success",
+      });
+    } catch {
+      setToast({
+        message: "Error al eliminar la trivia",
         type: "error",
       });
-      return;
+    } finally {
+      setConfirmDelete({
+        open: false,
+        triviaId: null,
+        triviaTitle: null,
+      });
     }
-
-    setTrivias((prev) => prev.filter((t) => t.id !== id));
-
-    setToast({
-      message: "Trivia eliminada",
-      type: "success",
-    });
   };
 
   const handleEditTrivia = async (trivia: Trivia) => {
@@ -901,7 +934,7 @@ export function CrearTrivias() {
                     </button>
 
                     <button
-                      onClick={() => handleDeleteTrivia(trivia.id)}
+                      onClick={() => handleDeleteTrivia(trivia)}
                       className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all"
                     >
                       ELIMINAR
@@ -913,6 +946,45 @@ export function CrearTrivias() {
           )}
         </div>
       </div>
+
+      {confirmDelete.open && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded-lg border-2 border-border max-w-sm w-full">
+            <h2 className="text-xl font-black mb-4">
+              ¿Eliminar trivia?
+            </h2>
+
+            <p className="text-muted-foreground mb-6">
+              Estás a punto de eliminar{" "}
+              <span className="font-bold">
+                "{confirmDelete.triviaTitle}"
+              </span>
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  setConfirmDelete({
+                    open: false,
+                    triviaId: null,
+                    triviaTitle: null,
+                  })
+                }
+                className="flex-1 px-4 py-2 bg-muted rounded-lg font-bold"
+              >
+                Cancelar
+              </button>
+
+              <button
+                onClick={confirmDeleteTrivia}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

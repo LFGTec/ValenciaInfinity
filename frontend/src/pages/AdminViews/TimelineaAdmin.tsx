@@ -18,7 +18,6 @@ import {
   type TimelineEvent,
 } from "../../services/timelineService";
 import { Toast } from "@/components/ui.disabled/Toast";
-//import { TimelineCard } from "../../components/TimelineCard";
 
 export function TimelineAdmin() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
@@ -30,7 +29,17 @@ export function TimelineAdmin() {
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
-      } | null>(null);
+  } | null>(null);
+
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean;
+eventId: TimelineEvent["id"] | null;
+    eventTitle: string | null;
+  }>({
+    open: false,
+    eventId: null,
+    eventTitle: null,
+  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -84,33 +93,42 @@ export function TimelineAdmin() {
   };
 
   const handleEditEvent = (event: TimelineEvent) => {
-  setEditingEvent(event);
+    setEditingEvent(event);
 
-  setFormData({
-    title: event.title,
-    date: event.date,
-    description: event.description,
-  });
+    setFormData({
+      title: event.title,
+      date: event.date,
+      description: event.description,
+    });
 
-  setImagePreview(event.image_url || "");
-  setImageFile(null);
+    setImagePreview(event.image_url || "");
+    setImageFile(null);
 
-  setView("edit");
-};
+    setView("edit");
+  };
 
   const handleSaveEvent = async () => {
     if (!formData.title.trim()) {
-      setToast({ message: "El título del acontecimiento es obligatorio", type: "error" });
+      setToast({
+        message: "El título del acontecimiento es obligatorio",
+        type: "error",
+      });
       return;
     }
 
     if (!formData.date.trim()) {
-      setToast({ message: "La fecha del acontecimiento es obligatoria", type: "error" });
+      setToast({
+        message: "La fecha del acontecimiento es obligatoria",
+        type: "error",
+      });
       return;
     }
 
     if (!formData.description.trim()) {
-      setToast({ message: "La descripción del acontecimiento es obligatoria", type: "error" });
+      setToast({
+        message: "La descripción del acontecimiento es obligatoria",
+        type: "error",
+      });
       return;
     }
 
@@ -135,10 +153,18 @@ export function TimelineAdmin() {
 
       if (view === "edit" && editingEvent) {
         await updateTimelineEvent(editingEvent.id, eventPayload);
-        setToast({ message: "Acontecimiento actualizado correctamente", type: "success" });
+
+        setToast({
+          message: "Acontecimiento actualizado correctamente",
+          type: "success",
+        });
       } else {
         await createTimelineEvent(eventPayload);
-        setToast({ message: "Acontecimiento creado correctamente", type: "success" });
+
+        setToast({
+          message: "Acontecimiento creado correctamente",
+          type: "success",
+        });
       }
 
       await loadEvents();
@@ -147,35 +173,63 @@ export function TimelineAdmin() {
       setEditingEvent(null);
       setView("list");
     } catch (error) {
-      setToast({ message: "Error guardando el acontecimiento", type: "error" });
+      setToast({
+        message: "Error guardando el acontecimiento",
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteEvent = async (event: TimelineEvent) => {
-    // const confirmDelete = window.confirm(
-    //   `¿Seguro que quieres eliminar "${event.title}"?`
-    // );
+  const handleDeleteEvent = (event: TimelineEvent) => {
+    setConfirmDelete({
+      open: true,
+      eventId: event.id,
+      eventTitle: event.title,
+    });
+  };
 
-    // if (!confirmDelete) return;
+  const confirmDeleteEvent = async () => {
+    if (!confirmDelete.eventId) return;
 
     try {
-      await deleteTimelineEvent(event.id);
+      await deleteTimelineEvent(confirmDelete.eventId);
 
-      setEvents((prev) => prev.filter((e) => e.id !== event.id));
+      setEvents((prev) =>
+        prev.filter((event) => event.id !== confirmDelete.eventId)
+      );
 
-      setToast({ message: `"${event.title}" eliminado correctamente`, type: "success" });
-    } catch (error) {
-      setToast({ message: "No se pudo eliminar el acontecimiento", type: "error" });
+      setToast({
+        message: `Acontecimiento "${confirmDelete.eventTitle}" eliminado`,
+        type: "success",
+      });
+    } catch {
+      setToast({
+        message: "No se pudo eliminar el acontecimiento",
+        type: "error",
+      });
+    } finally {
+      setConfirmDelete({
+        open: false,
+        eventId: null,
+        eventTitle: null,
+      });
     }
   };
 
-      if (view === "create" || view === "edit") {
-      return (
+  if (view === "create" || view === "edit") {
+    return (
       <div className="min-h-screen bg-white px-4 py-10 text-[#111111] md:px-8">
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+
         <div className="mx-auto max-w-[1400px]">
-          {/* Header formulario */}
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-[#ff6a00]">
@@ -184,11 +238,14 @@ export function TimelineAdmin() {
 
               <h1 className="mb-2 text-3xl font-black uppercase text-[#111111] md:text-5xl">
                 {view === "edit" ? "Editar" : "Crear"}{" "}
-              <span className="text-[#ff6a00]">Acontecimiento</span>     
+                <span className="text-[#ff6a00]">Acontecimiento</span>
               </h1>
+
+              <p className="text-sm text-gray-500 md:text-base">
                 {view === "edit"
                   ? "Modifica la información del acontecimiento seleccionado."
                   : "Nuevo acontecimiento para la línea del tiempo."}
+              </p>
             </div>
 
             <button
@@ -199,7 +256,6 @@ export function TimelineAdmin() {
             </button>
           </div>
 
-          {/* Formulario */}
           <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-xl">
             <h2 className="mb-6 text-2xl font-black uppercase text-[#111111]">
               Información{" "}
@@ -223,20 +279,20 @@ export function TimelineAdmin() {
                 />
               </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-black text-[#111111]">
-                    Fecha *
-                  </label>
+              <div>
+                <label className="mb-2 block text-sm font-black text-[#111111]">
+                  Fecha *
+                </label>
 
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, date: e.target.value })
-                    }
-                    className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-[#111111] outline-none transition focus:border-[#ff6a00] focus:bg-white"
-                  />
-                </div>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, date: e.target.value })
+                  }
+                  className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-[#111111] outline-none transition focus:border-[#ff6a00] focus:bg-white"
+                />
+              </div>
 
               <div>
                 <label className="mb-2 block text-sm font-black text-[#111111]">
@@ -311,7 +367,6 @@ export function TimelineAdmin() {
             </div>
           </div>
 
-          {/* Acciones */}
           <div className="flex flex-col gap-4 sm:flex-row">
             <button
               onClick={handleSaveEvent}
@@ -321,8 +376,8 @@ export function TimelineAdmin() {
               {saving
                 ? "Guardando..."
                 : view === "edit"
-                ? "Guardar Cambios"
-                : "Crear Acontecimiento"}
+                  ? "Guardar Cambios"
+                  : "Crear Acontecimiento"}
             </button>
 
             <button
@@ -340,7 +395,6 @@ export function TimelineAdmin() {
   return (
     <div className="min-h-screen bg-white px-4 py-10 text-[#111111] md:px-8">
       <div className="mx-auto max-w-[1400px]">
-        {/* Header lista */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-[#ff6a00]">
@@ -366,7 +420,6 @@ export function TimelineAdmin() {
           </button>
         </div>
 
-        {/* Stats */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           {[
             {
@@ -411,7 +464,6 @@ export function TimelineAdmin() {
           ))}
         </div>
 
-        {/* Lista */}
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
           <div className="border-b border-gray-200 bg-gray-50 p-6">
             <h2 className="text-2xl font-black uppercase text-[#111111]">
@@ -430,16 +482,14 @@ export function TimelineAdmin() {
               </h3>
 
               <p className="mt-2 text-sm text-gray-500">
-                Crea el primer acontecimiento para mostrarlo en la página de fans.
+                Crea el primer acontecimiento para mostrarlo en la página de
+                fans.
               </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
               {sortedEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="p-6 transition hover:bg-gray-50"
-                >
+                <div key={event.id} className="p-6 transition hover:bg-gray-50">
                   <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                     {event.image_url && (
                       <div className="h-32 w-full flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 shadow-md md:w-32">
@@ -496,13 +546,53 @@ export function TimelineAdmin() {
           )}
         </div>
       </div>
-                  {toast && (
-                      <Toast
-                      message={toast.message}
-                      type={toast.type}
-                      onClose={() => setToast(null)}
-                      />
-                  )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {confirmDelete.open && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded-lg border-2 border-border max-w-sm w-full">
+            <h2 className="text-xl font-black mb-4">
+              ¿Eliminar acontecimiento?
+            </h2>
+
+            <p className="text-muted-foreground mb-6">
+              Estás a punto de eliminar{" "}
+              <span className="font-bold">
+                "{confirmDelete.eventTitle}"
+              </span>
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  setConfirmDelete({
+                    open: false,
+                    eventId: null,
+                    eventTitle: null,
+                  })
+                }
+                className="flex-1 px-4 py-2 bg-muted rounded-lg font-bold"
+              >
+                Cancelar
+              </button>
+
+              <button
+                onClick={confirmDeleteEvent}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
