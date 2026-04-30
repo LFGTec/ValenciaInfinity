@@ -301,7 +301,7 @@ export function CardAlbum({ userId }: Props) {
 			{/* Canvas Container at Bottom */}
 			<div className="album-canvas-wrapper">
 				<Canvas
-					camera={{ fov: 42, position: [1.7, 0.25, 3.4] }}
+					camera={{ fov: 35, position: [1.7, 0.15, 3.4] }}
 					dpr={[1, 1.8]}
 					shadows
 				>
