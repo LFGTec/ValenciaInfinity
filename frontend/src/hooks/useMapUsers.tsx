@@ -1,45 +1,62 @@
-import { useEffect, useState } from "react"
-import {
-  getMapGeoData,
-  subscribeToMapUsers
-} from "@/services/mapService"
+import { useEffect, useState, useCallback } from "react";
+import { getMapGeoData } from "@/services/mapService";
+import { supabase } from "@/services/supabaseClient";
 
 export const useMapUsers = () => {
-  const [data, setData] = useState<GeoJSON.FeatureCollection | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      setLoading(true)
-      const geo = await getMapGeoData()
-      setData(geo)
+      setLoading(true);
+      const geo = await getMapGeoData();
+      setData(geo);
     } catch (err) {
-      console.error(err)
-      setError("Error cargando usuarios del mapa")
+      console.error(err);
+      setError("Error cargando mapa");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    load()
+    fetchData();
+  }, [fetchData]);
 
-    const channel = subscribeToMapUsers(() => {
-      load()
-    })
+  useEffect(() => {
+    const channel = supabase
+      .channel("map-users-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_locations",
+        },
+        () => {
+          console.log("📡 user_locations change → refetch");
+          fetchData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_preferences",
+        },
+        () => {
+          console.log("📡 user_preferences change → refetch");
+          fetchData();
+        }
+      )
+      .subscribe();
 
     return () => {
-      if (channel) {
-        channel.unsubscribe()
-      }
-    }
-  }, [])
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData]);
 
-  return {
-    data,
-    loading,
-    error,
-    reload: load
-  }
-}
+  return { data, loading, error, refetch: fetchData };
+};
