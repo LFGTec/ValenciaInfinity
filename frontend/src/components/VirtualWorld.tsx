@@ -41,7 +41,7 @@ export function VirtualWorld() {
         <div className="max-w-[1600px] mx-auto px-4 py-6 bg-content">
             <div className="mb-6">
                 <h1 className="text-5xl font-black mb-4 text-foreground">
-                MUNDO <span className="text-vcf-blue">VIRTUAL</span>
+                MUNDO <span className="text-vcf-orange">VIRTUAL</span>
                 </h1>
                 <p className="text-xl text-muted-foreground">
                 Conecta con fans del Valencia CF en tiempo real
