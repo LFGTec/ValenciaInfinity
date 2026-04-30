@@ -229,7 +229,7 @@ export const getUserPacks = async (userId: string): Promise<UserPack[]> => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error al obtener sobres del usuario:", error);
+    console.error("Error obtaining user packs:", error);
     return [];
   }
 
@@ -240,22 +240,27 @@ export const createUserPack = async (
   userId: string,
   packType: string = "standard"
 ): Promise<UserPack | null> => {
-  const { data, error } = await supabase
-    .from("user_packs")
-    .insert([
-      {
-        user_id: userId,
-        pack_type: packType,
-      },
-    ])
-    .select();
+  try {
+    const { data, error } = await supabase
+      .from("user_packs")
+      .insert([
+        {
+          user_id: userId,
+          pack_type: packType,
+        },
+      ])
+      .select();
 
-  if (error) {
-    console.error("Error al crear sobre:", error);
+    if (error) {
+      console.error("Error creating pack:", error);
+      return null;
+    }
+
+    return (data?.[0] as UserPack) || null;
+  } catch (err) {
+    console.error("Exception creating pack:", err);
     return null;
   }
-
-  return (data?.[0] as UserPack) || null;
 };
 
 export const openPack = async (packId: string): Promise<Card[] | null> => {
