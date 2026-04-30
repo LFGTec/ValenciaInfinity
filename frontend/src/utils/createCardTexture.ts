@@ -116,7 +116,7 @@ function createImageTextureFromPublic(
 }
 
 function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: number) {
-  const isMissing = card.obtained === false;
+  const isMissing = !card.obtained;
 
   if (isMissing) {
     ctx.fillStyle = "#181818";

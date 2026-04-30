@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   Video, BookOpen, Gamepad2,
   Share2, Globe, ArrowRight, Heart
