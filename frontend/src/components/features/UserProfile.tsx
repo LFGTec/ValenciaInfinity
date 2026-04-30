@@ -18,7 +18,9 @@ import { setUserAtom } from "@/stores/authStore";
 import { uploadAvatar, updateProfile } from "@/services/authService";
 
 export function UserProfile() {
-  const [activeTab, setActiveTab] = useState<"profile" | "stats" | "privacy" | "settings">("profile");
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "stats" | "privacy" | "settings"
+  >("profile");
   const { settings, toggleSetting } = usePrivacySettings();
   const { user } = useAuth();
   const [, setUser] = useAtom(setUserAtom);
@@ -110,10 +112,12 @@ export function UserProfile() {
       {activeTab === "profile" && (
         <div className="max-w-2xl mx-auto">
           <div className="bg-card border-2 border-border rounded-lg p-8 shadow-md">
-
             {/* Avatar */}
             <div className="flex flex-col items-center mb-10">
-              <div className="relative group cursor-pointer" onClick={() => !uploading && fileInputRef.current?.click()}>
+              <div
+                className="relative group cursor-pointer"
+                onClick={() => !uploading && fileInputRef.current?.click()}
+              >
                 <div className="w-32 h-32 rounded-full overflow-hidden shadow-lg">
                   {avatarSrc ? (
                     <img
@@ -123,11 +127,15 @@ export function UserProfile() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = "none";
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                        (
+                          e.target as HTMLImageElement
+                        ).nextElementSibling?.classList.remove("hidden");
                       }}
                     />
                   ) : null}
-                  <div className={`w-full h-full bg-vcf-orange flex items-center justify-center text-white text-4xl font-black ${avatarSrc ? "hidden" : ""}`}>
+                  <div
+                    className={`w-full h-full bg-vcf-orange flex items-center justify-center text-white text-4xl font-black ${avatarSrc ? "hidden" : ""}`}
+                  >
                     {initials}
                   </div>
                 </div>
@@ -147,7 +155,9 @@ export function UserProfile() {
                 onChange={handleAvatarChange}
               />
               <p className="text-xs text-muted-foreground mt-3">
-                {uploading ? "Subiendo foto..." : "Haz clic para cambiar la foto"}
+                {uploading
+                  ? "Subiendo foto..."
+                  : "Haz clic para cambiar la foto"}
               </p>
               {uploadError && (
                 <p className="text-xs text-red-500 mt-1">{uploadError}</p>
@@ -171,7 +181,11 @@ export function UserProfile() {
                 ) : (
                   <div className="flex items-center gap-3">
                     <p className="text-foreground font-bold text-lg">
-                      {user?.full_name || <span className="text-muted-foreground italic font-normal">Sin nombre</span>}
+                      {user?.full_name || (
+                        <span className="text-muted-foreground italic font-normal">
+                          Sin nombre
+                        </span>
+                      )}
                     </p>
                   </div>
                 )}
@@ -221,8 +235,11 @@ export function UserProfile() {
                 </>
               ) : (
                 <button
-                  onClick={() => { setNameValue(user?.full_name ?? ""); setEditing(true); }}
-                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-vcf-orange text-vcf-orange font-black rounded-lg hover:bg-vcf-orange hover:text-white transition-colors"
+                  onClick={() => {
+                    setNameValue(user?.full_name ?? "");
+                    setEditing(true);
+                  }}
+                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-vcf-orange text-vcf-orange font-black rounded-lg cursor-pointer "
                 >
                   <Edit size={16} />
                   EDITAR NOMBRE
@@ -238,8 +255,7 @@ export function UserProfile() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-card border-2 border-border rounded-lg p-8 shadow-md">
             <h3 className="text-2xl font-black mb-6 text-foreground">
-              CONFIGURACIÓN DE{" "}
-              <span className="text-vcf-blue">PRIVACIDAD</span>
+              CONFIGURACIÓN DE <span className="text-vcf-blue">PRIVACIDAD</span>
             </h3>
 
             <div className="space-y-6">
@@ -277,12 +293,17 @@ export function UserProfile() {
 
             <div className="mt-8 p-6 bg-vcf-blue/10 border-2 border-vcf-blue rounded-lg">
               <div className="flex items-start gap-3">
-                <Shield size={24} className="text-vcf-blue flex-shrink-0 mt-1" />
+                <Shield
+                  size={24}
+                  className="text-vcf-blue flex-shrink-0 mt-1"
+                />
                 <div>
-                  <h4 className="font-bold mb-2 text-foreground">Sobre tu privacidad</h4>
+                  <h4 className="font-bold mb-2 text-foreground">
+                    Sobre tu privacidad
+                  </h4>
                   <p className="text-sm text-muted-foreground">
-                    Tu información está protegida. Solo compartes lo que eliges compartir. Lee
-                    nuestra{" "}
+                    Tu información está protegida. Solo compartes lo que eliges
+                    compartir. Lee nuestra{" "}
                     <a href="#" className="text-vcf-blue underline font-bold">
                       Política de Privacidad
                     </a>
