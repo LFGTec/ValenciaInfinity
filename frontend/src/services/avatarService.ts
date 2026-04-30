@@ -1,6 +1,5 @@
 import { supabase } from "./supabaseClient";
 
-
 export type AvatarPieza = {
   id: number;
   categoria: string;
@@ -46,6 +45,14 @@ export type AvatarCategory = {
   };
 };
 
+function normalize(value?: string) {
+  return (value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 function cleanStoragePath(path: string) {
   if (!path) return "";
 
@@ -61,9 +68,18 @@ function getAvatarPublicUrl(path: string) {
     .from("avatar-assets")
     .getPublicUrl(cleanPath);
 
-  console.log("Avatar URL:", cleanPath, data.publicUrl);
-
   return data.publicUrl;
+}
+
+export async function getAvatarPalettes() {
+  const { data, error } = await supabase
+    .from("AvatarPaletasColor")
+    .select("*")
+    .eq("activo", true);
+
+  if (error) throw error;
+
+  return data as AvatarPaletaColor[];
 }
 
 export async function getAvatarCategories(): Promise<AvatarCategory[]> {
@@ -92,17 +108,18 @@ export async function getAvatarCategories(): Promise<AvatarCategory[]> {
   const categoriesMap: Record<string, AvatarCategory> = {};
 
   (piezas as AvatarPieza[]).forEach((item) => {
-    const categoria = item.categoria.trim().toLowerCase();
+    const categoriaOriginal = item.categoria.trim();
+    const categoriaId = normalize(item.categoria);
 
     const paleta = (paletas as AvatarPaletaColor[]).find(
-      (p) => p.categoria.trim().toLowerCase() === categoria
+      (p) => normalize(p.categoria) === categoriaId
     );
 
-    if (!categoriesMap[categoria]) {
-      categoriesMap[categoria] = {
-        id: categoria,
-        name: categoria,
-        label: item.etiqueta_categoria ?? categoria,
+    if (!categoriesMap[categoriaId]) {
+      categoriesMap[categoriaId] = {
+        id: categoriaId,
+        name: categoriaOriginal,
+        label: item.etiqueta_categoria ?? categoriaOriginal,
         removable: item.removible ?? false,
         posicion_categoria: item.posicion_categoria ?? 999,
         assets: [],
@@ -114,10 +131,10 @@ export async function getAvatarCategories(): Promise<AvatarCategory[]> {
       };
     }
 
-    categoriesMap[categoria].assets.push({
+    categoriesMap[categoriaId].assets.push({
       id: item.id,
       name: item.nombre,
-      group: categoria,
+      group: categoriaId,
       posicion_item: item.posicion_item ?? 999,
       url: getAvatarPublicUrl(item.ruta_archivo),
       thumbnail: item.ruta_thumbnail
@@ -173,6 +190,60 @@ export async function saveUserAvatarSelection(params: {
 
   if (error) {
     console.error("Error guardando selección de avatar:", error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function saveFullUserAvatar(params: {
+  userId: string;
+  selectedAssets: Record<string, AvatarAsset>;
+  selectedColors: Record<string, string>;
+}) {
+  const { userId, selectedAssets, selectedColors } = params;
+
+  const assetRows = Object.entries(selectedAssets).map(([categoria, asset]) => {
+    const colorKey = Object.keys(selectedColors).find(
+      (key) => normalize(key) === normalize(categoria)
+    );
+
+    return {
+      user_id: userId,
+      categoria,
+      pieza_id: asset.id,
+      color: colorKey ? selectedColors[colorKey] : null,
+    };
+  });
+
+  const colorRows = Object.entries(selectedColors)
+    .filter(([categoria]) => {
+      return !Object.keys(selectedAssets).some(
+        (assetCategoria) => normalize(assetCategoria) === normalize(categoria)
+      );
+    })
+    .map(([categoria, color]) => ({
+      user_id: userId,
+      categoria,
+      pieza_id: null,
+      color,
+    }));
+
+  const rows = [...assetRows, ...colorRows];
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("AvatarUsuario")
+    .upsert(rows, {
+      onConflict: "user_id,categoria",
+    })
+    .select();
+
+  if (error) {
+    console.error("Error guardando avatar completo:", error);
     throw error;
   }
 

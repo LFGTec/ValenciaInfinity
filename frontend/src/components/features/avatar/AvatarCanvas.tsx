@@ -4,9 +4,10 @@ import { AvatarExperience } from "./AvatarExperience";
 
 type Props = {
   selectedAssets?: Record<string, AvatarAsset>;
+  selectedColors?: Record<string, string>;
 };
 
-export function AvatarCanvas({ selectedAssets = {} }: Props) {
+export function AvatarCanvas({ selectedAssets = {}, selectedColors = {} }: Props) {
   return (
     <Canvas
       camera={{
@@ -22,7 +23,9 @@ export function AvatarCanvas({ selectedAssets = {} }: Props) {
       <fog attach="fog" args={["#130f30", 10, 40]} />
 
       <group position-y={-1}>
-        <AvatarExperience selectedAssets={selectedAssets} />
+        <AvatarExperience selectedAssets={selectedAssets}
+        selectedColors={selectedColors}/>
+
       </group>
     </Canvas>
   );

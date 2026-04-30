@@ -4,9 +4,10 @@ import { AvatarModel } from "./AvatarModel";
 
 type Props = {
   selectedAssets: Record<string, AvatarAsset>;
+  selectedColors: Record<string, string>;
 };
 
-export function AvatarExperience({ selectedAssets }: Props) {
+export function AvatarExperience({ selectedAssets, selectedColors }: Props) {
   return (
     <>
       <OrbitControls
@@ -35,7 +36,10 @@ export function AvatarExperience({ selectedAssets }: Props) {
       <directionalLight position={[-5, 5, 5]} intensity={0.7} />
       <directionalLight position={[3, 3, -5]} intensity={3} color="#ff671f" />
 
-      <AvatarModel selectedAssets={selectedAssets} />
+      <AvatarModel 
+        selectedAssets={selectedAssets}
+        selectedColors={selectedColors}
+      />
 
       <Gltf
         position-y={-0.31}
