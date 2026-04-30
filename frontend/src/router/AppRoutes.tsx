@@ -25,7 +25,6 @@ import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
-import { CardAlbum } from "@/components/features/CardAlbum";
 import Album from "@/pages/Album.tsx";
 
 export default function AppRoutes() {

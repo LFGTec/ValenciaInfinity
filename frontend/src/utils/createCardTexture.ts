@@ -258,7 +258,78 @@ export function createCardTexture(cards: Card[], title = "VALENCIA CF"): CanvasT
     drawCard(ctx, card, x, y);
   });
 
-  return makeTexture(canvas);
+  // Create texture now (fallback image already drawn) and then load any per-card images
+  const texture = makeTexture(canvas);
+
+  // For each card with an `image_url`, load the image and draw it into the card area,
+  // then mark the texture as needing update so Three can re-render.
+  cards.slice(0, CARDS_PER_FACE).forEach((card, idx) => {
+    if (!card.image_url || !card.obtained) return;
+
+    const col = idx % COLS;
+    const row = Math.floor(idx / COLS);
+    const x = PAD_X + col * (CARD_W + GAP);
+    const y = TITLE_H + PAD_Y + row * (CARD_H + GAP);
+
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      // Draw the image into the lower portion of the card (below the colored band)
+      const topH = Math.round(CARD_H * 0.45);
+      const areaX = x + 6;
+      const areaY = y + topH + 6;
+      const areaW = CARD_W - 12;
+      const areaH = CARD_H - topH - 12;
+
+      // Cover-fit the image into the area while preserving aspect ratio
+      const imgRatio = img.width / img.height;
+      const areaRatio = areaW / areaH;
+      let drawW = areaW;
+      let drawH = areaH;
+      let drawX = areaX;
+      let drawY = areaY;
+
+      if (imgRatio > areaRatio) {
+        // image too wide -> fit by height and crop sides
+        drawH = areaH;
+        drawW = Math.round(areaH * imgRatio);
+        drawX = areaX - Math.round((drawW - areaW) / 2);
+      } else {
+        // image too tall -> fit by width and crop top/bottom
+        drawW = areaW;
+        drawH = Math.round(areaW / imgRatio);
+        drawY = areaY - Math.round((drawH - areaH) / 2);
+      }
+
+      ctx.save();
+      // Clip to card inner rect to avoid overflow
+      ctx.beginPath();
+      ctx.roundRect(x, y + topH, CARD_W, CARD_H - topH, 4);
+      ctx.clip();
+
+      ctx.drawImage(img, drawX, drawY, drawW, drawH);
+      ctx.restore();
+
+      texture.needsUpdate = true;
+    };
+
+    img.onerror = () => {
+      // silently ignore per-image load errors (keeps texture fallback)
+    };
+
+    // Accept absolute URLs or internal public paths
+    const rawSrc = /^(https?:|data:)/i.test(card.image_url)
+      ? card.image_url!
+      : resolvePublicPath(card.image_url!);
+
+    // Sanitize accidental suffixes like "$0" which break the request
+    const sanitizedSrc = rawSrc.replace(/\$.*$/, "");
+    const src = sanitizedSrc;
+
+    img.src = src;
+  });
+
+  return texture;
 }
 
 export function createCoverTexture(): CanvasTexture {
