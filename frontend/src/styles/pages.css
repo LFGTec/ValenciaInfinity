@@ -282,6 +282,32 @@
   height: 100% !important;
 }
 
+.team-album-container-new {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: #ffffff;
+}
+
+.album-canvas-wrapper {
+  width: 100%;
+  height: 90vh;
+  min-height: 750px;
+  background: #ffffff;
+}
+
+.album-canvas-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.album-ui-container {
+  flex: 0 0 auto;
+  width: 100%;
+  background: #ffffff;
+  padding-bottom: 2rem;
+}
+
 .team-album-loading {
   display: flex;
   align-items: center;

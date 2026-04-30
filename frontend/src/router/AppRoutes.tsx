@@ -10,7 +10,7 @@ import { News } from "../pages/News";
 import { FansZonePage } from "../pages/FansZonePage";
 import LogIn from "../pages/LogIn";
 import { UserProfile } from "../components/features/UserProfile";
-
+import { CardAlbum } from "../components/features/CardAlbum";
 
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
@@ -50,6 +50,7 @@ export default function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="/fanzone" element={<FansZonePage />} />
           {/*Rutas dentro de FAN ZONE*/}
+          <Route path="/album" element={<CardAlbum />} />
           <Route path="/virtual-world" element={<VirtualWorld />} />
           <Route path="/album" element={<Album />} />
           <Route path="/album/:userId" element={<Album />} />
