@@ -1,12 +1,13 @@
-import { useEffect } from "react";
 import { supabase } from "@/services/supabaseClient";
 import { roundCoord } from "@/utils/locationUtils";
+
+const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const getBrowserLocation = (): Promise<GeolocationPosition> => {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(pos),
-      (err) => reject(err),
+      resolve,
+      reject,
       {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -17,75 +18,98 @@ const getBrowserLocation = (): Promise<GeolocationPosition> => {
 };
 
 export const useUserLocation = () => {
-  useEffect(() => {
 
-    const saveLocation = async (user: any) => {
-      try {
-        // 1. validar preferencias
-        const { data: prefs } = await supabase
-          .from("user_preferences")
-          .select("show_location")
-          .eq("user_id", user.id)
-          .single();
+  const saveLocation = async (user: any) => {
+    try {
 
-        if (!prefs?.show_location) return;
+      // 1. validar preferencias
+      const { data: prefs } = await supabase
+        .from("user_preferences")
+        .select("show_location")
+        .eq("user_id", user.id)
+        .single();
 
-        // 2. obtener GPS del navegador
-        let loc = null;
+      if (!prefs?.show_location) {
+        console.log(" ubicación desactivada por preferences");
+        return;
+      }
+
+      // 2. obtener ubicación actual
+      const position = await getBrowserLocation();
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+
+      // 3. revisar si ya existe y si ya tiene geodata
+      const { data: existing } = await supabase
+        .from("user_locations")
+        .select("city, country, region")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const shouldFetchGeo =
+        !existing?.city || !existing?.country;
+
+      let city = existing?.city ?? null;
+      let region = existing?.region ?? null;
+      let country = existing?.country ?? null;
+
+      // 4. reverse geocoding SOLO UNA VEZ
+      if (shouldFetchGeo) {
 
         try {
-          const position = await getBrowserLocation();
+          const res = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${TOKEN}`
+          );
 
-          loc = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
+          const data = await res.json();
+          const features = data.features;
+
+          city = features.find((f: any) =>
+            f.place_type.includes("place")
+          )?.text ?? null;
+
+          region = features.find((f: any) =>
+            f.place_type.includes("region")
+          )?.text ?? null;
+
+          country = features.find((f: any) =>
+            f.place_type.includes("country")
+          )?.text ?? null;
+
         } catch (err) {
-          console.error("Usuario no permitió geolocalización:", err);
-          return;
+          console.error("error geocoding:", err);
         }
-
-        if (!loc) return;
-
-        // 3. guardar en supabase
-        const { error } = await supabase.from("user_locations").upsert(
-          {
-            user_id: user.id,
-            lat: roundCoord(loc.latitude, 0),
-            lng: roundCoord(loc.longitude, 0),
-            is_visible: true,
-          },
-          {
-            onConflict: "user_id",
-          }
-        );
-
-        if (error) {
-          console.error("Error guardando ubicación:", error);
-        }
-
-      } catch (err) {
-        console.error("Error general en useUserLocation:", err);
+      } else {
+        console.log("⚡ usando geodata existente (no API call)");
       }
-    };
 
-    // 4. auth listener
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === "SIGNED_IN" && session?.user) {
-          saveLocation(session.user);
+      // 5. guardar (insert/update)
+      const { error } = await supabase.from("user_locations").upsert(
+        {
+          user_id: user.id,
+          lat: roundCoord(lat, 0),
+          lng: roundCoord(lng, 0),
+          city,
+          region,
+          country,
+          is_visible: true,
+        },
+        {
+          onConflict: "user_id",
         }
+      );
+
+      if (error) {
+        console.error("error guardando:", error);
+      } else {
+        console.log("ubicación guardada");
       }
-    );
 
-    // 5. sesión inicial
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) saveLocation(data.user);
-    });
+    } catch (err) {
+      console.error("error general:", err);
+    }
+  };
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-
-  }, []);
+  return { saveLocation };
 };

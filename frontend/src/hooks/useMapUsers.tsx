@@ -1,45 +1,38 @@
-import { useEffect, useState } from "react"
-import {
-  getMapGeoData,
-  subscribeToMapUsers
-} from "@/services/mapService"
+import { useEffect, useState } from "react";
+import { getMapGeoData, subscribeToMapUsers } from "@/services/mapService";
 
 export const useMapUsers = () => {
-  const [data, setData] = useState<GeoJSON.FeatureCollection | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  const fetchData = async () => {
     try {
-      setLoading(true)
-      const geo = await getMapGeoData()
-      setData(geo)
+      setLoading(true);
+      const geo = await getMapGeoData();
+      setData(geo);
     } catch (err) {
-      console.error(err)
-      setError("Error cargando usuarios del mapa")
+      console.error(err);
+      setError("Error cargando mapa");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    load()
+    fetchData();
+  }, []);
 
+  useEffect(() => {
     const channel = subscribeToMapUsers(() => {
-      load()
-    })
+      console.log("📡 cambio en mapa → refetch");
+      fetchData();
+    });
 
     return () => {
-      if (channel) {
-        channel.unsubscribe()
-      }
-    }
-  }, [])
+      channel.unsubscribe();
+    };
+  }, []);
 
-  return {
-    data,
-    loading,
-    error,
-    reload: load
-  }
-}
+  return { data, loading, error };
+};
