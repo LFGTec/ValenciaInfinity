@@ -34,7 +34,8 @@ export function MatchRooms() {
   const currentUser = user
     ? {
         id: user.id,
-        username: user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "Fan",
+        username: user.full_name ?? user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "Fan",
+        avatar_url: user.avatar_url ?? user.user_metadata?.avatar_url,
       }
     : null;
 

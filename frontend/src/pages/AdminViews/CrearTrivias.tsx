@@ -18,31 +18,33 @@ import {
   updateTrivia,
   type Trivia,
 } from "../../services/triviasService";
+
 import { supabase } from "@/services/supabaseClient";
+import { Toast } from "@/components/ui.disabled/Toast";
 
 export function CrearTrivias() {
   const [view, setView] = useState<"list" | "create" | "edit">("list");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [trivias, setTrivias] = useState<Trivia[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
 
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
-  useEffect(() => {
-  const cargarTrivias = async () => {
-    setLoading(true);
-
-    const data = await getTrivias();
-
-    setTrivias(data);
-    setLoading(false);
-  };
-
-  cargarTrivias();
-}, []);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean;
+    triviaId: string | null;
+    triviaTitle: string | null;
+  }>({
+    open: false,
+    triviaId: null,
+    triviaTitle: null,
+  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -54,7 +56,6 @@ export function CrearTrivias() {
     reward: 50,
     image: "",
   });
-
 
   const [questions, setQuestions] = useState([
     {
@@ -69,38 +70,33 @@ export function CrearTrivias() {
     loadTrivias();
   }, []);
 
-useEffect(() => {
-  const interval = setInterval(async () => {
-    setNow(Date.now());
-
-    const expiredTrivias = trivias.filter(
-      (trivia) => new Date(trivia.expires_at).getTime() <= now
-    );
-
-    if (expiredTrivias.length > 0) {
-      await deleteExpiredTrivias();
-
-      setTrivias((prev) =>
-        prev.filter(
-          (trivia) => new Date(trivia.expires_at).getTime() > Date.now()
-        )
-      );
-    }
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [trivias]);
-
   useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
+    const interval = setInterval(async () => {
+      setNow(Date.now());
+
+      const expiredTrivias = trivias.filter(
+        (trivia) => new Date(trivia.expires_at).getTime() <= Date.now()
+      );
+
+      if (expiredTrivias.length > 0) {
+        await deleteExpiredTrivias();
+
+        setTrivias((prev) =>
+          prev.filter(
+            (trivia) => new Date(trivia.expires_at).getTime() > Date.now()
+          )
+        );
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [trivias]);
 
   const loadTrivias = async () => {
+    setLoading(true);
     const data = await getTrivias();
     setTrivias(data);
+    setLoading(false);
   };
 
   const getExpirationDate = () => {
@@ -154,7 +150,16 @@ useEffect(() => {
       image: "",
     });
 
-    setQuestions([]);
+    setQuestions([
+      {
+        id: "1",
+        question: "",
+        options: ["", "", "", ""],
+        correct_answer: 0,
+      },
+    ]);
+
+    setImageFile(null);
     setImagePreview("");
     setEditingId(null);
   };
@@ -199,124 +204,208 @@ useEffect(() => {
     setQuestions(newQuestions);
   };
 
+  const handleSaveTrivia = async () => {
+    try {
+      setLoading(true);
 
-const handleSaveTrivia = async () => {
-  try {
-    setLoading(true);
-
-    if (
-      !formData.title ||
-      !formData.description ||
-      !formData.category ||
-      formData.durationValue <= 0
-    ) {
-      alert("Completa los campos obligatorios");
-      return;
-    }
-
-    let imageUrl = formData.image || "";
-
-    if (imageFile) {
-      const uploadedUrl = await uploadTriviaImage(imageFile);
-
-      console.log("URL subida:", uploadedUrl);
-
-      if (!uploadedUrl) {
-        alert("No se pudo subir la imagen");
+      if (
+        !formData.title ||
+        !formData.description ||
+        !formData.category ||
+        formData.durationValue <= 0
+      ) {
+        setToast({
+          message: "Completa los campos obligatorios",
+          type: "error",
+        });
         return;
       }
 
-      imageUrl = uploadedUrl;
+      if (questions.length === 0) {
+        setToast({
+          message: "Agrega al menos una pregunta",
+          type: "error",
+        });
+        return;
+      }
+
+      const hasEmptyQuestion = questions.some(
+        (q) => !q.question.trim() || q.options.some((option) => !option.trim())
+      );
+
+      if (hasEmptyQuestion) {
+        setToast({
+          message: "Completa todas las preguntas y opciones",
+          type: "error",
+        });
+        return;
+      }
+
+      let imageUrl = formData.image || "";
+
+      if (imageFile) {
+        const uploadedUrl = await uploadTriviaImage(imageFile);
+
+        console.log("URL subida:", uploadedUrl);
+
+        if (!uploadedUrl) {
+          setToast({
+            message: "No se pudo subir la imagen",
+            type: "error",
+          });
+          return;
+        }
+
+        imageUrl = uploadedUrl;
+      }
+
+      const triviaData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        difficulty: formData.difficulty,
+        expires_at: getExpirationDate(),
+        reward: formData.reward,
+        questions: questions.length,
+        status: "active" as const,
+        image_url: imageUrl,
+      };
+
+      if (view === "edit" && editingId !== null) {
+        await updateTrivia(editingId, triviaData);
+
+        const { error: deleteQuestionsError } = await supabase
+          .from("trivia_questions")
+          .delete()
+          .eq("trivia_id", editingId);
+
+        if (deleteQuestionsError) {
+          setToast({
+            message:
+              "Se actualizó la trivia, pero no se pudieron borrar las preguntas anteriores",
+            type: "error",
+          });
+          return;
+        }
+
+        const preguntasActualizadas = questions.map((q) => ({
+          trivia_id: editingId,
+          question: q.question,
+          options: q.options,
+          correct_answer: q.correct_answer,
+        }));
+
+        const preguntasCreadas = await createTriviaQuestions(
+          preguntasActualizadas
+        );
+
+        if (!preguntasCreadas) {
+          setToast({
+            message:
+              "Se actualizó la trivia, pero no se pudieron guardar las preguntas nuevas",
+            type: "error",
+          });
+          return;
+        }
+
+        setToast({
+          message: "Trivia actualizada correctamente",
+          type: "success",
+        });
+      } else {
+        const triviaCreada = await createTrivia(triviaData);
+
+        if (!triviaCreada) {
+          setToast({
+            message: "No se pudo crear la trivia",
+            type: "error",
+          });
+          return;
+        }
+
+        const preguntasParaSupabase = questions.map((q) => ({
+          trivia_id: triviaCreada.id,
+          question: q.question,
+          options: q.options,
+          correct_answer: q.correct_answer,
+        }));
+
+        const preguntasCreadas = await createTriviaQuestions(
+          preguntasParaSupabase
+        );
+
+        if (!preguntasCreadas) {
+          setToast({
+            message: "La trivia se creó, pero las preguntas no se guardaron",
+            type: "error",
+          });
+          return;
+        }
+
+        setToast({
+          message: "Trivia creada correctamente",
+          type: "success",
+        });
+      }
+
+      setEditingId(null);
+      setView("list");
+      resetForm();
+      await loadTrivias();
+    } catch (error) {
+      console.error("Error guardando trivia:", error);
+
+      setToast({
+        message: "No se pudo guardar la trivia",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const triviaData = {
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      difficulty: formData.difficulty,
-      expires_at: getExpirationDate(),
-      reward: formData.reward,
-      questions: questions.length,
-      status: "active" as const,
-      image_url: imageUrl,
-    };
+  const handleDeleteTrivia = (trivia: Trivia) => {
+    setConfirmDelete({
+      open: true,
+      triviaId: trivia.id,
+      triviaTitle: trivia.title,
+    });
+  };
 
-if (view === "edit" && editingId !== null) {
-  await updateTrivia(editingId, triviaData);
+  const confirmDeleteTrivia = async () => {
+    if (!confirmDelete.triviaId) return;
 
-  const { error: deleteQuestionsError } = await supabase
-    .from("trivia_questions")
-    .delete()
-    .eq("trivia_id", editingId);
+    try {
+      const success = await deleteTrivia(confirmDelete.triviaId);
 
-  if (deleteQuestionsError) {
-    console.error("Error eliminando preguntas anteriores:", deleteQuestionsError);
-    alert("Se actualizó la trivia, pero no se pudieron borrar las preguntas anteriores");
-    return;
-  }
+      if (!success) {
+        setToast({
+          message: "Error al eliminar la trivia",
+          type: "error",
+        });
+        return;
+      }
 
-  const preguntasActualizadas = questions.map((q) => ({
-    trivia_id: editingId,
-    question: q.question,
-    options: q.options,
-    correct_answer: q.correct_answer,
-  }));
+      setTrivias((prev) =>
+        prev.filter((trivia) => trivia.id !== confirmDelete.triviaId)
+      );
 
-  const preguntasCreadas = await createTriviaQuestions(preguntasActualizadas);
-
-  if (!preguntasCreadas) {
-    alert("Se actualizó la trivia, pero no se pudieron guardar las preguntas nuevas");
-    return;
-  }
-
-  alert("Trivia actualizada correctamente");
-} else {
-  const triviaCreada = await createTrivia(triviaData);
-
-  if (!triviaCreada) {
-    alert("No se pudo crear la trivia");
-    return;
-  }
-
-  const preguntasParaSupabase = questions.map((q) => ({
-    trivia_id: triviaCreada.id,
-    question: q.question,
-    options: q.options,
-    correct_answer: q.correct_answer,
-  }));
-
-  const preguntasCreadas = await createTriviaQuestions(preguntasParaSupabase);
-
-  if (!preguntasCreadas) {
-    alert("La trivia se creó, pero las preguntas no se guardaron");
-    return;
-  }
-
-  alert("Trivia creada correctamente");
-}
-
-    setEditingId(null);
-    setView("list");
-    resetForm();
-    await loadTrivias();
-  } catch (error) {
-    console.error("Error guardando trivia:", error);
-    alert("No se pudo guardar la trivia");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleDeleteTrivia = async (id: string) => {
-    const success = await deleteTrivia(id);
-
-    if (!success) {
-      setMessage("Error al eliminar");
-      return;
+      setToast({
+        message: `Trivia "${confirmDelete.triviaTitle}" eliminada`,
+        type: "success",
+      });
+    } catch {
+      setToast({
+        message: "Error al eliminar la trivia",
+        type: "error",
+      });
+    } finally {
+      setConfirmDelete({
+        open: false,
+        triviaId: null,
+        triviaTitle: null,
+      });
     }
-
-    setTrivias((prev) => prev.filter((t) => t.id !== id));
-    setMessage("Trivia eliminada");
   };
 
   const handleEditTrivia = async (trivia: Trivia) => {
@@ -337,25 +426,27 @@ if (view === "edit" && editingId !== null) {
 
     const preguntas = await getQuestionsByTriviaId(trivia.id);
 
-      setQuestions(
-        preguntas.map((q) => ({
-          id: q.id,
-          question: q.question,
-          options: q.options,
-          correct_answer: q.correct_answer,
-        }))
-      );
+    setQuestions(
+      preguntas.map((q) => ({
+        id: q.id,
+        question: q.question,
+        options: q.options,
+        correct_answer: q.correct_answer,
+      }))
+    );
 
     setView("edit");
   };
 
   if (view === "create" || view === "edit") {
     return (
-  <div className="bg-white text-black min-h-screen p-6">
-            {message && (
-          <div className="fixed top-6 right-6 bg-vcf-orange text-white font-bold px-6 py-3 rounded-lg shadow-lg z-50">
-            {message}
-          </div>
+      <div className="bg-white text-black min-h-screen p-6">
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
         )}
 
         <div className="mb-8 flex items-center justify-between">
@@ -534,10 +625,14 @@ if (view === "edit" && editingId !== null) {
                   >
                     <Upload size={48} className="text-vcf-orange mb-3" />
                     <p className="mb-2 text-sm font-bold text-foreground">
-                      <span className="text-vcf-orange">Haz clic para subir</span>{" "}
+                      <span className="text-vcf-orange">
+                        Haz clic para subir
+                      </span>{" "}
                       o arrastra y suelta
                     </p>
-                    <p className="text-xs text-muted-foreground">PNG, JPG o GIF</p>
+                    <p className="text-xs text-muted-foreground">
+                      PNG, JPG o GIF
+                    </p>
                   </label>
                 </div>
               ) : (
@@ -651,7 +746,11 @@ if (view === "edit" && editingId !== null) {
             disabled={loading}
             className="flex-1 py-4 bg-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-all shadow-lg text-lg disabled:opacity-60"
           >
-          {loading ? "GUARDANDO..." : "CREAR TRIVIA"}
+            {loading
+              ? "GUARDANDO..."
+              : editingId
+                ? "ACTUALIZAR TRIVIA"
+                : "CREAR TRIVIA"}
           </button>
 
           <button
@@ -669,10 +768,13 @@ if (view === "edit" && editingId !== null) {
   }
 
   return (
-  <div className="bg-white text-black min-h-screen p-6">      {message && (
-        <div className="fixed top-6 right-6 bg-vcf-orange text-white font-bold px-6 py-3 rounded-lg shadow-lg z-50">
-          {message}
-        </div>
+    <div className="bg-white text-black min-h-screen p-6">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
 
       <div className="mb-8 flex items-center justify-between">
@@ -745,108 +847,144 @@ if (view === "edit" && editingId !== null) {
         </div>
 
         <div className="divide-y divide-border">
-          {trivias.map((trivia) => (
-            <div
-              key={trivia.id}
-              className="p-6 hover:bg-muted transition-colors"
-            >
-              <div className="flex items-start justify-between gap-6">
-                {trivia.image_url && (
-                  <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden border-2 border-border shadow-md">
-                    <img
-                      src={trivia.image_url}
-                      alt={trivia.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-black text-foreground">
-                      {trivia.title}
-                    </h3>
-
-                    <span
-                      className={`${difficultyColors[trivia.difficulty]} text-white px-3 py-1 rounded-full text-xs font-black`}
-                    >
-                      {trivia.difficulty === "easy"
-                        ? "FÁCIL"
-                        : trivia.difficulty === "medium"
-                          ? "MEDIO"
-                          : "DIFÍCIL"}
-                    </span>
-
-                    <span className="bg-gray-200 text-white px-3 py-1 rounded text-xs font-black">
-                      {trivia.category}
-                    </span>
-                  </div>
-
-                  <p className="text-muted-foreground mb-4">
-                    {trivia.description}
-                  </p>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-muted rounded-lg p-3">
-                      <div className="text-2xl font-black text-foreground">
-                        {trivia.questions}
-                      </div>
-                      <div className="text-xs text-muted-foreground font-bold">
-                        Preguntas
-                      </div>
-                    </div>
-
-                    <div className="bg-muted rounded-lg p-3">
-                      <div className="text-2xl font-black text-vcf-orange">
-                        +{trivia.reward}
-                      </div>
-                      <div className="text-xs text-muted-foreground font-bold">
-                        Puntos
-                      </div>
-                    </div>
-
-                    <div className="bg-muted rounded-lg p-3">
-                      <div className="text-sm font-black text-foreground">
-                        {getCountdown(trivia.expires_at)}
-                      </div>
-                      <div className="text-xs text-muted-foreground font-bold">
-                        Tiempo restante
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 ml-6">
-                  <button
-                    onClick={() => handleEditTrivia(trivia)}
-                    className="px-4 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all"
-                  >
-                    EDITAR
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteTrivia(trivia.id)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all"
-                  >
-                    ELIMINAR
-                  </button>
-                </div>
-              </div>
+          {trivias.length === 0 ? (
+            <div className="p-6">
+              <p className="text-muted-foreground font-bold">
+                No hay trivias creadas todavía.
+              </p>
             </div>
-          ))}
-
-          {/* {trivias.length === 0 ? (
-            <p>No hay trivias creadas todavía.</p>
           ) : (
             trivias.map((trivia) => (
-              <div key={trivia.id}>
-                <h3>{trivia.title}</h3>
-                <p>{trivia.description}</p>
+              <div
+                key={trivia.id}
+                className="p-6 hover:bg-muted transition-colors"
+              >
+                <div className="flex items-start justify-between gap-6">
+                  {trivia.image_url && (
+                    <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden border-2 border-border shadow-md">
+                      <img
+                        src={trivia.image_url}
+                        alt={trivia.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-black text-foreground">
+                        {trivia.title}
+                      </h3>
+
+                      <span
+                        className={`${difficultyColors[trivia.difficulty]} text-white px-3 py-1 rounded-full text-xs font-black`}
+                      >
+                        {trivia.difficulty === "easy"
+                          ? "FÁCIL"
+                          : trivia.difficulty === "medium"
+                            ? "MEDIO"
+                            : "DIFÍCIL"}
+                      </span>
+
+                      <span className="bg-gray-200 text-white px-3 py-1 rounded text-xs font-black">
+                        {trivia.category}
+                      </span>
+                    </div>
+
+                    <p className="text-muted-foreground mb-4">
+                      {trivia.description}
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-muted rounded-lg p-3">
+                        <div className="text-2xl font-black text-foreground">
+                          {trivia.questions}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-bold">
+                          Preguntas
+                        </div>
+                      </div>
+
+                      <div className="bg-muted rounded-lg p-3">
+                        <div className="text-2xl font-black text-vcf-orange">
+                          +{trivia.reward}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-bold">
+                          Puntos
+                        </div>
+                      </div>
+
+                      <div className="bg-muted rounded-lg p-3">
+                        <div className="text-sm font-black text-foreground">
+                          {getCountdown(trivia.expires_at)}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-bold">
+                          Tiempo restante
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 ml-6">
+                    <button
+                      onClick={() => handleEditTrivia(trivia)}
+                      className="px-4 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all"
+                    >
+                      EDITAR
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteTrivia(trivia)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all"
+                    >
+                      ELIMINAR
+                    </button>
+                  </div>
+                </div>
               </div>
             ))
-          )} */}
+          )}
         </div>
       </div>
+
+      {confirmDelete.open && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded-lg border-2 border-border max-w-sm w-full">
+            <h2 className="text-xl font-black mb-4">
+              ¿Eliminar trivia?
+            </h2>
+
+            <p className="text-muted-foreground mb-6">
+              Estás a punto de eliminar{" "}
+              <span className="font-bold">
+                "{confirmDelete.triviaTitle}"
+              </span>
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  setConfirmDelete({
+                    open: false,
+                    triviaId: null,
+                    triviaTitle: null,
+                  })
+                }
+                className="flex-1 px-4 py-2 bg-muted rounded-lg font-bold"
+              >
+                Cancelar
+              </button>
+
+              <button
+                onClick={confirmDeleteTrivia}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

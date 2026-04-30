@@ -32,9 +32,6 @@ export function TeamPage() {
       {/* Equipo */}
       <section className="mx-auto max-w-[1400px] px-4 py-12">
         <div className="mb-8">
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-vcf-orange">
-            Plantilla oficial
-          </p>
 
           <h1 className="mb-3 text-5xl font-black text-foreground">
             EL <span className="text-vcf-orange">EQUIPO</span>

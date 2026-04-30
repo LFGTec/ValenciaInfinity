@@ -18,7 +18,7 @@ type Tab = "events" | "stats" | "lineups" | "chat";
 
 interface RoomViewProps {
   room: RoomDB;
-  user: { id: string; username: string };
+  user: { id: string; username: string; avatar_url?: string };
   onLeave: () => void;
 }
 
@@ -178,6 +178,7 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
                   messages={messages}
                   spectatorCount={spectatorCount}
                   currentUserId={user.id}
+                  currentUserAvatarUrl={user.avatar_url}
                   onSendEmoji={(emoji) => sendEmoji(emoji, user)}
                 />
               )}

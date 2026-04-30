@@ -1,56 +1,78 @@
 import { supabase } from "./supabaseClient";
-import { roundCoord } from "@/utils/locationUtils";
 
-export interface UserLocation {
-  id: string;
-  user_id: string;
-  country: string | null;
-  region: string | null;
-  city: string | null;
-  lat: number | null;
-  lng: number | null;
-  is_visible: boolean;
-}
-
-
-export const getMapUsers = async (): Promise<UserLocation[]> => {
-  const { data, error } = await supabase
+export const getMapGeoData = async () => {
+  
+  const { data: locations, error: locError } = await supabase
     .from("user_locations")
-    .select("*")
+    .select("user_id, lat, lng")
+    .eq("is_visible", true);
 
-  if (error) throw error
+  if (locError) throw locError;
 
-  return (data || []).filter(
-    (u) => u.is_visible && u.lat !== null && u.lng !== null
-  )
-}
+  if (!locations || locations.length === 0) {
+    return {
+      type: "FeatureCollection",
+      features: []
+    };
+  }
 
-export const toGeoJSON = (users: UserLocation[]): GeoJSON.FeatureCollection => {
-  return {
-    type: "FeatureCollection",
-    features: users.map((u) => ({
+  const userIds = locations.map(u => u.user_id);
+
+  
+  const { data: prefs, error: prefError } = await supabase
+    .from("user_preferences")
+    .select("user_id, profile_public")
+    .in("user_id", userIds);
+
+  if (prefError) throw prefError;
+
+ 
+  const { data: profiles, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", userIds);
+
+  if (profileError) throw profileError;
+
+  const prefMap = new Map(
+    prefs?.map(p => [p.user_id, p]) || []
+  );
+
+  const profileMap = new Map(
+    profiles?.map(p => [p.id, p]) || []
+  );
+  
+
+  const features = locations.map(loc => {
+    const pref = prefMap.get(loc.user_id);
+    const profile = profileMap.get(loc.user_id);
+    console.log("LOC:", loc.user_id)
+    console.log("PROFILE:", profile)
+
+    const isPublic = pref?.profile_public ?? true;
+
+    return {
       type: "Feature",
       geometry: {
         type: "Point",
-        coordinates: [
-          roundCoord(u.lng!, 1),
-          roundCoord(u.lat!, 1)
-        ]
+        coordinates: [loc.lng, loc.lat]
       },
       properties: {
-        userId: u.user_id,
-        city: u.city,
-        region: u.region,
-        country: u.country
+        userId: loc.user_id,
+        username: isPublic
+          ? (profile?.full_name || "Usuario")
+          : null,
+        profile_public: isPublic
       }
-    }))
-  }
-}
+    };
+  });
 
-export const getMapGeoData = async () => {
-  const users = await getMapUsers()
-  return toGeoJSON(users)
-}
+  return {
+    type: "FeatureCollection",
+    features
+  };
+};
+
 
 export const subscribeToMapUsers = (callback: () => void) => {
   return supabase
@@ -63,8 +85,8 @@ export const subscribeToMapUsers = (callback: () => void) => {
         table: "user_locations"
       },
       () => {
-        callback()
+        callback();
       }
     )
-    .subscribe()
-}
+    .subscribe();
+};

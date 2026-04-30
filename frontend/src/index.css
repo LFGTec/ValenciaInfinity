@@ -310,3 +310,33 @@ h3 {
 .border-themed {
   border-color: var(--border);
 }
+
+/* Popup custom styles */
+.mapboxgl-popup-close-button {
+  background: transparent;
+  color: #ff671f;
+  font-size: 20px;
+  top: 6px;
+  right: 6px;
+  opacity: 0.8;
+  transition: 0.2s;
+}
+
+.mapboxgl-popup-close-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.mapboxgl-popup-content {
+  background: white; 
+  border: 2px solid #ff671f;
+  color: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  font-family: system-ui;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: #ff671f !important;
+}
