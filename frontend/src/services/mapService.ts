@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 
 export const getMapGeoData = async () => {
-  // 1️⃣ Locations
+  
   const { data: locations, error: locError } = await supabase
     .from("user_locations")
     .select("user_id, lat, lng")
@@ -18,7 +18,7 @@ export const getMapGeoData = async () => {
 
   const userIds = locations.map(u => u.user_id);
 
-  // 2️⃣ Preferences
+  
   const { data: prefs, error: prefError } = await supabase
     .from("user_preferences")
     .select("user_id, profile_public")
@@ -26,7 +26,7 @@ export const getMapGeoData = async () => {
 
   if (prefError) throw prefError;
 
-  // 3️⃣ Profiles
+ 
   const { data: profiles, error: profileError } = await supabase
     .from("profiles")
     .select("id, full_name")
@@ -34,7 +34,6 @@ export const getMapGeoData = async () => {
 
   if (profileError) throw profileError;
 
-  // 4️⃣ Maps (clave 🔥)
   const prefMap = new Map(
     prefs?.map(p => [p.user_id, p]) || []
   );
@@ -44,7 +43,6 @@ export const getMapGeoData = async () => {
   );
   
 
-  // 5️⃣ GeoJSON
   const features = locations.map(loc => {
     const pref = prefMap.get(loc.user_id);
     const profile = profileMap.get(loc.user_id);

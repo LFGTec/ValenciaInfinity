@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useSetAtom } from "jotai";
-import { useParams } from "react-router-dom";
 import { AlbumUI, pageAtom } from "../UI";
 import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
