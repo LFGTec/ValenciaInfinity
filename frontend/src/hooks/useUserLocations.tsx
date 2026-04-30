@@ -36,6 +36,9 @@ export const useUserLocation = () => {
 
       // 2. obtener ubicación actual
       const position = await getBrowserLocation();
+
+      if (!position?.coords) return;
+      
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
 

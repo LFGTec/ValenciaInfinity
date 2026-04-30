@@ -8,6 +8,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { useUserLocationStatus } from '@/hooks/useUserLocationsStatus';
+import { useActivateLocation } from '@/hooks/useActivateLocation';
 
 
 export function VirtualWorld() {
@@ -15,19 +16,24 @@ export function VirtualWorld() {
     const { user } = useAuth()
     const { data, loading, error } = useMapUsers()
     const typedData = data as UserFeatureCollection | null
+    const { activateLocation, loadingActivate } = useActivateLocation();
 
     const {
         locationSaved,
         isVisible,
         setLocationSaved,
-        loadinguserLocation
+        loadinguserLocation,
+        refetch
         } = useUserLocationStatus(user?.id);
 
     const handleActivate = async () => {
-    if (!user || locationSaved) return;
+    if (!user) return;
 
-    await saveLocation(user);
-    setLocationSaved(true);
+    const ok = await activateLocation(user, saveLocation);
+
+    if (ok) {
+        await refetch(); 
+    }
     };
    
 
