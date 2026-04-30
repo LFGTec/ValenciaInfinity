@@ -13,7 +13,7 @@ import {
   Ticket,
 } from "lucide-react";
 
-import stadiumImage from "../assets/EquipoVF.png";
+import stadiumImage from "../assets/Stadium3.avif";
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
 import card1 from "../assets/CartaAmarilla.png";
 import card2 from "../assets/CartaAzul.png";
@@ -151,8 +151,8 @@ export default function HomePage() {
       <section className="relative">
         <div className="h-[450px] md:h-[500px] flex items-center justify-center relative overflow-hidden">
           <div
-            className="absolute inset-0 bg-cover bg-center scale-105"
-            style={{ backgroundImage: `url(${stadiumImage})` }}
+            className="absolute inset-0 bg-cover bg-black bg-center scale-105"
+
           />
 
           <div className="absolute inset-0 bg-black/60" />
