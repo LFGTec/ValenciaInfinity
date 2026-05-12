@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { RoomDB } from "@/services/matchRoomsService";
 import { useLiveMatch } from "@/hooks/useLiveMatch";
+import { useMatchSimulation } from "@/hooks/useMatchSimulation";
 import { useRoomPresence } from "@/hooks/useRoomPresence";
 import { useRoomChat } from "@/hooks/useRoomChat";
 import { LiveScoreBoard } from "./LiveScoreBoard";
@@ -26,7 +27,8 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
   const [showCopied, setShowCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("events");
 
-  const { liveMatch } = useLiveMatch(room.match_id);
+  const { liveMatch, loading } = useLiveMatch(room.match_id);
+  useMatchSimulation(room.match_id, liveMatch, loading);
   const { count: spectatorCount } = useRoomPresence(room.id, user);
   const { messages, sendEmoji } = useRoomChat(room.id);
 
