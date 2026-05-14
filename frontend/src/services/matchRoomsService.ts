@@ -113,19 +113,30 @@ export async function createRoom(params: {
 }
 
 export async function getOrCreateMainRoom(matchId: string, matchLabel: string): Promise<RoomDB> {
+  const roomName = `Sala General — ${matchLabel}`;
+
   const { data: existing } = await supabase
     .from("match_rooms")
     .select("*")
     .eq("match_id", matchId)
     .eq("is_main_room", true)
-    .single();
+    .maybeSingle();
 
-  if (existing) return existing;
+  if (existing) {
+    const { data, error } = await supabase
+      .from("match_rooms")
+      .update({ name: roomName, match_label: matchLabel })
+      .eq("id", existing.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
 
   const { data, error } = await supabase
     .from("match_rooms")
     .insert({
-      name: `Sala General — ${matchLabel}`,
+      name: roomName,
       host_id: null,
       match_id: matchId,
       match_label: matchLabel,

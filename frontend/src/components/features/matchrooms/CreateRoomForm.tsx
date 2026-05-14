@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Video } from "lucide-react";
-import { usePartidosVCF } from "@/hooks/usePartidosVCF";
 import { createRoom, type RoomDB } from "@/services/matchRoomsService";
+
+// Partidos disponibles para crear salas.
+// El ID debe coincidir con SIMULATED_MATCH_ID del script scripts/simulate-match.mjs.
+const AVAILABLE_MATCHES = [
+  {
+    id:    "sim-vcf-atm-001",
+    label: "Valencia CF vs Atlético Madrid",
+    display: "Valencia CF vs Atlético Madrid — LA LIGA",
+  },
+] as const;
 
 interface CreateRoomFormProps {
   userId: string;
@@ -10,7 +19,6 @@ interface CreateRoomFormProps {
 }
 
 export function CreateRoomForm({ userId, onCreateRoom }: CreateRoomFormProps) {
-  const { proximos } = usePartidosVCF();
   const [name, setName] = useState("");
   const [matchId, setMatchId] = useState("");
   const [matchLabel, setMatchLabel] = useState("");
@@ -78,14 +86,11 @@ export function CreateRoomForm({ userId, onCreateRoom }: CreateRoomFormProps) {
                 className="w-full px-4 py-3 border-2 border-border bg-muted text-foreground rounded-lg focus:border-vcf-orange outline-none text-base"
               >
                 <option value="">Selecciona un partido...</option>
-                {proximos.map((p) => {
-                  const label = `Valencia CF vs ${p.rival}`;
-                  return (
-                    <option key={p.id} value={p.id} data-label={label}>
-                      {label} — {p.dia}/{p.mes + 1} {p.hora}
-                    </option>
-                  );
-                })}
+                {AVAILABLE_MATCHES.map((m) => (
+                  <option key={m.id} value={m.id} data-label={m.label}>
+                    {m.display}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -163,7 +168,7 @@ export function CreateRoomForm({ userId, onCreateRoom }: CreateRoomFormProps) {
               "Dale un nombre divertido para atraer fans",
               "Comparte el enlace antes del partido",
               "Las salas privadas generan un código único para compartir",
-              "Máximo 50 personas para una mejor experiencia",
+              "Máximo 100 personas por sala",
             ].map((tip, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="text-vcf-orange font-black mt-0.5">•</span>

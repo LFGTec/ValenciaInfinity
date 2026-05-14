@@ -47,7 +47,9 @@ export function LiveScoreBoard({ liveMatch }: LiveScoreBoardProps) {
         <div className="grid grid-cols-3 items-center gap-2">
           <div className="text-center">
             <div className="w-12 h-12 bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-xl mx-auto mb-2 flex items-center justify-center shadow-lg shadow-vcf-orange/30">
-              <span className="text-xs font-black text-white tracking-wide">VCF</span>
+              <span className="text-xs font-black text-white tracking-wide">
+                {liveMatch?.home_team?.slice(0, 3).toUpperCase() ?? "VCF"}
+              </span>
             </div>
             <p className="text-[11px] font-bold text-white/60 mb-1 truncate px-1">{liveMatch?.home_team ?? "Valencia CF"}</p>
             <div className="text-5xl font-black text-vcf-yellow tabular-nums leading-none">{liveMatch?.home_score ?? 0}</div>
