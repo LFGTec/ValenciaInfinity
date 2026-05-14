@@ -1,67 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Gamepad2, Play, Info, Maximize2, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 //import gamePreviewImage from 'figma:asset/0107d7278b203d778714c2fb14040f76a844ad75.png';
-
-declare global {
-  interface Window {
-    createUnityInstance?: any;
-    unityInstance?: any;
-  }
-}
 
 export function Juego() {
   const [isGameLoaded, setIsGameLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  useEffect(() => {
-    if (!isGameLoaded || !canvasRef.current) return;
-
-    const loaderUrl = "/unity/DeployValencia/Build/DeployValencia.loader.js";
-
-    const config = {
-      dataUrl: "/unity/DeployValencia/Build/DeployValencia.data",
-      frameworkUrl: "/unity/DeployValencia/Build/DeployValencia.framework.js",
-      codeUrl: "/unity/DeployValencia/Build/DeployValencia.wasm",
-      streamingAssetsUrl: "/unity/DeployValencia/StreamingAssets",
-      companyName: "LFG Consulting Group",
-      productName: "Mestalla Rivals",
-      productVersion: "1.0",
-    };
-
-    const script = document.createElement("script");
-    script.src = loaderUrl;
-    script.async = true;
-
-    script.onload = () => {
-      if (!canvasRef.current || !window.createUnityInstance) return;
-
-      window.createUnityInstance(canvasRef.current, config)
-        .then((unityInstance: any) => {
-          window.unityInstance = unityInstance;
-          console.log("Unity cargó correctamente");
-        })
-        .catch((error: any) => {
-          console.error("Error cargando Unity:", error);
-        });
-    };
-
-    script.onerror = () => {
-      console.error("No se pudo cargar el loader de Unity:", loaderUrl);
-    };
-
-    document.body.appendChild(script);
-
-    return () => {
-      if (window.unityInstance) {
-        window.unityInstance.Quit?.();
-        window.unityInstance = null;
-      }
-
-      script.remove();
-    };
-  }, [isGameLoaded]);
+  const unityGameUrl = "https://subtle-longma-efe73c.netlify.app";
 
   const handleLoadGame = () => {
     setIsGameLoaded(true);
@@ -69,21 +15,14 @@ export function Juego() {
   };
 
   const handleRestartGame = () => {
-    if (window.unityInstance) {
-      window.unityInstance.Quit?.();
-      window.unityInstance = null;
-    }
-
     setIsGameLoaded(false);
   };
 
   const handleFullscreen = () => {
-    const canvas = canvasRef.current;
+    const iframe = document.getElementById("unity-game-frame");
 
-    if (!canvas) return;
-
-    if (canvas.requestFullscreen) {
-      canvas.requestFullscreen();
+    if (iframe?.requestFullscreen) {
+      iframe.requestFullscreen();
     }
   };
 
@@ -198,11 +137,13 @@ export function Juego() {
                     </div>
                   </div>
                 ) : (
-                  <canvas
-                    ref={canvasRef}
-                    id="unity-canvas"
-                    className="w-full h-full bg-black"
-                    tabIndex={0}
+                  <iframe
+                    id="unity-game-frame"
+                    src={unityGameUrl}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowFullScreen
+                    title="Mestalla Rivals"
                   />
                 )}
               </div>
