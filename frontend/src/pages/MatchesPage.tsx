@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Video, Calendar } from "lucide-react";
+import { Video, Calendar, BarChart2 } from "lucide-react";
 import { usePartidosVCF, type Partido } from "../hooks/usePartidosVCF";
-import { EstadisticasTemporadaCard } from "../components/features/EstadisticasTemporada";
 import { InfoModal } from "@/components/features/matches/InfoModal";
 import { CalendarioModal } from "@/components/features/matches/CalendarioModal";
 import { TablaPartidos } from "@/components/features/matches/TablaPartido";
@@ -11,7 +10,7 @@ const vcfShield = "/EscudoValenciaCF.png";
 // ─── MatchesPage ──────────────────────────────────────────────────────────────
 export function MatchesPage() {
   const navegar = useNavigate();
-  const { proximos, jugados, estadisticas, cargando } = usePartidosVCF();
+  const { proximos, jugados, cargando } = usePartidosVCF();
   const partidoDestacado = proximos[0];
 
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
@@ -71,6 +70,13 @@ export function MatchesPage() {
             </button>
           ))}
         </div>
+        <button
+          onClick={() => navegar("/estadisticas")}
+          className="flex items-center gap-2 px-5 py-3 bg-card border-2 border-black hover:border-vcf-orange text-foreground hover:text-vcf-orange rounded-xl font-black transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base "
+        >
+          <BarChart2 size={20} />
+          ESTADÍSTICAS
+        </button>
         <button
           onClick={() => setMostrarCalendario(true)}
           className="flex items-center gap-2 px-5 py-3 bg-white text-black border-2 border-black rounded-xl font-black hover:bg-black hover:text-white transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base"
@@ -220,18 +226,6 @@ export function MatchesPage() {
           )}
         </div>
       </div>
-
-      {/* Estadísticas temporada */}
-      {estadisticas && (
-        <div className="mt-16 mb-10">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-3xl font-black text-foreground">
-              ESTADÍSTICAS <span className="text-vcf-orange">TEMPORADA</span>
-            </h2>
-          </div>
-          <EstadisticasTemporadaCard stats={estadisticas} />
-        </div>
-      )}
     </div>
   );
 }

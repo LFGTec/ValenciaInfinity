@@ -26,6 +26,7 @@ import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
 import Album from "@/pages/Album.tsx";
+import { EstadisticasPage } from "@/pages/EstadisticasPage";
 
 export default function AppRoutes() {
   return (
@@ -42,6 +43,7 @@ export default function AppRoutes() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/matches" element={<MatchesPage />} />
+        <Route path="/estadisticas" element={<EstadisticasPage />} />
         <Route path="/news" element={<News />} />
         <Route path="/nou-mestalla" element={<NouMestellaPage />} />
 
