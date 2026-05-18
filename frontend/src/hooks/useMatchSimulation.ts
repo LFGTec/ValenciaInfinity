@@ -78,7 +78,8 @@ const STATS_SNAPSHOTS = [
 export function useMatchSimulation(
   matchId: string,
   liveMatch: LiveMatchState | null,
-  loading: boolean
+  loading: boolean,
+  simKey = 0
 ) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Estado mutable del partido — evita closures stale en el loop async
@@ -97,28 +98,21 @@ export function useMatchSimulation(
     // Esperar a que useLiveMatch termine de cargar
     if (loading) return;
 
-    // Si ya hay un driver activo (updated_at reciente), no arrancar otro
-    if (liveMatch?.status === "IN_PLAY" || liveMatch?.status === "PAUSED") {
+    // Si ya hay un driver activo (updated_at reciente), no arrancar otro.
+    // Se omite esta comprobación cuando simKey > 0 (reinicio explícito).
+    if (simKey === 0 && (liveMatch?.status === "IN_PLAY" || liveMatch?.status === "PAUSED")) {
       const lastUpdate = new Date(liveMatch.updated_at).getTime();
       if (Date.now() - lastUpdate < DRIVER_TTL_MS) return;
     }
 
-    // Si el partido terminó → reiniciar desde 0 (limpia datos viejos)
-    const isFinished = liveMatch?.status === "FINISHED";
-
-    const startMinute = isFinished ? 0 : (liveMatch?.minute ?? 0);
-    const startEvents = isFinished ? [] : (liveMatch?.events ?? []) as object[];
-    const startHome   = isFinished ? 0 : (liveMatch?.home_score ?? 0);
-    const startAway   = isFinished ? 0 : (liveMatch?.away_score ?? 0);
-    const startStats  = isFinished ? {} : (liveMatch?.stats ?? {});
-
+    // Siempre arrancar desde 0 — para sim- no tiene sentido reanudar a mitad
     stateRef.current = {
-      minute:     startMinute,
-      homeScore:  startHome,
-      awayScore:  startAway,
-      status:     "IN_PLAY",
-      events:     startEvents,
-      stats:      startStats,
+      minute:    0,
+      homeScore: 0,
+      awayScore: 0,
+      status:    "IN_PLAY",
+      events:    [],
+      stats:     {},
     };
 
     async function push() {
@@ -194,5 +188,5 @@ export function useMatchSimulation(
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchId, loading]);
+  }, [matchId, loading, simKey]);
 }

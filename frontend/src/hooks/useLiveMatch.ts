@@ -27,13 +27,17 @@ export function useLiveMatch(matchId: string | null) {
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "match_live_state",
           filter: `match_id=eq.${matchId}`,
         },
         (payload) => {
-          setLiveMatch(payload.new as LiveMatchState);
+          if (payload.eventType === "DELETE") {
+            setLiveMatch(null);
+          } else {
+            setLiveMatch(payload.new as LiveMatchState);
+          }
         }
       )
       .subscribe();
