@@ -3,12 +3,9 @@ import {
   Search,
   UserPlus,
   Users,
-  MessageCircle,
   X,
   Check,
   Trophy,
-  Star,
-  MoreVertical,
   BookOpen,
   Video,
   MapPin,
@@ -16,6 +13,7 @@ import {
 } from "lucide-react";
 import { Toast } from "@/components/ui.disabled/Toast";
 import { useFriends } from "@/hooks/useFriends";
+import { Link } from "react-router-dom";
 
 export function Friends() {
     const [activeTab, setActiveTab] = useState<"friends" | "search" | "requests">("friends");
@@ -49,7 +47,6 @@ export function Friends() {
     if (loading) {
         return <div>Cargando...</div>;
     }
-
 
     return (
         <div className="max-w-[1600px] mx-auto px-4 py-12 bg-content min-h-screen">
@@ -149,7 +146,7 @@ export function Friends() {
                             <div className="relative">
                                 <img
                                 src={friend.avatar_url}
-                                alt={friend.username}
+                                alt={friend.full_name}
                                 className="w-16 h-16 rounded-full object-cover border-2 border-vcf-orange"
                                 />
                             </div>
@@ -157,9 +154,7 @@ export function Friends() {
                                 <h3 className="font-black text-foreground">
                                 {friend.full_name}
                                 </h3>
-                                <p className="text-sm text-muted-foreground">
-                                {friend.username}
-                                </p>
+                                
                                 <div className="flex items-center gap-1 mt-1">
                                     <MapPin size={12} className="text-vcf-orange" />
                                     <span className="text-xs text-muted-foreground">
@@ -210,7 +205,7 @@ export function Friends() {
                                     text-white
                                     rounded-lg
                                     font-bold
-                                    hover:bg-[#e05516]
+                                    hover:scale-105
                                     transition-all
                                     text-sm
                                 "
@@ -227,14 +222,14 @@ export function Friends() {
 
                         <div className="flex flex-col gap-2">
                             <div className="flex gap-2">
-                            <button className="flex-1 px-3 py-2 bg-black text-white rounded-lg font-bold hover:bg-gray-800 transition-all flex items-center justify-center gap-2 text-sm">
+                            <Link to={`/album/${friend.id}`} className="flex-1 px-3 py-2 bg-black text-white rounded-lg font-bold hover:bg-gray-800 transition-all flex items-center justify-center gap-2 text-sm">
                                 <BookOpen size={16} />
-                                Ver Álbum
-                            </button>
-                            <button className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm">
+                                Ver Álbum 
+                            </Link>
+                            <Link to="/match-rooms" className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm">
                                 <Video size={16} />
                                 Match Room
-                            </button>
+                            </Link>
                             </div>
                             <button
                             onClick={() => removeFriend(friend.friendship_id!)}
@@ -314,7 +309,7 @@ export function Friends() {
                         bg-vcf-orange
                         text-white
                         font-bold
-                        hover:bg-[#e05516]
+                        hover:scale-105
                         transition-all
                     "
                     >
@@ -364,7 +359,7 @@ export function Friends() {
                                 <div className="relative">
                                 <img
                                     src={user.avatar_url}
-                                    alt={user.username}
+                                    alt={user.full_name}
                                     className="w-16 h-16 rounded-full object-cover border-2 border-vcf-orange"
                                 />
                                 
@@ -373,9 +368,6 @@ export function Friends() {
                                     <h3 className="font-black text-foreground">
                                         {user.full_name}
                                     </h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        {user.username}
-                                    </p>
 
                                     <div className="flex items-center gap-1 mt-1">
                                         <MapPin size={12} className="text-vcf-orange" />
@@ -424,119 +416,119 @@ export function Friends() {
                     </div>
                 )}
                 </div>
-                )}
+            )}
 
-                {/* Search Results */}
-                {activeTab === "search" && (
-                    <div className="mb-8">
-                    <div className="relative">
-                        <Search
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                        size={20}
-                        />
-                        <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Buscar por nombre o usuario..."
-                        className="w-full pl-12 pr-4 py-4 bg-card border-2 border-border rounded-lg text-foreground font-bold focus:border-vcf-orange focus:outline-none transition-colors"
-                        />
-                    </div>
-                    </div>
-                )}
-                
-                {activeTab === "search" && (
-                    <div>
-                    {searchQuery.trim() === "" ? (
-                        <div className="text-center py-16">
-                        <Search
-                            size={64}
-                            className="mx-auto mb-4 text-muted-foreground"
-                        />
-                        <h3 className="text-2xl font-black mb-2 text-foreground">
-                            Busca usuarios
-                        </h3>
-                        <p className="text-muted-foreground">
-                            Escribe un nombre o usuario para buscar
-                        </p>
-                        </div>
-                    ) : searchResults.length === 0 ? (
-                        <div className="text-center py-16">
-                        <Users size={64} className="mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="text-2xl font-black mb-2 text-foreground">
-                            No se encontraron resultados
-                        </h3>
-                        <p className="text-muted-foreground">
-                            Intenta con otro término de búsqueda
-                        </p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {searchResults.map((user) => (
-                            <div
-                            key={user.id}
-                            className="bg-card border-2 border-border rounded-lg p-6 hover:border-vcf-orange transition-all shadow-md hover:shadow-xl"
-                            >
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <img
-                                    src={user.avatar_url}
-                                    alt={user.full_name}
-                                    className="w-16 h-16 rounded-full object-cover border-2 border-border"
-                                    />
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-foreground">
-                                    {user.full_name}
-                                    </h3>
-                                    <div className="flex items-center gap-1 mt-1">
-                                        <MapPin size={12} className="text-vcf-orange" />
-                                        <span className="text-xs text-muted-foreground">
-                                        {user.location}
-                                        </span>
-                                    </div>     
-                                </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="bg-muted rounded-lg p-3 text-center">
-                                <div className="flex items-center justify-center gap-1 mb-1">
-                                    <Trophy size={16} className="text-vcf-orange" />
-                                    <span className="text-xl font-black text-foreground">
-                                    {user.points}
-                                    </span>
-                                </div>
-                                <div className="text-xs text-muted-foreground font-bold">
-                                    Puntos
-                                </div>
-                                </div>
-                                
-                            </div>
-
-                            <button
-                                onClick={() => sendRequest(user.id)}
-                                className="w-full px-4 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all flex items-center justify-center gap-2"
-                            >
-                                <UserPlus size={18} />
-                                AGREGAR AMIGO
-                            </button>
-                            </div>
-                        ))}
-                        </div>
-                    )}
-                    </div>
-                )}
-
-                {/* Toast Notifications */}
-                {toast && (
-                    <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
+            {/* Search Results */}
+            {activeTab === "search" && (
+                <div className="mb-8">
+                <div className="relative">
+                    <Search
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                    size={20}
                     />
+                    <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar por nombre o usuario..."
+                    className="w-full pl-12 pr-4 py-4 bg-card border-2 border-border rounded-lg text-foreground font-bold focus:border-vcf-orange focus:outline-none transition-colors"
+                    />
+                </div>
+                </div>
+            )}
+                
+            {activeTab === "search" && (
+                <div>
+                {searchQuery.trim() === "" ? (
+                    <div className="text-center py-16">
+                    <Search
+                        size={64}
+                        className="mx-auto mb-4 text-muted-foreground"
+                    />
+                    <h3 className="text-2xl font-black mb-2 text-foreground">
+                        Busca usuarios
+                    </h3>
+                    <p className="text-muted-foreground">
+                        Escribe un nombre o usuario para buscar
+                    </p>
+                    </div>
+                ) : searchResults.length === 0 ? (
+                    <div className="text-center py-16">
+                    <Users size={64} className="mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-2xl font-black mb-2 text-foreground">
+                        No se encontraron resultados
+                    </h3>
+                    <p className="text-muted-foreground">
+                        Intenta con otro término de búsqueda
+                    </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {searchResults.map((user) => (
+                        <div
+                        key={user.id}
+                        className="bg-card border-2 border-border rounded-lg p-6 hover:border-vcf-orange transition-all shadow-md hover:shadow-xl"
+                        >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <img
+                                src={user.avatar_url}
+                                alt={user.full_name}
+                                className="w-16 h-16 rounded-full object-cover border-2 border-border"
+                                />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-foreground">
+                                {user.full_name}
+                                </h3>
+                                <div className="flex items-center gap-1 mt-1">
+                                    <MapPin size={12} className="text-vcf-orange" />
+                                    <span className="text-xs text-muted-foreground">
+                                    {user.location}
+                                    </span>
+                                </div>     
+                            </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="bg-muted rounded-lg p-3 text-center">
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                                <Trophy size={16} className="text-vcf-orange" />
+                                <span className="text-xl font-black text-foreground">
+                                {user.points}
+                                </span>
+                            </div>
+                            <div className="text-xs text-muted-foreground font-bold">
+                                Puntos
+                            </div>
+                            </div>
+                            
+                        </div>
+
+                        <button
+                            onClick={() => sendRequest(user.id)}
+                            className="w-full px-4 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all flex items-center justify-center gap-2"
+                        >
+                            <UserPlus size={18} />
+                            AGREGAR AMIGO
+                        </button>
+                        </div>
+                    ))}
+                    </div>
                 )}
-            </div>
+                </div>
+            )}
+
+            {/* Toast Notifications */}
+            {toast && (
+                <Toast
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast(null)}
+                />
+            )}
+        </div>
     );
 }
