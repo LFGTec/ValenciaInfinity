@@ -7,7 +7,7 @@ export function Juego() {
   const [isMuted, setIsMuted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
 
-  const unityGameUrl = "https://subtle-longma-efe73c.netlify.app";
+  const unityGameUrl = "https://strong-froyo-b4166e.netlify.app/";
 
   const handleLoadGame = () => {
     setIsGameLoaded(true);
