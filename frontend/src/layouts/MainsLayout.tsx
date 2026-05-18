@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { 
-  Sun, Moon, Menu, X, User, LogOut, Settings, ChevronDown 
+import {
+  Sun, Moon, Menu, X, User, LogOut, Settings, ChevronDown, Flame
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";
 import valenciaPointsIcon from "../assets/ValenciaPoints.png";
@@ -10,7 +10,7 @@ import valenciaPointsIcon from "../assets/ValenciaPoints.png";
 export default function MainLayout() {
   const { user, isAuthenticated, signOut, isSigningOut } = useAuth();
   const navigate = useNavigate();
-  
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -33,7 +33,7 @@ export default function MainLayout() {
       <header className="bg-black border-b-2 border-vcf-orange sticky top-0 z-50 shadow-md">
         <div className="w-full px-4">
           <div className="flex items-center justify-between py-4">
-            
+
             {/* Logo */}
             <Link to="/home" className="flex items-center gap-3">
               <img src={vcfShield} alt="VCF" className="w-14 h-14 object-contain" />
@@ -65,13 +65,22 @@ export default function MainLayout() {
 
             {/* Acciones Derecha */}
             <div className="flex items-center gap-4 w-[260px] justify-end">
-              
-              {/* Puntos (Solo si está autenticado) */}
+
+              {/* Puntos + Racha (Solo si está autenticado) */}
               {isAuthenticated && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-vcf-orange/10 border border-vcf-orange/30 rounded-lg">
-                  <img src={valenciaPointsIcon} alt="Pts" className="w-6 h-6" />
-                  <span className="text-white font-black">2,340</span>
-                </div>
+                <>
+                  <Link
+                    to="/daily-rewards"
+                    className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
+                  >
+                    <Flame size={16} className="text-orange-400" />
+                    <span className="text-white font-black text-sm">7</span>
+                  </Link>
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-vcf-orange/10 border border-vcf-orange/30 rounded-lg">
+                    <img src={valenciaPointsIcon} alt="Pts" className="w-6 h-6" />
+                    <span className="text-white font-black">2,340</span>
+                  </div>
+                </>
               )}
 
               <button onClick={toggleTheme} className="text-white hover:text-vcf-orange">
@@ -107,18 +116,18 @@ export default function MainLayout() {
                         <div className="px-4 py-3 border-b border-white/5">
                           <p className="text-sm font-bold text-white truncate">{user.full_name ?? user.user_metadata?.full_name}</p>
                           <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                        </div> 
-                        <Link to="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"> 
-                          <User size={16} /> Mi Perfil </Link> 
-                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"> 
-                          <Settings size={16} /> Configuración 
-                        </Link> 
-                        <div className="border-t border-white/5 mt-1"> 
-                          <button onClick={handleLogout} disabled={isSigningOut} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" > 
-                            <LogOut size={16} /> 
-                            {isSigningOut ? "Saliendo..." : "Cerrar Sesión"} 
-                          </button> 
-                        </div> 
+                        </div>
+                        <Link to="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors">
+                          <User size={16} /> Mi Perfil </Link>
+                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors">
+                          <Settings size={16} /> Configuración
+                        </Link>
+                        <div className="border-t border-white/5 mt-1">
+                          <button onClick={handleLogout} disabled={isSigningOut} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" >
+                            <LogOut size={16} />
+                            {isSigningOut ? "Saliendo..." : "Cerrar Sesión"}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -127,7 +136,7 @@ export default function MainLayout() {
                     INICIAR SESIÓN
                   </Link>
                 )}
-                </div>
+              </div>
 
               {/* Mobile Menu Toggle */}
               <button className="lg:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -145,8 +154,8 @@ export default function MainLayout() {
 
       {/* Footer (Simplificado) */}
       <footer className="bg-black border-t border-white/5 py-10 text-center">
-         <img src={vcfShield} alt="VCF" className="w-10 h-10 mx-auto mb-4 opacity-50" />
-         <p className="text-gray-600 text-xs tracking-widest uppercase">© 2026 VALENCIA CF FAN PLATFORM</p>
+        <img src={vcfShield} alt="VCF" className="w-10 h-10 mx-auto mb-4 opacity-50" />
+        <p className="text-gray-600 text-xs tracking-widest uppercase">© 2026 VALENCIA CF FAN PLATFORM</p>
       </footer>
     </div>
   );
