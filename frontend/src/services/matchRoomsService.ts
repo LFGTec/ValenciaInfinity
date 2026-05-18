@@ -157,6 +157,11 @@ export async function deleteRoom(roomId: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function resetMatchLiveState(matchId: string): Promise<void> {
+  const { error } = await supabase.from("match_live_state").delete().eq("match_id", matchId);
+  if (error) throw error;
+}
+
 export function subscribeToRooms(callback: () => void) {
   return supabase
     .channel("match_rooms_changes")
