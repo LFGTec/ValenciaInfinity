@@ -55,24 +55,23 @@ export function useFriends() {
     [users]
   );
 
-  const searchUsers = (
-    query: string
-  ): FriendUser[] => {
-    if (!query.trim()) return [];
+  const searchUsers = (query: string) => {
 
-    return users.filter(
-      (u) =>
-        u.friendship_status === "NONE" &&
-        (
-          u.full_name
-            ?.toLowerCase()
-            .includes(query.toLowerCase()) ||
-          u.username
-            ?.toLowerCase()
-            .includes(query.toLowerCase())
-        )
+  if (!query.trim()) return [];
+
+  return users.filter((user) => {
+
+    const normalizedQuery =
+      query.toLowerCase();
+    
+
+    return (
+      user.full_name
+        ?.toLowerCase()
+        .startsWith(normalizedQuery) 
     );
-  };
+  });
+};
 
   const sendRequest = async (
     receiverId: string

@@ -42,7 +42,7 @@ export function Friends() {
         useState("");
 
     const searchResults =
-        searchUsers(searchQuery);
+        searchUsers(searchQuery).filter((u) => u.friendship_status !== "FRIENDS");
 
     if (loading) {
         return <div>Cargando...</div>;
@@ -198,20 +198,25 @@ export function Friends() {
                                     setSelectedPin(friend.friend_pin || "N/A")
                                 }
                                 className="
-                                    w-full
-                                    px-3
-                                    py-2
-                                    bg-vcf-orange
-                                    text-white
-                                    rounded-lg
-                                    font-bold
-                                    hover:scale-105
-                                    transition-all
-                                    text-sm
-                                "
-                                >
-                                Mostrar PIN
-                                </button>
+                                w-full
+                                px-3
+                                py-2
+                                border-2
+                                border-vcf-orange
+                                text-vcf-orange
+                                bg-white
+                                rounded-lg
+                                font-bold
+                                hover:bg-vcf-orange
+                                hover:text-white
+                                hover:shadow-md
+                                transition-all
+                                duration-200
+                                text-sm
+                            "
+                            >
+                            Mostrar PIN
+                            </button>
                             </div>
 
                             <div className="text-xs text-muted-foreground font-bold">
@@ -222,11 +227,53 @@ export function Friends() {
 
                         <div className="flex flex-col gap-2">
                             <div className="flex gap-2">
-                            <Link to={`/album/${friend.id}`} className="flex-1 px-3 py-2 bg-black text-white rounded-lg font-bold hover:bg-gray-800 transition-all flex items-center justify-center gap-2 text-sm">
+                            <Link to={`/album/${friend.id}`} 
+                            className="
+                                flex-1
+                                px-3
+                                py-2
+                                border-2
+                                border-vcf-orange
+                                text-vcf-orange
+                                bg-white
+                                rounded-lg
+                                font-bold
+                                hover:bg-vcf-orange
+                                hover:text-white
+                                hover:shadow-md
+                                transition-all
+                                duration-200
+                                flex
+                                items-center
+                                justify-center
+                                gap-2
+                                text-sm
+                            ">
                                 <BookOpen size={16} />
                                 Ver Álbum 
                             </Link>
-                            <Link to="/match-rooms" className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm">
+                            <Link to="/match-rooms" 
+                            className="
+                                flex-1
+                                px-3
+                                py-2
+                                border-2
+                                border-vcf-orange
+                                text-vcf-orange
+                                bg-white
+                                rounded-lg
+                                font-bold
+                                hover:bg-vcf-orange
+                                hover:text-white
+                                hover:shadow-md
+                                transition-all
+                                duration-200
+                                flex
+                                items-center
+                                justify-center
+                                gap-2
+                                text-sm
+                            ">
                                 <Video size={16} />
                                 Match Room
                             </Link>
@@ -492,10 +539,13 @@ export function Friends() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                            <div className="bg-muted rounded-lg p-3 text-center">
+                        <div className="flex justify-center mb-4">
+                            <div className="bg-muted rounded-lg p-3 text-center min-w-[140px]">
                             <div className="flex items-center justify-center gap-1 mb-1">
-                                <Trophy size={16} className="text-vcf-orange" />
+                                <Trophy
+                                size={16}
+                                className="text-vcf-orange"
+                                />
                                 <span className="text-xl font-black text-foreground">
                                 {user.points}
                                 </span>
@@ -504,16 +554,40 @@ export function Friends() {
                                 Puntos
                             </div>
                             </div>
-                            
                         </div>
 
-                        <button
-                            onClick={() => sendRequest(user.id)}
-                            className="w-full px-4 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all flex items-center justify-center gap-2"
-                        >
+                        {user.friendship_status === "PENDING_SENT" || user.friendship_status === "PENDING_RECEIVED" ? (
+                            <button
+                            disabled
+                            className="
+                                w-full
+                                px-4
+                                py-3
+                                border-2
+                                border-vcf-orange
+                                text-vcf-orange
+                                bg-white
+                                rounded-lg
+                                font-bold
+                                cursor-not-allowed
+                                flex
+                                items-center
+                                justify-center
+                                gap-2
+                            "
+                            >
                             <UserPlus size={18} />
-                            AGREGAR AMIGO
-                        </button>
+                            SOLICITUD ENVIADA
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => sendRequest(user.id)}
+                                className="w-full px-4 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all flex items-center justify-center gap-2"
+                            >
+                                <UserPlus size={18} />
+                                AGREGAR AMIGO
+                            </button>
+                        )}
                         </div>
                     ))}
                     </div>
