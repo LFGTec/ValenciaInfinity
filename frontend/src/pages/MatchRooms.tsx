@@ -8,6 +8,7 @@ import {
   deleteRoom,
   subscribeToRooms,
   getRoomByInviteCode,
+  getOrCreateMainRoom,
   type RoomDB,
 } from "@/services/matchRoomsService";
 import { RoomCard } from "@/components/features/matchrooms/RoomCard";
@@ -41,6 +42,7 @@ export function MatchRooms() {
 
   const loadRooms = async () => {
     try {
+      getOrCreateMainRoom("sim-vcf-atm-001", "Valencia CF vs Atlético Madrid").catch(() => {});
       const [pub, mine] = await Promise.all([
         getPublicRooms(),
         user ? getMyRooms(user.id) : Promise.resolve([]),

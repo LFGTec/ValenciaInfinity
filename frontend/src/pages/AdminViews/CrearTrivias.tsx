@@ -1,10 +1,12 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Gamepad2,
   TrendingUp,
   FileText,
   Upload,
   X,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 
 import {
@@ -75,7 +77,7 @@ export function CrearTrivias() {
       setNow(Date.now());
 
       const expiredTrivias = trivias.filter(
-        (trivia) => new Date(trivia.expires_at).getTime() <= Date.now()
+        (trivia) => new Date(trivia.expires_at).getTime() <= Date.now(),
       );
 
       if (expiredTrivias.length > 0) {
@@ -83,8 +85,8 @@ export function CrearTrivias() {
 
         setTrivias((prev) =>
           prev.filter(
-            (trivia) => new Date(trivia.expires_at).getTime() > Date.now()
-          )
+            (trivia) => new Date(trivia.expires_at).getTime() > Date.now(),
+          ),
         );
       }
     }, 1000);
@@ -197,7 +199,7 @@ export function CrearTrivias() {
   const handleOptionChange = (
     questionIndex: number,
     optionIndex: number,
-    value: string
+    value: string,
   ) => {
     const newQuestions = [...questions];
     newQuestions[questionIndex].options[optionIndex] = value;
@@ -230,7 +232,7 @@ export function CrearTrivias() {
       }
 
       const hasEmptyQuestion = questions.some(
-        (q) => !q.question.trim() || q.options.some((option) => !option.trim())
+        (q) => !q.question.trim() || q.options.some((option) => !option.trim()),
       );
 
       if (hasEmptyQuestion) {
@@ -296,7 +298,7 @@ export function CrearTrivias() {
         }));
 
         const preguntasCreadas = await createTriviaQuestions(
-          preguntasActualizadas
+          preguntasActualizadas,
         );
 
         if (!preguntasCreadas) {
@@ -331,7 +333,7 @@ export function CrearTrivias() {
         }));
 
         const preguntasCreadas = await createTriviaQuestions(
-          preguntasParaSupabase
+          preguntasParaSupabase,
         );
 
         if (!preguntasCreadas) {
@@ -387,7 +389,7 @@ export function CrearTrivias() {
       }
 
       setTrivias((prev) =>
-        prev.filter((trivia) => trivia.id !== confirmDelete.triviaId)
+        prev.filter((trivia) => trivia.id !== confirmDelete.triviaId),
       );
 
       setToast({
@@ -432,7 +434,7 @@ export function CrearTrivias() {
         question: q.question,
         options: q.options,
         correct_answer: q.correct_answer,
-      }))
+      })),
     );
 
     setView("edit");
@@ -714,11 +716,7 @@ export function CrearTrivias() {
                         name={`correct-${qIndex}`}
                         checked={q.correct_answer === oIndex}
                         onChange={() =>
-                          handleQuestionChange(
-                            qIndex,
-                            "correct_answer",
-                            oIndex
-                          )
+                          handleQuestionChange(qIndex, "correct_answer", oIndex)
                         }
                         className="w-5 h-5 accent-vcf-orange"
                       />
@@ -928,16 +926,16 @@ export function CrearTrivias() {
                   <div className="flex gap-2 ml-6">
                     <button
                       onClick={() => handleEditTrivia(trivia)}
-                      className="px-4 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all"
+                      className="px-4 py-2 bg-gray-400 text-white rounded-lg font-bold hover:bg-gray-500 transition-all"
                     >
-                      EDITAR
+                      <Edit2 size={18} />
                     </button>
 
                     <button
                       onClick={() => handleDeleteTrivia(trivia)}
                       className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all"
                     >
-                      ELIMINAR
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
@@ -950,15 +948,11 @@ export function CrearTrivias() {
       {confirmDelete.open && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-card p-6 rounded-lg border-2 border-border max-w-sm w-full">
-            <h2 className="text-xl font-black mb-4">
-              ¿Eliminar trivia?
-            </h2>
+            <h2 className="text-xl font-black mb-4">¿Eliminar trivia?</h2>
 
             <p className="text-muted-foreground mb-6">
               Estás a punto de eliminar{" "}
-              <span className="font-bold">
-                "{confirmDelete.triviaTitle}"
-              </span>
+              <span className="font-bold">"{confirmDelete.triviaTitle}"</span>
             </p>
 
             <div className="flex gap-3">

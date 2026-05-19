@@ -33,7 +33,7 @@ export function TimelineAdmin() {
 
   const [confirmDelete, setConfirmDelete] = useState<{
     open: boolean;
-eventId: TimelineEvent["id"] | null;
+    eventId: TimelineEvent["id"] | null;
     eventTitle: string | null;
   }>({
     open: false,
@@ -197,7 +197,7 @@ eventId: TimelineEvent["id"] | null;
       await deleteTimelineEvent(confirmDelete.eventId);
 
       setEvents((prev) =>
-        prev.filter((event) => event.id !== confirmDelete.eventId)
+        prev.filter((event) => event.id !== confirmDelete.eventId),
       );
 
       setToast({
@@ -338,9 +338,7 @@ eventId: TimelineEvent["id"] | null;
                         una imagen
                       </p>
 
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG o GIF
-                      </p>
+                      <p className="text-xs text-gray-500">PNG, JPG o GIF</p>
                     </label>
                   </div>
                 ) : (
@@ -402,8 +400,7 @@ eventId: TimelineEvent["id"] | null;
             </p>
 
             <h1 className="mb-2 text-3xl font-black uppercase text-[#111111] md:text-5xl">
-              Gestionar{" "}
-              <span className="text-[#ff6a00]">Línea del Tiempo</span>
+              Gestionar <span className="text-[#ff6a00]">Línea del Tiempo</span>
             </h1>
 
             <p className="text-sm text-gray-500 md:text-base">
@@ -525,7 +522,7 @@ eventId: TimelineEvent["id"] | null;
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditEvent(event)}
-                        className="rounded-lg bg-[#ff6a00] px-4 py-3 font-bold text-white transition hover:bg-[#e05516]"
+                        className="rounded-lg bg-gray-400 px-4 py-3 font-bold text-white transition hover:bg-gray-500"
                         title="Editar"
                       >
                         <Edit2 size={18} />
@@ -564,9 +561,7 @@ eventId: TimelineEvent["id"] | null;
 
             <p className="text-muted-foreground mb-6">
               Estás a punto de eliminar{" "}
-              <span className="font-bold">
-                "{confirmDelete.eventTitle}"
-              </span>
+              <span className="font-bold">"{confirmDelete.eventTitle}"</span>
             </p>
 
             <div className="flex gap-3">

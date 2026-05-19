@@ -2,10 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users, Share2, Check, ArrowLeft,
-  Clock, BarChart2, List, MessageCircle,
+  Clock, BarChart2, List, MessageCircle, RotateCcw,
 } from "lucide-react";
 import type { RoomDB } from "@/services/matchRoomsService";
+import { resetMatchLiveState } from "@/services/matchRoomsService";
 import { useLiveMatch } from "@/hooks/useLiveMatch";
+import { useMatchSimulation } from "@/hooks/useMatchSimulation";
 import { useRoomPresence } from "@/hooks/useRoomPresence";
 import { useRoomChat } from "@/hooks/useRoomChat";
 import { LiveScoreBoard } from "./LiveScoreBoard";
@@ -25,8 +27,23 @@ interface RoomViewProps {
 export function RoomView({ room, user, onLeave }: RoomViewProps) {
   const [showCopied, setShowCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("events");
+  const [simKey, setSimKey] = useState(0);
+  const [resetting, setResetting] = useState(false);
 
-  const { liveMatch } = useLiveMatch(room.match_id);
+  const { liveMatch, loading } = useLiveMatch(room.match_id);
+  useMatchSimulation(room.match_id, liveMatch, loading, simKey);
+
+  const isSimMatch = room.match_id.startsWith("sim-");
+
+  const handleResetSimulation = async () => {
+    setResetting(true);
+    try {
+      await resetMatchLiveState(room.match_id);
+      setSimKey((k) => k + 1);
+    } finally {
+      setResetting(false);
+    }
+  };
   const { count: spectatorCount } = useRoomPresence(room.id, user);
   const { messages, sendEmoji } = useRoomChat(room.id);
 
@@ -119,6 +136,20 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
                 <Users size={11} className="text-muted-foreground" />
                 <span className="font-bold text-xs text-foreground">{spectatorCount}</span>
               </div>
+              {isSimMatch && (
+                <motion.button
+                  onClick={handleResetSimulation}
+                  disabled={resetting}
+                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-muted border border-border text-muted-foreground hover:text-foreground rounded-xl font-bold text-xs disabled:opacity-50"
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  title="Reiniciar simulación"
+                >
+                  <RotateCcw size={13} className={resetting ? "animate-spin" : ""} />
+                  <span className="hidden sm:inline">{resetting ? "..." : "Reiniciar"}</span>
+                </motion.button>
+              )}
               <motion.button
                 onClick={copyInviteLink}
                 className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-vcf-orange text-white rounded-xl font-bold text-xs shadow-md shadow-vcf-orange/20"
