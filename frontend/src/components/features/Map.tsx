@@ -145,7 +145,6 @@ export default function Map({ data  }: Props) {
 
           const container = document.createElement("div")
 
-          // 🔥 IMPORTANTE: render síncrono seguro
           const root = ReactDOM.createRoot(container)
 
           root.render(
