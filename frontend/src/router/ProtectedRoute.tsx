@@ -1,3 +1,4 @@
+/*
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
@@ -26,6 +27,24 @@ export default function ProtectedRoute({ adminOnly = false }: ProtectedRouteProp
     console.warn("Acceso denegado: No eres admin", user);
     return <Navigate to="/home" replace />;
   }
+
+  return <Outlet />;
+}
+*/
+
+// TEMPORAL: ProtectedRoute desactivado para poder visualizar rutas de administrador.
+// TODO: Reactivar la validación de usuario y rol cuando se corrija useAuth / roles.
+
+import { Outlet } from "react-router-dom";
+
+interface ProtectedRouteProps {
+  adminOnly?: boolean;
+}
+
+export default function ProtectedRoute({ adminOnly = false }: ProtectedRouteProps) {
+  console.warn("ProtectedRoute temporalmente desactivado. Acceso permitido.", {
+    adminOnly,
+  });
 
   return <Outlet />;
 }

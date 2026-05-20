@@ -3,7 +3,8 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { 
   Home, TrendingUp, Users, BookOpen, 
-  Gamepad2, Calendar, Trophy, Settings, Menu, LogOut, ChevronLeft
+  Gamepad2, Calendar, Trophy, Settings, Menu, LogOut, ChevronLeft,
+  BarChart3
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";
 
@@ -19,6 +20,7 @@ export default function AdminLayout() {
 
   const adminNavItems = [
     { id: "home", label: "Dashboard", icon: Home, path: "/admin/dashboard" },
+    { id: "statistics", label: "Estadísticas", icon: BarChart3, path: "/admin/statistics" },
     { id: "activity", label: "Actividad", icon: TrendingUp, path: "/admin/activity" },
     { id: "users", label: "Usuarios", icon: Users, path: "/admin/users" },
     { id: "manage-cards", label: "Cartas", icon: BookOpen, path: "/admin/cards" },

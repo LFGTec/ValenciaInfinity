@@ -15,6 +15,9 @@ import {
   type TriviaQuestion,
 } from "../../services/triviasService";
 
+import { addRewardToCurrentUser } from "@/services/rewardsService";
+
+
 export function TriviasQuizzes() {
   const [activeTab, setActiveTab] = useState<"active" | "leaderboard">(
     "active"
@@ -132,21 +135,35 @@ export function TriviasQuizzes() {
     if (selectedAnswer !== null) return;
 
     const currentQ = quizQuestions[currentQuestion];
+    const isCorrect = answerIndex === currentQ.correct_answer;
+    const nextScore = isCorrect ? score + 1 : score;
 
     setSelectedAnswer(answerIndex);
     setShowResult(true);
 
-    if (answerIndex === currentQ.correct_answer) {
-      setScore((prev) => prev + 1);
+    if (isCorrect) {
+      setScore(nextScore);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestion < quizQuestions.length - 1) {
         setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer(null);
         setShowResult(false);
       } else {
         if (selectedTrivia) {
+          const percentage = Math.round(
+            (nextScore / quizQuestions.length) * 100
+          );
+
+          const earnedPoints = Math.round(
+            (percentage / 100) * selectedTrivia.reward
+          );
+
+          await addRewardToCurrentUser({
+            reward: earnedPoints,
+          });
+
           saveCompletedTrivia(selectedTrivia.id);
         }
 
