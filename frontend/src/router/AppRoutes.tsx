@@ -23,6 +23,7 @@ import { TriviasQuizzes } from  "../components/features/TriviasQuizzes"
 import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
+import { Friends } from "@/pages/Friends.tsx";
 
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
 import Album from "@/pages/Album.tsx";
@@ -61,6 +62,7 @@ export default function AppRoutes() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />
           <Route path="/trivias" element={<TriviasQuizzes />} />
+          <Route path="/friends" element={<Friends />} />
         </Route>
       </Route>
 
