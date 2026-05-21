@@ -29,6 +29,15 @@ function getColorByCategory(
   return foundKey ? selectedColors[foundKey] : undefined;
 }
 
+function getSkinColor(selectedColors: Record<string, string>) {
+  return (
+    getColorByCategory(selectedColors, "Cabeza") ||
+    getColorByCategory(selectedColors, "Cara") ||
+    getColorByCategory(selectedColors, "Piel") ||
+    getColorByCategory(selectedColors, "Cuerpo")
+  );
+}
+
 function getAssetPosition(asset: any) {
   return (
     asset?.posicion_item ??
@@ -45,12 +54,30 @@ function canPaintAsset(categoryId: string, asset: any) {
   const category = normalize(categoryId);
   const position = getAssetPosition(asset);
 
-  if (category === "pantalon" || category === "bottom") {
-    return position <= 3;
+  if (
+    category === "ojos" ||
+    category === "eyes" ||
+    category === "rostro" ||
+    category === "face" ||
+    category === "cara"
+  ) {
+    return false;
+  }
+
+  if (category === "lentes" || category === "glasses") {
+    return position === 1 || position === 4;
+  }
+
+  if (category === "sombrero" || category === "hat") {
+    return position === 2;
   }
 
   if (category === "playera" || category === "top") {
-    return position <= 5;
+    return position <= 3;
+  }
+
+  if (category === "pantalon" || category === "bottom") {
+    return position <= 3;
   }
 
   return true;
@@ -83,6 +110,22 @@ function getEffectiveColor(
 
   if (category === "playera" || category === "top") {
     return getColorByCategory(selectedColors, "Playera");
+  }
+
+  if (category === "nariz" || category === "nose") {
+    return getSkinColor(selectedColors) || getColorByCategory(selectedColors, categoryId);
+  }
+
+  if (category === "lentes" || category === "glasses") {
+    return getColorByCategory(selectedColors, "Lentes");
+  }
+
+  if (category === "sombrero" || category === "hat") {
+    return getColorByCategory(selectedColors, "Sombrero");
+  }
+
+  if (category === "zapatos" || category === "shoes") {
+    return getColorByCategory(selectedColors, "Zapatos");
   }
 
   return getColorByCategory(selectedColors, categoryId);
@@ -123,6 +166,7 @@ export function AvatarModel({ selectedAssets, selectedColors }: Props) {
 
   const skeleton = findSkeleton(nodes);
   const assets = Object.entries(selectedAssets ?? {}) as [string, any][];
+  const skinColor = getSkinColor(selectedColors);
 
   useEffect(() => {
     const idle = actions?.Idle;
@@ -136,14 +180,6 @@ export function AvatarModel({ selectedAssets, selectedColors }: Props) {
 
   useEffect(() => {
     if (!group.current) return;
-
-    const skinColor =
-      getColorByCategory(selectedColors, "Cabeza") ||
-      getColorByCategory(selectedColors, "Cara") ||
-      getColorByCategory(selectedColors, "Piel") ||
-      getColorByCategory(selectedColors, "Cuerpo") ||
-      getColorByCategory(selectedColors, "Rostro");
-
     if (!skinColor) return;
 
     group.current.traverse((obj: Object3D) => {
@@ -163,7 +199,9 @@ export function AvatarModel({ selectedAssets, selectedColors }: Props) {
         normalizedMaterialName.includes("body") ||
         normalizedMaterialName.includes("face") ||
         normalizedMaterialName.includes("cuerpo") ||
-        normalizedMaterialName.includes("cara");
+        normalizedMaterialName.includes("cara") ||
+        normalizedMaterialName.includes("head") ||
+        normalizedMaterialName.includes("cabeza");
 
       if (!isSkinPart) return;
 
@@ -175,7 +213,7 @@ export function AvatarModel({ selectedAssets, selectedColors }: Props) {
 
       applyMaterialColor(mesh, skinColor);
     });
-  }, [selectedColors]);
+  }, [skinColor]);
 
   if (!skeleton || !nodes?.mixamorigHips) {
     return null;
@@ -211,7 +249,9 @@ export function AvatarModel({ selectedAssets, selectedColors }: Props) {
 
             return (
               <Suspense
-                key={`${categoryId}-${asset.id}-${assetColor ?? "default"}`}
+                key={`${categoryId}-${asset.id}-${assetColor ?? "default"}-${
+                  skinColor ?? "skin-default"
+                }`}
                 fallback={null}
               >
                 <AvatarAsset
@@ -219,6 +259,7 @@ export function AvatarModel({ selectedAssets, selectedColors }: Props) {
                   skeleton={skeleton}
                   color={assetColor}
                   categoryId={categoryId}
+                  skinColor={skinColor}
                 />
               </Suspense>
             );

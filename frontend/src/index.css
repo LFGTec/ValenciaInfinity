@@ -268,6 +268,10 @@ h3 {
   background-color: #e05516;
 }
 
+.hover\:text-white:hover {
+  color: #ffffff !important;
+}
+
 .hover\:bg-vcf-blue:hover {
   background-color: #005a87;
 }

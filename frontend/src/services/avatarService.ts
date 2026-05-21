@@ -1,48 +1,33 @@
 import { supabase } from "./supabaseClient";
 
-export type AvatarPieza = {
-  id: number;
-  categoria: string;
-  etiqueta_categoria: string | null;
-  posicion_categoria: number | null;
-  posicion_item: number | null;
-  nombre: string;
-  ruta_archivo: string;
-  ruta_thumbnail: string | null;
-  removible: boolean | null;
-  activo: boolean | null;
-};
-
-export type AvatarPaletaColor = {
-  id: number;
-  categoria: string;
-  nombre: string;
-  colores: string[];
-  activo: boolean;
-};
-
 export type AvatarAsset = {
-  id: number;
-  name: string;
-  group: string;
-  url: string;
-  thumbnail: string | null;
-  posicion_item: number;
-  lockedGroups: string[];
+  id: number | string;
+  name?: string;
+  nombre?: string;
+  group?: string;
+  url?: string;
+  model_url?: string;
+  file_url?: string;
+  asset_url?: string;
+  thumbnail?: string;
+  ruta_archivo?: string;
+  ruta_thumbnail?: string;
+  posicion_item?: number;
+  position_item?: number;
+  removable?: boolean;
+  removible?: boolean;
+  activo?: boolean;
 };
 
 export type AvatarCategory = {
   id: string;
-  name: string;
-  label: string;
-  removable: boolean;
-  posicion_categoria: number;
+  name?: string;
+  label?: string;
+  etiqueta_categoria?: string;
+  removable?: boolean;
+  removible?: boolean;
+  posicion_categoria?: number;
   assets: AvatarAsset[];
-  expand: {
-    colorPalette: {
-      colors: string[];
-    };
-  };
 };
 
 function normalize(value?: string) {
@@ -53,16 +38,14 @@ function normalize(value?: string) {
     .trim();
 }
 
-function cleanStoragePath(path: string) {
+function getPublicUrl(path?: string | null) {
   if (!path) return "";
 
-  return path
-    .replace(/^avatar-assets\//, "")
-    .replace(/^\/+/, "");
-}
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
 
-function getAvatarPublicUrl(path: string) {
-  const cleanPath = cleanStoragePath(path);
+  const cleanPath = path.replace(/^avatar-assets\//, "");
 
   const { data } = supabase.storage
     .from("avatar-assets")
@@ -71,181 +54,244 @@ function getAvatarPublicUrl(path: string) {
   return data.publicUrl;
 }
 
+function getColorKeyForSave(categoryId: string) {
+  const category = normalize(categoryId);
+
+  if (
+    category === "cabello" ||
+    category === "cejas" ||
+    category === "barba" ||
+    category === "hair" ||
+    category === "eyebrow" ||
+    category === "eyebrows" ||
+    category === "facialhair"
+  ) {
+    return "Cabello";
+  }
+
+  if (category === "nariz" || category === "nose") {
+    return "Cabeza";
+  }
+
+  if (category === "pantalon" || category === "bottom") {
+    return "Pantalón";
+  }
+
+  if (category === "playera" || category === "top") {
+    return "Playera";
+  }
+
+  if (category === "lentes" || category === "glasses") {
+    return "Lentes";
+  }
+
+  if (category === "sombrero" || category === "hat") {
+    return "Sombrero";
+  }
+
+  if (category === "zapatos" || category === "shoes") {
+    return "Zapatos";
+  }
+
+  return categoryId;
+}
+
+function getColorForCategory(
+  selectedColors: Record<string, string>,
+  categoryId: string
+) {
+  const colorKey = getColorKeyForSave(categoryId);
+
+  return (
+    selectedColors[categoryId] ||
+    selectedColors[colorKey] ||
+    selectedColors[normalize(categoryId)] ||
+    null
+  );
+}
+
 export async function getAvatarPalettes() {
   const { data, error } = await supabase
     .from("AvatarPaletasColor")
     .select("*")
-    .eq("activo", true);
+    .eq("activo", true)
+    .order("id", { ascending: true });
 
   if (error) throw error;
 
-  return data as AvatarPaletaColor[];
+  return data ?? [];
 }
 
 export async function getAvatarCategories(): Promise<AvatarCategory[]> {
-  const { data: piezas, error: piezasError } = await supabase
+  const { data, error } = await supabase
     .from("AvatarPiezas")
     .select("*")
     .eq("activo", true)
     .order("posicion_categoria", { ascending: true })
     .order("posicion_item", { ascending: true });
 
-  if (piezasError) {
-    console.error("Error cargando piezas de avatar:", piezasError);
-    throw piezasError;
-  }
+  if (error) throw error;
 
-  const { data: paletas, error: paletasError } = await supabase
-    .from("AvatarPaletasColor")
-    .select("*")
-    .eq("activo", true);
+  const categoryMap = new Map<string, AvatarCategory>();
 
-  if (paletasError) {
-    console.error("Error cargando paletas de avatar:", paletasError);
-    throw paletasError;
-  }
+  (data ?? []).forEach((piece: any) => {
+    const categoryId = piece.categoria;
 
-  const categoriesMap: Record<string, AvatarCategory> = {};
-
-  (piezas as AvatarPieza[]).forEach((item) => {
-    const categoriaOriginal = item.categoria.trim();
-    const categoriaId = normalize(item.categoria);
-
-    const paleta = (paletas as AvatarPaletaColor[]).find(
-      (p) => normalize(p.categoria) === categoriaId
-    );
-
-    if (!categoriesMap[categoriaId]) {
-      categoriesMap[categoriaId] = {
-        id: categoriaId,
-        name: categoriaOriginal,
-        label: item.etiqueta_categoria ?? categoriaOriginal,
-        removable: item.removible ?? false,
-        posicion_categoria: item.posicion_categoria ?? 999,
+    if (!categoryMap.has(categoryId)) {
+      categoryMap.set(categoryId, {
+        id: categoryId,
+        name: categoryId,
+        label: piece.etiqueta_categoria || categoryId,
+        etiqueta_categoria: piece.etiqueta_categoria || categoryId,
+        removable: piece.removible ?? false,
+        removible: piece.removible ?? false,
+        posicion_categoria: piece.posicion_categoria ?? 999,
         assets: [],
-        expand: {
-          colorPalette: {
-            colors: paleta?.colores ?? [],
-          },
-        },
-      };
+      });
     }
 
-    categoriesMap[categoriaId].assets.push({
-      id: item.id,
-      name: item.nombre,
-      group: categoriaId,
-      posicion_item: item.posicion_item ?? 999,
-      url: getAvatarPublicUrl(item.ruta_archivo),
-      thumbnail: item.ruta_thumbnail
-        ? getAvatarPublicUrl(item.ruta_thumbnail)
-        : null,
-      lockedGroups: [],
+    const category = categoryMap.get(categoryId)!;
+
+    category.assets.push({
+      id: piece.id,
+      name: piece.nombre,
+      nombre: piece.nombre,
+      group: categoryId,
+      url: getPublicUrl(piece.ruta_archivo),
+      model_url: getPublicUrl(piece.ruta_archivo),
+      file_url: getPublicUrl(piece.ruta_archivo),
+      asset_url: getPublicUrl(piece.ruta_archivo),
+      thumbnail: getPublicUrl(piece.ruta_thumbnail),
+      ruta_archivo: piece.ruta_archivo,
+      ruta_thumbnail: piece.ruta_thumbnail,
+      posicion_item: piece.posicion_item,
+      position_item: piece.posicion_item,
+      removable: piece.removible,
+      removible: piece.removible,
+      activo: piece.activo,
     });
   });
 
-  return Object.values(categoriesMap)
-    .sort((a, b) => a.posicion_categoria - b.posicion_categoria)
-    .map((category) => ({
-      ...category,
-      assets: category.assets.sort(
-        (a, b) => a.posicion_item - b.posicion_item
-      ),
-    }));
+  return Array.from(categoryMap.values()).sort(
+    (a, b) => (a.posicion_categoria ?? 999) - (b.posicion_categoria ?? 999)
+  );
 }
 
-export async function getUserAvatar(userId: string) {
+export async function saveFullUserAvatar(
+  selectedAssets: Record<string, any>,
+  selectedColors: Record<string, string>
+) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) throw userError;
+  if (!user) throw new Error("No hay usuario autenticado");
+
+  const { error: deleteError } = await supabase
+    .from("AvatarUsuario")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (deleteError) throw deleteError;
+
+  const rows = Object.entries(selectedAssets)
+    .filter(([, asset]) => asset?.id)
+    .map(([categoryId, asset]) => {
+      return {
+        user_id: user.id,
+        categoria: categoryId,
+        pieza_id: asset.id,
+        color: getColorForCategory(selectedColors, categoryId),
+      };
+    });
+
+  if (rows.length === 0) return;
+
+  const { error: insertError } = await supabase
+    .from("AvatarUsuario")
+    .insert(rows);
+
+  if (insertError) throw insertError;
+}
+
+export async function getUserAvatar() {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) throw userError;
+  if (!user) return [];
+
   const { data, error } = await supabase
     .from("AvatarUsuario")
-    .select("*")
-    .eq("user_id", userId);
+    .select(`
+      id,
+      user_id,
+      categoria,
+      pieza_id,
+      color,
+      AvatarPiezas (
+        id,
+        categoria,
+        etiqueta_categoria,
+        posicion_categoria,
+        posicion_item,
+        nombre,
+        ruta_archivo,
+        ruta_thumbnail,
+        removible,
+        activo
+      )
+    `)
+    .eq("user_id", user.id);
 
-  if (error) {
-    console.error("Error cargando avatar del usuario:", error);
-    throw error;
-  }
+  if (error) throw error;
 
-  return data;
+  return data ?? [];
 }
 
-export async function saveUserAvatarSelection(params: {
-  userId: string;
-  categoria: string;
-  piezaId?: number | null;
-  color?: string | null;
-}) {
-  const { userId, categoria, piezaId, color } = params;
+export function buildSavedAvatarState(savedAvatar: any[]) {
+  const selectedAssets: Record<string, AvatarAsset> = {};
+  const selectedColors: Record<string, string> = {};
 
-  const { data, error } = await supabase.from("AvatarUsuario").upsert(
-    {
-      user_id: userId,
-      categoria,
-      pieza_id: piezaId ?? null,
-      color: color ?? null,
-    },
-    {
-      onConflict: "user_id,categoria",
-    }
-  );
+  savedAvatar.forEach((row: any) => {
+    const piece = Array.isArray(row.AvatarPiezas)
+      ? row.AvatarPiezas[0]
+      : row.AvatarPiezas;
 
-  if (error) {
-    console.error("Error guardando selección de avatar:", error);
-    throw error;
-  }
+    if (!piece) return;
 
-  return data;
-}
-
-export async function saveFullUserAvatar(params: {
-  userId: string;
-  selectedAssets: Record<string, AvatarAsset>;
-  selectedColors: Record<string, string>;
-}) {
-  const { userId, selectedAssets, selectedColors } = params;
-
-  const assetRows = Object.entries(selectedAssets).map(([categoria, asset]) => {
-    const colorKey = Object.keys(selectedColors).find(
-      (key) => normalize(key) === normalize(categoria)
-    );
-
-    return {
-      user_id: userId,
-      categoria,
-      pieza_id: asset.id,
-      color: colorKey ? selectedColors[colorKey] : null,
+    selectedAssets[row.categoria] = {
+      id: piece.id,
+      name: piece.nombre,
+      nombre: piece.nombre,
+      group: row.categoria,
+      url: getPublicUrl(piece.ruta_archivo),
+      model_url: getPublicUrl(piece.ruta_archivo),
+      file_url: getPublicUrl(piece.ruta_archivo),
+      asset_url: getPublicUrl(piece.ruta_archivo),
+      thumbnail: getPublicUrl(piece.ruta_thumbnail),
+      ruta_archivo: piece.ruta_archivo,
+      ruta_thumbnail: piece.ruta_thumbnail,
+      posicion_item: piece.posicion_item,
+      position_item: piece.posicion_item,
+      removable: piece.removible,
+      removible: piece.removible,
+      activo: piece.activo,
     };
+
+    if (row.color) {
+      const colorKey = getColorKeyForSave(row.categoria);
+      selectedColors[row.categoria] = row.color;
+      selectedColors[colorKey] = row.color;
+    }
   });
 
-  const colorRows = Object.entries(selectedColors)
-    .filter(([categoria]) => {
-      return !Object.keys(selectedAssets).some(
-        (assetCategoria) => normalize(assetCategoria) === normalize(categoria)
-      );
-    })
-    .map(([categoria, color]) => ({
-      user_id: userId,
-      categoria,
-      pieza_id: null,
-      color,
-    }));
-
-  const rows = [...assetRows, ...colorRows];
-
-  if (rows.length === 0) {
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from("AvatarUsuario")
-    .upsert(rows, {
-      onConflict: "user_id,categoria",
-    })
-    .select();
-
-  if (error) {
-    console.error("Error guardando avatar completo:", error);
-    throw error;
-  }
-
-  return data;
+  return {
+    selectedAssets,
+    selectedColors,
+  };
 }
