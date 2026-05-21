@@ -6,6 +6,9 @@ import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
 import { getAlbumCardsByUser, getUserPacks, openPack, createUserPack, type Card, type UserPack } from "../../services/cardsService";
 import { PackOpenAnimation } from "./PackOpenAnimation";
+import { useVisitingAlbum } from "@/hooks/useVisitingAlbum";
+import { Star, Trophy } from "lucide-react";
+import { VisitorAlbumHeader } from "../album/visitorAlbum";
 
 type Props = {
   userId?: string;
@@ -14,8 +17,21 @@ type Props = {
 export function CardAlbum({ userId }: Props) {
   // Authentication and user context
   const { user } = useAuth();
-  const targetUserId = userId ?? user?.id;
+  
   const setPage = useSetAtom(pageAtom);
+
+  const targetUserId =
+    userId ?? user?.id;
+
+  const isVisiting =
+    !!userId &&
+    userId !== user?.id;
+
+   const {
+    profile: friend,
+    sendFriendRequest,
+    loadingVisiting,
+  } = useVisitingAlbum(targetUserId);
 
   // Album cards state
   const [cards, setCards] = useState<Card[]>([]);
@@ -179,29 +195,40 @@ export function CardAlbum({ userId }: Props) {
                 {obtainedCards} de {totalCards} cartas coleccionadas ({progress}%)
               </p>
             </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => packs.length > 0 && handleOpenPack(packs[0].id)}
-                disabled={packs.length === 0 || openingPackId !== null}
-                className="flex items-center justify-center gap-2 bg-vcf-orange hover:bg-vcf-orange/90 disabled:bg-gray-400 text-white font-bold px-6 py-3 rounded-lg transition-all disabled:cursor-not-allowed"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
-                </svg>
-                {openingPackId ? "Abriendo..." : `ABRIR SOBRE (${packs.length})`}
-              </button>
-              <button className="flex items-center justify-center gap-2 border-2 border-vcf-orange text-vcf-orange hover:bg-vcf-orange/5 font-bold px-6 py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleBuyPacks}
-                disabled={buyingPacks}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 2l-1.41 1.41L9.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-5.17l1.58-1.59L15 2H9zm0 2h6v3H9V4zm7 12H8v-2h8v2z" />
-                </svg>
-                {buyingPacks ? "Comprando..." : "COMPRAR SOBRES"}
-              </button>
-            </div>
+            
+            {!isVisiting && (
+              <div className="flex gap-3">
+              
+                <button
+                  onClick={() => packs.length > 0 && handleOpenPack(packs[0].id)}
+                  disabled={packs.length === 0 || openingPackId !== null}
+                  className="flex items-center justify-center gap-2 bg-vcf-orange hover:bg-vcf-orange/90 disabled:bg-gray-400 text-white font-bold px-6 py-3 rounded-lg transition-all disabled:cursor-not-allowed"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
+                  </svg>
+                  {openingPackId ? "Abriendo..." : `ABRIR SOBRE (${packs.length})`}
+                </button>
+                <button className="flex items-center justify-center gap-2 border-2 border-vcf-orange text-vcf-orange hover:bg-vcf-orange/5 font-bold px-6 py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleBuyPacks}
+                  disabled={buyingPacks}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 2l-1.41 1.41L9.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-5.17l1.58-1.59L15 2H9zm0 2h6v3H9V4zm7 12H8v-2h8v2z" />
+                  </svg>
+                  {buyingPacks ? "Comprando..." : "COMPRAR SOBRES"}
+                </button>
+              </div>
+            )}
           </div>
+          {isVisiting && friend && (
+
+            <VisitorAlbumHeader
+              friend={friend}
+              onSendFriendRequest={sendFriendRequest}
+            />
+
+          )}
 
           {/* Album progress section */}
           <div className="mb-4 bg-white border-2 border-vcf-orange backdrop-blur-sm rounded-lg px-6 py-4">
@@ -265,40 +292,25 @@ export function CardAlbum({ userId }: Props) {
                       </div>
                     )}
                   </div>
-                ))
-              ) : (
-                <div className="col-span-3 text-center py-8">
-                  <p className="text-gray-500">No tienes sobres sin abrir</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Search and filter section */}
-          <div className="mb-6">
-            <div className="flex flex-col md:flex-row gap-4 mb-4">
-              {/* Search input */}
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  placeholder="Buscar carta por nombre o número..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-6 py-3 pl-12 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-vcf-orange transition-colors"
-                />
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                )}
               </div>
 
-              {/* Filter button */}
-              <button className="flex items-center justify-center gap-2 bg-white border-2 border-gray-200 hover:border-vcf-orange text-black hover:text-vcf-orange font-bold px-6 py-3 rounded-lg transition-all whitespace-nowrap">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 6a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v5.172a1 1 0 01-1.447.894l-2-1A1 1 0 018 17.118v-4.414a1 1 0 00-.293-.707L1.293 8.707A1 1 0 011 8V6z" />
-                </svg>
-                FILTROS
-              </button>
-            </div>
+              {/* Search and filter section */}
+              <div className="mb-6">
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  {/* Search input */}
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder="Buscar carta por nombre o número..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-6 py-3 pl-12 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-vcf-orange transition-colors"
+                    />
+                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
 
             {/* Category filter tabs */}
             <div className="flex overflow-x-auto gap-3 pb-2">
@@ -322,7 +334,10 @@ export function CardAlbum({ userId }: Props) {
                 </button>
               ))}
             </div>
-          </div>
+          )}
+          
+          
+          
         </div>
       </div>
 
