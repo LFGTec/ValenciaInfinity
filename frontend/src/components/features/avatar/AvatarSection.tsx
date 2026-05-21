@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import {
   getAvatarCategories,
   getAvatarPalettes,
+  getUserAvatar,
   saveFullUserAvatar,
+  buildSavedAvatarState,
   type AvatarCategory,
   type AvatarAsset,
 } from "../../../services/avatarService";
 
-import { supabase } from "../../../services/supabaseClient";
 import { AvatarCanvas } from "./AvatarCanvas";
 import { AvatarControls } from "./AvatarControls";
 
@@ -16,6 +17,140 @@ type ToastType = {
   title: string;
   message: string;
 };
+
+function normalize(value?: string) {
+  return (value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim();
+}
+
+function getPaletteColors(colors: any): string[] {
+  if (Array.isArray(colors)) return colors;
+
+  if (typeof colors === "string") {
+    try {
+      const parsed = JSON.parse(colors);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
+function sameCategory(a?: string, b?: string) {
+  const x = normalize(a);
+  const y = normalize(b);
+
+  if (x === y) return true;
+
+  const aliases: Record<string, string[]> = {
+    cabeza: ["cabeza", "head", "cara", "face"],
+    cabello: ["cabello", "hair", "pelo", "cejas", "barba"],
+    pantalon: ["pantalon", "bottom"],
+    playera: ["playera", "top"],
+    lentes: ["lentes", "glasses"],
+    sombrero: ["sombrero", "hat"],
+    zapatos: ["zapatos", "shoes"],
+  };
+
+  return Object.values(aliases).some(
+    (group) => group.includes(x) && group.includes(y)
+  );
+}
+
+function getColorCategory(categoryId: string) {
+  const category = normalize(categoryId);
+
+  if (
+    category === "cabello" ||
+    category === "cejas" ||
+    category === "barba" ||
+    category === "hair" ||
+    category === "eyebrow" ||
+    category === "eyebrows" ||
+    category === "facialhair"
+  ) {
+    return "Cabello";
+  }
+
+  if (category === "nariz" || category === "nose") {
+    return "Cabeza";
+  }
+
+  if (category === "pantalon" || category === "bottom") {
+    return "Pantalón";
+  }
+
+  if (category === "playera" || category === "top") {
+    return "Playera";
+  }
+
+  if (category === "lentes" || category === "glasses") {
+    return "Lentes";
+  }
+
+  if (category === "sombrero" || category === "hat") {
+    return "Sombrero";
+  }
+
+  if (category === "zapatos" || category === "shoes") {
+    return "Zapatos";
+  }
+
+  return categoryId;
+}
+
+function buildInitialAssets(categories: AvatarCategory[]) {
+  const initialAssets: Record<string, AvatarAsset> = {};
+
+  categories.forEach((cat) => {
+    if (cat.assets.length > 0 && !cat.removable && !cat.removible) {
+      initialAssets[cat.id] = cat.assets[0];
+    }
+  });
+
+  return initialAssets;
+}
+
+function buildInitialColors(palettes: any[]) {
+  const initialColors: Record<string, string> = {};
+
+  palettes.forEach((palette: any) => {
+    const colors = getPaletteColors(palette?.colores);
+
+    if (palette?.categoria && colors.length > 0) {
+      initialColors[palette.categoria] = colors[0];
+    }
+  });
+
+  return initialColors;
+}
+
+function getRandomColorForCategory(categoryId: string, palettes: any[]) {
+  const colorCategory = getColorCategory(categoryId);
+
+  const palette = palettes.find((p) => {
+    return (
+      sameCategory(p?.categoria, colorCategory) ||
+      sameCategory(p?.nombre, colorCategory)
+    );
+  });
+
+  const colors = getPaletteColors(palette?.colores);
+
+  if (colors.length === 0) return null;
+
+  const randomColorIndex = Math.floor(Math.random() * colors.length);
+
+  return {
+    key: palette?.categoria || colorCategory,
+    color: colors[randomColorIndex],
+  };
+}
 
 export function AvatarSection() {
   const [categories, setCategories] = useState<AvatarCategory[]>([]);
@@ -41,31 +176,28 @@ export function AvatarSection() {
       try {
         const data = await getAvatarCategories();
         const paletteData = await getAvatarPalettes();
+        const savedAvatar = await getUserAvatar();
 
         setCategories(data);
         setPalettes(paletteData);
 
         if (data.length > 0) {
           setSelectedCategory(data[0].id);
-
-          const initialAssets: Record<string, AvatarAsset> = {};
-          const initialColors: Record<string, string> = {};
-
-          data.forEach((cat) => {
-            if (cat.assets.length > 0 && !cat.removable) {
-              initialAssets[cat.id] = cat.assets[0];
-            }
-          });
-
-          paletteData.forEach((palette: any) => {
-            if (palette?.categoria && palette?.colores?.length > 0) {
-              initialColors[palette.categoria] = palette.colores[0];
-            }
-          });
-
-          setSelectedAssets(initialAssets);
-          setSelectedColors(initialColors);
         }
+
+        const defaultAssets = buildInitialAssets(data);
+        const defaultColors = buildInitialColors(paletteData);
+        const savedState = buildSavedAvatarState(savedAvatar);
+
+        setSelectedAssets({
+          ...defaultAssets,
+          ...savedState.selectedAssets,
+        });
+
+        setSelectedColors({
+          ...defaultColors,
+          ...savedState.selectedColors,
+        });
       } catch (error) {
         console.error("Error cargando avatar:", error);
 
@@ -110,7 +242,7 @@ export function AvatarSection() {
 
     categories.forEach((cat) => {
       if (cat.assets.length > 0) {
-        const shouldRemove = cat.removable && Math.random() < 0.35;
+        const shouldRemove = (cat.removable || cat.removible) && Math.random() < 0.35;
 
         if (!shouldRemove) {
           const randomIndex = Math.floor(Math.random() * cat.assets.length);
@@ -118,13 +250,10 @@ export function AvatarSection() {
         }
       }
 
-      const palette = palettes.find(
-        (p) => p.categoria?.toLowerCase() === cat.id?.toLowerCase()
-      );
+      const randomColor = getRandomColorForCategory(cat.id, palettes);
 
-      if (palette?.colores?.length > 0) {
-        const randomColorIndex = Math.floor(Math.random() * palette.colores.length);
-        randomColors[palette.categoria] = palette.colores[randomColorIndex];
+      if (randomColor) {
+        randomColors[randomColor.key] = randomColor.color;
       }
     });
 
@@ -136,28 +265,7 @@ export function AvatarSection() {
     try {
       setSaving(true);
 
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      if (error || !user) {
-        console.error("No hay usuario logeado:", error);
-
-        showToast({
-          type: "error",
-          title: "ERROR",
-          message: "Necesitas iniciar sesión para guardar tu avatar",
-        });
-
-        return;
-      }
-
-      await saveFullUserAvatar({
-        userId: user.id,
-        selectedAssets,
-        selectedColors,
-      });
+      await saveFullUserAvatar(selectedAssets, selectedColors);
 
       showToast({
         type: "success",

@@ -12,6 +12,7 @@ type Props = {
   skeleton: Skeleton | null;
   color?: string;
   categoryId?: string;
+  skinColor?: string;
 };
 
 function normalize(value?: string) {
@@ -50,6 +51,8 @@ function isSkinMaterial(mat: any) {
     name.includes("cuerpo") ||
     name.includes("face") ||
     name.includes("cara") ||
+    name.includes("head") ||
+    name.includes("cabeza") ||
     name.includes("hand") ||
     name.includes("hands") ||
     name.includes("mano") ||
@@ -57,27 +60,182 @@ function isSkinMaterial(mat: any) {
     name.includes("arm") ||
     name.includes("arms") ||
     name.includes("brazo") ||
-    name.includes("brazos")
+    name.includes("brazos") ||
+    name.includes("leg") ||
+    name.includes("legs") ||
+    name.includes("pierna") ||
+    name.includes("piernas") ||
+    name.includes("neck") ||
+    name.includes("cuello") ||
+    name.includes("ear") ||
+    name.includes("ears") ||
+    name.includes("oreja") ||
+    name.includes("orejas")
+  );
+}
+
+function isHairMaterial(mat: any) {
+  const name = normalize(mat?.name);
+
+  return (
+    name.includes("hair") ||
+    name.includes("cabello") ||
+    name.includes("pelo") ||
+    name.includes("ceja") ||
+    name.includes("cejas") ||
+    name.includes("eyebrow") ||
+    name.includes("eyebrows") ||
+    name.includes("barba") ||
+    name.includes("beard") ||
+    name.includes("facialhair") ||
+    name.includes("mustache") ||
+    name.includes("moustache") ||
+    name.includes("bigote")
+  );
+}
+
+function isEyeMaterial(mat: any) {
+  const name = normalize(mat?.name);
+
+  return (
+    name.includes("eye") ||
+    name.includes("eyes") ||
+    name.includes("ojo") ||
+    name.includes("ojos") ||
+    name.includes("iris") ||
+    name.includes("pupil") ||
+    name.includes("pupila")
+  );
+}
+
+function isMouthMaterial(mat: any) {
+  const name = normalize(mat?.name);
+
+  return (
+    name.includes("mouth") ||
+    name.includes("boca") ||
+    name.includes("teeth") ||
+    name.includes("tooth") ||
+    name.includes("diente") ||
+    name.includes("dientes") ||
+    name.includes("tongue") ||
+    name.includes("lengua") ||
+    name.includes("labio") ||
+    name.includes("labios")
+  );
+}
+
+function isGlassMaterial(mat: any) {
+  const name = normalize(mat?.name);
+
+  return (
+    name.includes("glass") ||
+    name.includes("cristal") ||
+    name.includes("lens") ||
+    name.includes("lente")
+  );
+}
+
+function isClothingCategory(categoryId?: string) {
+  const category = normalize(categoryId);
+
+  return (
+    category === "playera" ||
+    category === "top" ||
+    category === "pantalon" ||
+    category === "bottom"
+  );
+}
+
+function isNeverPaintCategory(categoryId?: string) {
+  const category = normalize(categoryId);
+
+  return (
+    category === "ojos" ||
+    category === "eyes" ||
+    category === "rostro" ||
+    category === "face" ||
+    category === "cara"
   );
 }
 
 function shouldSkipMaterialForCategory(categoryId: string | undefined, mat: any) {
   const category = normalize(categoryId);
 
-  const isClothing =
+  const isClothingLike =
     category === "playera" ||
     category === "top" ||
     category === "pantalon" ||
-    category === "bottom";
+    category === "bottom" ||
+    category === "sombrero" ||
+    category === "hat" ||
+    category === "zapatos" ||
+    category === "shoes";
 
-  return isClothing && isSkinMaterial(mat);
+  const isGlasses = category === "lentes" || category === "glasses";
+
+  const isSkinLikeCategory =
+    category === "nariz" ||
+    category === "nose" ||
+    category === "cabeza" ||
+    category === "head" ||
+    category === "piel" ||
+    category === "cuerpo" ||
+    category === "body";
+
+ 
+  if (isNeverPaintCategory(categoryId)) {
+    return true;
+  }
+
+  
+  if (isClothingLike) {
+    return isHairMaterial(mat) || isEyeMaterial(mat) || isMouthMaterial(mat);
+  }
+
+  
+  if (isGlasses) {
+    return isGlassMaterial(mat);
+  }
+
+  
+  if (isSkinLikeCategory) {
+    return isHairMaterial(mat) || isEyeMaterial(mat) || isMouthMaterial(mat);
+  }
+
+  return false;
 }
 
-function paintMaterial(material: any, color: string, categoryId?: string) {
+function paintMaterial(
+  material: any,
+  color: string | undefined,
+  categoryId?: string,
+  skinColor?: string
+) {
   const materials = Array.isArray(material) ? material : [material];
+  const isClothing = isClothingCategory(categoryId);
 
   materials.forEach((mat: MeshStandardMaterial | any) => {
     if (!mat) return;
+
+    
+    if (isNeverPaintCategory(categoryId)) {
+      return;
+    }
+
+  
+    if (isClothing && isSkinMaterial(mat)) {
+      if (skinColor && mat.color) {
+        mat.color.set(skinColor);
+        mat.needsUpdate = true;
+      }
+      return;
+    }
+
+    
+    if (!color) {
+      return;
+    }
 
     if (shouldSkipMaterialForCategory(categoryId, mat)) {
       return;
@@ -85,10 +243,6 @@ function paintMaterial(material: any, color: string, categoryId?: string) {
 
     if (mat.color) {
       mat.color.set(color);
-    }
-
-    if ("map" in mat) {
-      mat.map = null;
     }
 
     if ("vertexColors" in mat) {
@@ -99,7 +253,13 @@ function paintMaterial(material: any, color: string, categoryId?: string) {
   });
 }
 
-export function AvatarAsset({ url, skeleton, color, categoryId }: Props) {
+export function AvatarAsset({
+  url,
+  skeleton,
+  color,
+  categoryId,
+  skinColor,
+}: Props) {
   const gltf = useGLTF(url) as any;
 
   const scene = useMemo(() => {
@@ -124,7 +284,7 @@ export function AvatarAsset({ url, skeleton, color, categoryId }: Props) {
   }, [gltf.scene, skeleton]);
 
   useEffect(() => {
-    if (!color) return;
+    if (!color && !skinColor) return;
 
     scene.traverse((obj: Object3D) => {
       const mesh = obj as any;
@@ -132,9 +292,9 @@ export function AvatarAsset({ url, skeleton, color, categoryId }: Props) {
       if (!isPaintableMesh(obj)) return;
       if (!mesh.material) return;
 
-      paintMaterial(mesh.material, color, categoryId);
+      paintMaterial(mesh.material, color, categoryId, skinColor);
     });
-  }, [scene, color, categoryId]);
+  }, [scene, color, categoryId, skinColor]);
 
   return <primitive object={scene} />;
 }
