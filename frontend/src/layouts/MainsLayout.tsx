@@ -64,32 +64,34 @@ export default function MainLayout() {
             </nav>
 
             {/* Acciones Derecha */}
-            <div className="flex items-center gap-4 w-[260px] justify-end">
+            <div className="flex items-center gap-2 flex-shrink-0 justify-end">
 
               {/* Puntos + Racha (Solo si está autenticado) */}
               {isAuthenticated && (
                 <>
                   <Link
                     to="/daily-rewards"
-                    className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
+                    className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
                   >
-                    <Flame size={16} className="text-orange-400" />
+                    <Flame size={16} className="text-orange-400 flex-shrink-0" />
                     <span className="text-white font-black text-sm">7</span>
                   </Link>
-                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-vcf-orange/10 border border-vcf-orange/30 rounded-lg">
-                    <img src={valenciaPointsIcon} alt="Pts" className="w-6 h-6" />
-                    <span className="text-white font-black">2,340</span>
+                  <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-vcf-orange/10 border border-vcf-orange/30 rounded-lg whitespace-nowrap">
+                    <img src={valenciaPointsIcon} alt="" className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-vcf-orange font-black text-sm tabular-nums">
+                      {(user?.points ?? 0).toLocaleString("es-ES")}
+                    </span>
+                    <span className="text-white/40 text-[10px] font-bold uppercase">pts</span>
                   </div>
                 </>
               )}
 
-              <button onClick={toggleTheme} className="text-white hover:text-vcf-orange">
+              <button onClick={toggleTheme} className="text-white hover:text-vcf-orange flex-shrink-0">
                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
 
-              {/* Perfil / Dropdown */}
-              {/* Perfil / Login (contenedor fijo) */}
-              <div className="w-[120px] flex justify-end relative">
+              {/* Perfil / Login */}
+              <div className="flex justify-end relative flex-shrink-0">
                 {isAuthenticated && user ? (
                   <div className="relative">
                     <button

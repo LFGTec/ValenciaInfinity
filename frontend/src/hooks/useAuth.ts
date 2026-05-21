@@ -33,6 +33,13 @@ export function useAuth() {
     }
   }, [setUser]);
 
+  const updatePoints = useCallback((delta: number) => {
+    if (!user) return;
+    const newPoints = (user.points ?? 0) + delta;
+    setUser({ ...user, points: newPoints });
+    localStorage.setItem(`vcf_pts_${user.id}`, String(newPoints));
+  }, [user, setUser]);
+
   return {
     user,
     loading,
@@ -40,6 +47,7 @@ export function useAuth() {
     isSigningOut,
     isAuthenticated: user !== null,
     signOut,
+    updatePoints,
   };
 }
 

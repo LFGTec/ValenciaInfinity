@@ -14,8 +14,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const profile = await getUserProfile(user.id);
       if (profile) {
+        const cachedPoints = parseInt(localStorage.getItem(`vcf_pts_${user.id}`) ?? "0", 10);
+        const points = Math.max(profile.points ?? 0, cachedPoints);
+        localStorage.setItem(`vcf_pts_${user.id}`, String(points));
         return {
           ...profile,
+          points,
           avatar_url: profile.avatar_url ?? user.user_metadata?.avatar_url,
           user_metadata: user.user_metadata,
         };

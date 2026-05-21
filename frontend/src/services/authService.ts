@@ -8,6 +8,7 @@ export interface User {
   role: string;
   full_name?: string;
   avatar_url?: string;
+  points?: number;
   user_metadata?: {
     full_name?: string;
     avatar_url?: string;
@@ -181,6 +182,7 @@ export async function getUserProfile(userId: string): Promise<User | null> {
       role: data.role,
       full_name: data.full_name,
       avatar_url: data.avatar_url,
+      points: (data.points as number) ?? 0,
       user_metadata: {  },
     };
   } catch (error) {
@@ -368,6 +370,34 @@ export async function updateProfile(
     return { error: null };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Update failed";
+    return { error: message };
+  }
+}
+
+export async function addUserPoints(
+  userId: string,
+  points: number
+): Promise<{ error: string | null }> {
+  try {
+    const { data: profile, error: fetchError } = await supabase
+      .from("profiles")
+      .select("points")
+      .eq("id", userId)
+      .single();
+
+    if (fetchError) return { error: fetchError.message };
+
+    const newPoints = ((profile?.points as number) ?? 0) + points;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ points: newPoints })
+      .eq("id", userId);
+
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to add points";
     return { error: message };
   }
 }
