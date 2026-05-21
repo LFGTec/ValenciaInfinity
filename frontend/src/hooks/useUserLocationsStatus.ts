@@ -45,7 +45,7 @@ export const useUserLocationStatus = (userId?: string) => {
         (payload) => {
           console.log("📡 location status changed:", payload);
 
-          const newRow = payload.new;
+          const newRow = payload.new as { lat?: number; lng?: number; is_visible?: boolean };
 
           if (newRow?.lat && newRow?.lng) {
             setLocationSaved(true);

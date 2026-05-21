@@ -1,13 +1,14 @@
 import {
   Video, BookOpen, Gamepad2,
-  Share2, Globe, ArrowRight, Heart
+  Share2, Globe, ArrowRight,  Heart,
+  Users
 } from 'lucide-react';
 import { NavLink } from "react-router-dom";
 
 import { AvatarSection } from "../components/features/avatar/AvatarSection";
 
 export function FansZonePage() {
-
+  
   return (
     <div className=" mx-auto px-4 py-12 bg-content">
       
@@ -29,7 +30,7 @@ export function FansZonePage() {
           { icon: Gamepad2, title: 'TRIVIAS & QUIZZES', desc: 'Demuestra tus conocimientos', path: '/trivias' },
           { icon: Share2, title: 'INTERCAMBIO', desc: 'Comercia cartas con otros fans', path: '/exchange' },
           { icon: Globe, title: 'MUNDO VIRTUAL', desc: 'Explora y conecta globalmente', path: '/virtual-world' },
-          { icon: Heart, title: 'FAN MOOD TRACKER', desc: 'Vota tu emoción después de cada partido', path: '/mood-tracker' },
+          { icon: Users, title: 'MIS AMIGOS', desc: 'Conecta con otros fanáticos del Valencia CF', path: '/friends' },
         ].map((feature, i) => (
           <NavLink
             key={i}

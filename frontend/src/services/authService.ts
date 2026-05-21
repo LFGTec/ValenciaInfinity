@@ -157,6 +157,11 @@ export async function signInWithGoogle(
 export async function getUserProfile(userId: string): Promise<User | null> {
   try {
     console.log("🔵 [authService] Obteniendo perfil de BD:", userId);
+
+
+    console.log("🌎 SUPABASE URL:", import.meta.env.VITE_SUPABASE_URL);
+    console.log("🧍 USER ID BUSCADO:", userId);
+
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -164,7 +169,7 @@ export async function getUserProfile(userId: string): Promise<User | null> {
       .single();
 
     if (error) {
-      console.error("❌ [authService] Error obteniendo perfil:", error.message);
+      console.error("❌ [authService] Error obteniendo perfil:", error);
       return null;
     }
 

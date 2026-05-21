@@ -1,4 +1,3 @@
-import React from "react";
 import { TimelinePublic } from "./TimelinePublic";
 
 import player1 from "../assets/Jugador1.png";
