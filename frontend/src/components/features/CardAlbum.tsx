@@ -132,7 +132,7 @@ export function CardAlbum({ userId }: Props) {
 
     setBuyingPacks(true);
     try {
-      const newPack = await createUserPack(user.id, "standard");
+      const newPack = await createUserPack(user.id);
 
       if (newPack) {
         // Reload packs list
@@ -261,7 +261,7 @@ export function CardAlbum({ userId }: Props) {
                     ) : (
                       <div className="text-center">
                         <p className="text-4xl">📦</p>
-                        <p className="text-xs font-bold text-gray-600 mt-2">{pack.pack_type}</p>
+                        <p className="text-xs font-bold text-gray-600 mt-2">Sobre</p>
                       </div>
                     )}
                   </div>
@@ -304,10 +304,10 @@ export function CardAlbum({ userId }: Props) {
             <div className="flex overflow-x-auto gap-3 pb-2">
               {[
                 { id: "todas", label: "TODAS", count: cards.length },
-                { id: "jugadores", label: "JUGADORES", count: cards.filter(c => c.tipo === "player").length },
-                { id: "leyendas", label: "LEYENDAS", count: cards.filter(c => c.rareza === "legendary").length },
-                { id: "estadio", label: "ESTADIO", count: cards.filter(c => c.tipo === "stadium").length },
-                { id: "histor", label: "HISTOR", count: cards.filter(c => c.tipo === "historic").length }
+                { id: "jugadores", label: "JUGADORES", count: cards.filter(c => c.type === "jugador").length },
+                { id: "leyendas", label: "LEYENDAS", count: cards.filter(c => c.rarity === "legendaria").length },
+                { id: "estadio", label: "ESTADIO", count: cards.filter(c => c.type === "estadio").length },
+                { id: "aficion", label: "AFICIÓN", count: cards.filter(c => c.type === "aficion").length }
               ].map((category) => (
                 <button
                   key={category.id}

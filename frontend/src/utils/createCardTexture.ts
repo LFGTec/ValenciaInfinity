@@ -147,71 +147,12 @@ function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: numbe
     return;
   }
 
-  const colors = card.rareza ? (RAREZA_COLORS[card.rareza] ?? DEFAULT_COLOR) : DEFAULT_COLOR;
-  const topH = Math.round(CARD_H * 0.45);
-
-  ctx.shadowColor = "rgba(0,0,0,0.2)";
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetX = 1;
-  ctx.shadowOffsetY = 2;
-
+  // White background and border for obtained cards
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.roundRect(x, y, CARD_W, CARD_H, 5);
   ctx.fill();
 
-  ctx.shadowColor = "transparent";
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-
-  // Colored top band (rareza color)
-  ctx.fillStyle = colors.bg;
-  ctx.beginPath();
-  ctx.roundRect(x, y, CARD_W, topH, [5, 5, 0, 0]);
-  ctx.fill();
-
-  // Number — large, centered in top
-  ctx.fillStyle = "rgba(255,255,255,0.95)";
-  ctx.font = `bold ${Math.round(CARD_H * 0.28)}px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(String(card.numero ?? "-"), x + CARD_W / 2, y + topH / 2);
-
-  // Rareza abbreviation top-left
-  ctx.fillStyle = "rgba(255,255,255,0.6)";
-  ctx.font = `bold ${Math.round(CARD_H * 0.09)}px Arial`;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  ctx.fillText((card.rareza ?? "N/A").slice(0, 3).toUpperCase(), x + 4, y + 3);
-
-  // Separator line
-  ctx.strokeStyle = colors.bg;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(x + 4, y + topH);
-  ctx.lineTo(x + CARD_W - 4, y + topH);
-  ctx.stroke();
-
-  // Player name (last word)
-  const fullName = (card.nombre ?? "").trim().toUpperCase();
-  ctx.fillStyle = "#111111";
-  ctx.font = `bold ${Math.round(CARD_H * 0.11)}px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  const nameY = y + topH + (CARD_H - topH) * 0.35;
-  ctx.fillText(fullName, x + CARD_W / 2, nameY, CARD_W - 6);
-
-  // Tipo
-  ctx.fillStyle = colors.bg;
-  ctx.font = `${Math.round(CARD_H * 0.085)}px Arial`;
-  ctx.fillText((card.tipo ?? "DESCONOCIDO").toUpperCase(), x + CARD_W / 2, nameY + Math.round(CARD_H * 0.15), CARD_W - 6);
-
-  // Temporada
-  ctx.fillStyle = "#888";
-  ctx.font = `${Math.round(CARD_H * 0.075)}px Arial`;
-
-  // Border
   ctx.strokeStyle = "#e0e0e0";
   ctx.lineWidth = 0.8;
   ctx.beginPath();
@@ -274,38 +215,31 @@ export function createCardTexture(cards: Card[], title = "VALENCIA CF"): CanvasT
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
-      // Draw the image into the lower portion of the card (below the colored band)
-      const topH = Math.round(CARD_H * 0.45);
-      const areaX = x + 6;
-      const areaY = y + topH + 6;
-      const areaW = CARD_W - 12;
-      const areaH = CARD_H - topH - 12;
+      // Draw the image to fill the entire card with rounded corners
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, CARD_W, CARD_H, 5);
+      ctx.clip();
 
-      // Cover-fit the image into the area while preserving aspect ratio
+      // Cover-fit the image to fill the card
       const imgRatio = img.width / img.height;
-      const areaRatio = areaW / areaH;
-      let drawW = areaW;
-      let drawH = areaH;
-      let drawX = areaX;
-      let drawY = areaY;
+      const cardRatio = CARD_W / CARD_H;
+      let drawW = CARD_W;
+      let drawH = CARD_H;
+      let drawX = x;
+      let drawY = y;
 
-      if (imgRatio > areaRatio) {
+      if (imgRatio > cardRatio) {
         // image too wide -> fit by height and crop sides
-        drawH = areaH;
-        drawW = Math.round(areaH * imgRatio);
-        drawX = areaX - Math.round((drawW - areaW) / 2);
+        drawH = CARD_H;
+        drawW = Math.round(CARD_H * imgRatio);
+        drawX = x - Math.round((drawW - CARD_W) / 2);
       } else {
         // image too tall -> fit by width and crop top/bottom
-        drawW = areaW;
-        drawH = Math.round(areaW / imgRatio);
-        drawY = areaY - Math.round((drawH - areaH) / 2);
+        drawW = CARD_W;
+        drawH = Math.round(CARD_W / imgRatio);
+        drawY = y - Math.round((drawH - CARD_H) / 2);
       }
-
-      ctx.save();
-      // Clip to card inner rect to avoid overflow
-      ctx.beginPath();
-      ctx.roundRect(x, y + topH, CARD_W, CARD_H - topH, 4);
-      ctx.clip();
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
       ctx.restore();

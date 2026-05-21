@@ -54,19 +54,17 @@ export function ManageCards(){
     ];
 
     const [formData, setForm] = useState({
-    nombre: "",
-    tipo: "",
-    temporada: "" as any,
-    numero: "" as any,
-    category_id: "", 
+    name: "",
+    type: "",
+    season: "" as any,
+    category_id: "",
     });
 
     const resetForm = () => {
     setForm({
-        nombre: "",
-        tipo: "",
-        temporada: "",
-        numero: "",
+        name: "",
+        type: "",
+        season: "",
         category_id: "",
     });
 
@@ -79,7 +77,7 @@ export function ManageCards(){
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nombre.trim()) {
+    if (!formData.name.trim()) {
         setToast({ message: "Nombre obligatorio", type: "error" });
         return;
     }
@@ -88,10 +86,9 @@ export function ManageCards(){
         if (editingCard) {
         await editCard(
           editingCard.id,
-          formData.nombre,
-          formData.tipo,
-          Number(formData.temporada),
-          Number(formData.numero),
+          formData.name,
+          formData.type,
+          Number(formData.season),
           formData.category_id,
           editingCard.image_url || null,
           fileUpload || undefined
@@ -103,10 +100,9 @@ export function ManageCards(){
         });
         } else {
         await createCard(
-            formData.nombre,
-            formData.tipo,
-            Number(formData.temporada),
-            Number(formData.numero),
+            formData.name,
+            formData.type,
+            Number(formData.season),
             formData.category_id,
             fileUpload || undefined
         );
@@ -133,14 +129,13 @@ export function ManageCards(){
     setEditingCard(card);
 
     setForm({
-        nombre: card.nombre,
-        tipo: card.tipo || "",
-        temporada: card.temporada || "",
-        numero: card.numero || "",
+        name: card.name,
+        type: card.type || "",
+        season: card.season || "",
         category_id: card.category_id,
     });
 
-    setImagePreview(card.image_url || null); 
+    setImagePreview(card.image_url || null);
     setFile(null);
 
     setShowForm(true);
@@ -178,7 +173,7 @@ export function ManageCards(){
         filterCategory === "ALL" ||
         card.category_id === filterCategory;
 
-    const matchesSearch = card.nombre
+    const matchesSearch = card.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
@@ -276,18 +271,14 @@ export function ManageCards(){
 
                         {/* Info */}
                         <div className="p-4">
-                            <h3 className="font-black text-lg">{card.nombre}</h3>
+                            <h3 className="font-black text-lg">{card.name}</h3>
 
                             <p className="text-sm text-muted-foreground mb-1">
-                                <span className="font-bold">Tipo:</span> {card.tipo}
-                            </p>
-
-                            <p className="text-sm text-muted-foreground mb-1">
-                                <span className="font-bold">Temporada:</span> {card.temporada}
+                                <span className="font-bold">Tipo:</span> {card.type}
                             </p>
 
                             <p className="text-sm text-muted-foreground mb-3">
-                                <span className="font-bold">Número:</span> {card.numero}
+                                <span className="font-bold">Temporada:</span> {card.season}
                             </p>
 
                             {/* Actions */}
@@ -302,7 +293,7 @@ export function ManageCards(){
                                 setConfirmDelete({
                                     open: true,
                                     cardId: card.id,
-                                    cardName: card.nombre,
+                                    cardName: card.name,
                                 })
                                 }
                                 className="px-3 py-2 bg-black border-2 border-black text-white rounded-lg font-bold hover:bg-gray-900 hover:border-gray-900 transition-all flex items-center justify-center"
@@ -359,9 +350,9 @@ export function ManageCards(){
                         <input
                         type="text"
                         required
-                        value={formData.nombre}
+                        value={formData.name}
                         onChange={(e) =>
-                            setForm({ ...formData, nombre: e.target.value })
+                            setForm({ ...formData, name: e.target.value })
                         }
                         placeholder="Ej: Hugo Duro"
                         className="w-full px-4 py-3 bg-muted border-2 border-transparent rounded-lg focus:border-vcf-orange outline-none transition-all text-foreground"
@@ -376,9 +367,9 @@ export function ManageCards(){
                         <input
                         type="text"
                         required
-                        value={formData.tipo}
+                        value={formData.type}
                         onChange={(e) =>
-                            setForm({ ...formData, tipo: e.target.value })
+                            setForm({ ...formData, type: e.target.value })
                         }
                         placeholder="Ej. Jugador"
                         className="w-full px-4 py-3 bg-muted border-2 border-transparent rounded-lg focus:border-vcf-orange outline-none transition-all text-foreground"
@@ -393,30 +384,12 @@ export function ManageCards(){
                         <input
                         type="number"
                         required
-                        value={formData.temporada}
+                        value={formData.season}
                         onChange={(e) => {
                             const val = e.target.value;
-                            setForm({ ...formData, temporada: val === "" ? "" : Number(val) });
+                            setForm({ ...formData, season: val === "" ? "" : Number(val) });
                         }}
                         placeholder="Ej. 2026"
-                        className="w-full px-4 py-3 bg-muted border-2 border-transparent rounded-lg focus:border-vcf-orange outline-none transition-all text-foreground"
-                        />
-                    </div>
-
-                     {/* Card Numero */}
-                    <div>
-                        <label className="block text-sm font-bold text-foreground mb-2">
-                        Numero de la carta*
-                        </label>
-                        <input
-                        type="number"
-                        required
-                        value={formData.numero}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            setForm({ ...formData, numero: val === "" ? "" : Number(val) });
-                        }}
-                        placeholder="Ej. 2"
                         className="w-full px-4 py-3 bg-muted border-2 border-transparent rounded-lg focus:border-vcf-orange outline-none transition-all text-foreground"
                         />
                     </div>

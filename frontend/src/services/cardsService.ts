@@ -12,13 +12,11 @@ export interface Category {
 
 export interface Card {
   id: string;
-  nombre: string;
-  tipo: string | null;
-  temporada: number | null;
-  numero: number | null;
+  name: string;
+  type: string | null;
+  season: number | null;
   image_url?: string;
-  rareza: string
-
+  rarity: string | null;
   category_id: string;
   is_deleted: boolean;
 
@@ -33,8 +31,8 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
   const { data: catalog, error: catalogError } = await supabase
     .from("Cards")
     .select("*")
-    .order("temporada", { ascending: true })
-    .order("numero", { ascending: true });
+    .eq("is_deleted", false)
+    .order("season", { ascending: true });
 
   if (catalogError) {
     console.error("Error al obtener el catalogo de cartas:", catalogError);
@@ -47,7 +45,6 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
     .eq("user_id", userId);
 
   if (userCardsError) {
-    // Si la tabla no existe aun, mantenemos comportamiento seguro para no romper UI.
     console.warn("No se pudo consultar user_cards:", userCardsError.message);
   }
 
@@ -94,18 +91,16 @@ export const getCards = async (): Promise<Card[]> => {
 export interface UserPack {
   id: string;
   user_id: string;
-  pack_type: string;
   created_at: string;
   opened_at: string | null;
 }
 
 export async function addCard(
-  nombre: string,
-  tipo: string,
-  temporada: number,
-  numero: number,
+  name: string,
+  type: string,
+  season: number,
   category_id: string,
-  rareza: string | null, 
+  rarity: string | null,
   file?: File
 ) {
   let image_url = null;
@@ -130,12 +125,11 @@ export async function addCard(
     .from("Cards")
     .insert([
       {
-        nombre,
-        tipo,
-        temporada,
-        numero,
+        name,
+        type,
+        season,
         category_id,
-        rareza, 
+        rarity,
         image_url,
       },
     ])
@@ -161,12 +155,11 @@ export const deleteCard = async (id: string) => {
 
 export const updateCard = async (
   id: string,
-  nombre: string,
-  tipo: string,
-  temporada: number,
-  numero: number,
+  name: string,
+  type: string,
+  season: number,
   category_id: string,
-  rareza: string | null,
+  rarity: string | null,
   existing_image_url: string | null,
   file?: File
 ) => {
@@ -191,12 +184,11 @@ export const updateCard = async (
   const { data, error } = await supabase
     .from("Cards")
     .update({
-      nombre,
-      tipo,
-      temporada,
-      numero,
+      name,
+      type,
+      season,
       category_id,
-      rareza,
+      rarity,
       image_url,
     })
     .eq("id", id)
@@ -236,17 +228,13 @@ export const getUserPacks = async (userId: string): Promise<UserPack[]> => {
   return data as UserPack[];
 };
 
-export const createUserPack = async (
-  userId: string,
-  packType: string = "standard"
-): Promise<UserPack | null> => {
+export const createUserPack = async (userId: string): Promise<UserPack | null> => {
   try {
     const { data, error } = await supabase
       .from("user_packs")
       .insert([
         {
           user_id: userId,
-          pack_type: packType,
         },
       ])
       .select();
@@ -291,7 +279,7 @@ export const openPack = async (packId: string): Promise<Card[] | null> => {
 
     const cardsWithWeights = (allCards as Card[]).map((card) => ({
       ...card,
-      weight: rarityWeights[card.rareza?.toLowerCase() || "comun"] || 1,
+      weight: rarityWeights[card.rarity?.toLowerCase() || "comun"] || 1,
     }));
 
     // Select 5 random cards with weighted distribution

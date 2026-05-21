@@ -7,7 +7,7 @@ export default function Album() {
     const { userId } = useParams();
 
     return (
-                <div className="bg-content">
+       <div className="bg-content">
                 <CardAlbum userId={userId} />
 
                 <section className="mx-auto max-w-5xl px-4 pb-16 pt-2 md:px-8">

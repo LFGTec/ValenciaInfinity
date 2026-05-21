@@ -51,7 +51,6 @@ export default function AppRoutes() {
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/fanzone" element={<FansZonePage />} />
-          {/*Rutas dentro de FAN ZONE*/}
           <Route path="/virtual-world" element={<VirtualWorld />} />
           <Route path="/album" element={<Album />} />
           <Route path="/album/:userId" element={<Album />} />
