@@ -9,6 +9,9 @@ export interface User {
   full_name?: string;
   avatar_url?: string;
   points?: number;
+  current_streak?: number;
+  longest_streak?: number;
+  total_days?: number;
   user_metadata?: {
     full_name?: string;
     avatar_url?: string;

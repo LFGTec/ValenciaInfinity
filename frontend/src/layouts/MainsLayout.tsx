@@ -69,13 +69,15 @@ export default function MainLayout() {
               {/* Puntos + Racha (Solo si está autenticado) */}
               {isAuthenticated && (
                 <>
-                  <Link
-                    to="/daily-rewards"
-                    className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
-                  >
-                    <Flame size={16} className="text-orange-400 flex-shrink-0" />
-                    <span className="text-white font-black text-sm">7</span>
-                  </Link>
+                  {(user?.current_streak ?? 0) > 0 && (
+                    <Link
+                      to="/daily-rewards"
+                      className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
+                    >
+                      <Flame size={16} className="text-orange-400 flex-shrink-0" />
+                      <span className="text-white font-black text-sm">{user?.current_streak}</span>
+                    </Link>
+                  )}
                   <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-vcf-orange/10 border border-vcf-orange/30 rounded-lg whitespace-nowrap">
                     <img src={valenciaPointsIcon} alt="" className="w-5 h-5 flex-shrink-0" />
                     <span className="text-vcf-orange font-black text-sm tabular-nums">
