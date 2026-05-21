@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Users,
   TrendingUp,
@@ -14,22 +14,16 @@ import {
   BarChart3,
   PieChart,
 } from "lucide-react";
+import {
+  getAdminStatsSummary,
+  getMostActiveUsers,
+  getPopularTrivias,
+  type AdminStatsSummary,
+  type ActiveUserStat,
+  type PopularTriviaStat,
+} from "@/services/adminStatisticsService";
 
 type TimeRange = "day" | "week" | "month";
-
-type UserActivity = {
-  userId: string;
-  username: string;
-  triviasCompleted: number;
-  points: number;
-  lastActive: string;
-};
-
-type TriviaStat = {
-  name: string;
-  participants: number;
-  avgScore: number;
-};
 
 type FeatureUsage = {
   name: string;
@@ -40,41 +34,53 @@ type FeatureUsage = {
 
 export function AdminStatistics() {
   const [timeRange, setTimeRange] = useState<TimeRange>("week");
+  const [loading, setLoading] = useState(true);
 
-  const topUsers: UserActivity[] = [
-    {
-      userId: "empty-1",
-      username: "Sin datos registrados",
-      triviasCompleted: 0,
-      points: 0,
-      lastActive: "No disponible",
-    },
-  ];
+  const [summary, setSummary] = useState<AdminStatsSummary>({
+    activeUsers: 0,
+    triviasPlayed: 0,
+    averageScore: 0,
+    completionRate: 0,
+  });
 
-  const triviaStats: TriviaStat[] = [
-    {
-      name: "Sin trivias con participación registrada",
-      participants: 0,
-      avgScore: 0,
-    },
-  ];
+  const [topUsers, setTopUsers] = useState<ActiveUserStat[]>([]);
+  const [triviaStats, setTriviaStats] = useState<PopularTriviaStat[]>([]);
+
+  useEffect(() => {
+    const loadStatistics = async () => {
+      setLoading(true);
+
+      const [summaryData, usersData, triviasData] = await Promise.all([
+        getAdminStatsSummary(),
+        getMostActiveUsers(),
+        getPopularTrivias(),
+      ]);
+
+      setSummary(summaryData);
+      setTopUsers(usersData);
+      setTriviaStats(triviasData);
+      setLoading(false);
+    };
+
+    loadStatistics();
+  }, []);
 
   const engagementStats = {
     day: {
-      activeUsers: 0,
-      triviasPlayed: 0,
+      activeUsers: summary.activeUsers,
+      triviasPlayed: summary.triviasPlayed,
       cardsTraded: 0,
       matchRoomVisits: 0,
     },
     week: {
-      activeUsers: 0,
-      triviasPlayed: 0,
+      activeUsers: summary.activeUsers,
+      triviasPlayed: summary.triviasPlayed,
       cardsTraded: 0,
       matchRoomVisits: 0,
     },
     month: {
-      activeUsers: 0,
-      triviasPlayed: 0,
+      activeUsers: summary.activeUsers,
+      triviasPlayed: summary.triviasPlayed,
       cardsTraded: 0,
       matchRoomVisits: 0,
     },
@@ -91,7 +97,7 @@ export function AdminStatistics() {
     },
     {
       name: "Trivias",
-      value: 0,
+      value: summary.triviasPlayed,
       icon: Gamepad2,
       color: "bg-purple-500",
     },
@@ -103,7 +109,7 @@ export function AdminStatistics() {
     },
     {
       name: "Rankings",
-      value: 0,
+      value: summary.activeUsers,
       icon: Trophy,
       color: "bg-yellow-500",
     },
@@ -133,7 +139,11 @@ export function AdminStatistics() {
             Análisis de actividad y engagement de usuarios
           </p>
 
-          
+          {loading && (
+            <p className="mt-4 text-sm font-bold text-vcf-orange">
+              Cargando estadísticas...
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2 mb-8">
@@ -196,43 +206,52 @@ export function AdminStatistics() {
             </div>
 
             <div className="space-y-3">
-              {topUsers.map((user, index) => (
-                <div
-                  key={user.userId}
-                  className="flex items-center justify-between p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-black bg-gray-500 text-white">
-                      {index + 1}
+              {topUsers.length > 0 ? (
+                topUsers.map((user, index) => (
+                  <div
+                    key={user.userId}
+                    className="flex items-center justify-between p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-black bg-gray-500 text-white">
+                        {index + 1}
+                      </div>
+
+                      <div>
+                        <div className="font-black text-black">
+                          {user.username}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Última actividad: {user.lastActive}
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <div className="font-black text-black">
-                        {user.username}
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <div className="text-xl font-black text-vcf-orange">
+                          {user.triviasCompleted}
+                        </div>
+                        <div className="text-xs text-gray-600">Trivias</div>
                       </div>
-                      <div className="text-xs text-gray-600">
-                        {user.lastActive}
+
+                      <div className="text-center">
+                        <div className="text-xl font-black text-black">
+                          {user.points}
+                        </div>
+                        <div className="text-xs text-gray-600">Puntos</div>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <div className="text-xl font-black text-vcf-orange">
-                        {user.triviasCompleted}
-                      </div>
-                      <div className="text-xs text-gray-600">Trivias</div>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="text-xl font-black text-black">
-                        {user.points}
-                      </div>
-                      <div className="text-xs text-gray-600">Puntos</div>
-                    </div>
+                ))
+              ) : (
+                <div className="p-4 bg-gray-100 rounded-lg">
+                  <div className="font-black text-black">
+                    Sin datos registrados
                   </div>
+                  <div className="text-sm text-gray-600">No disponible</div>
                 </div>
-              ))}
+              )}
             </div>
           </section>
 
@@ -245,42 +264,53 @@ export function AdminStatistics() {
             </div>
 
             <div className="space-y-3">
-              {triviaStats.map((trivia, index) => (
-                <div
-                  key={index}
-                  className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-black text-black">{trivia.name}</div>
+              {triviaStats.length > 0 ? (
+                triviaStats.map((trivia) => (
+                  <div
+                    key={trivia.triviaId}
+                    className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-black text-black">{trivia.title}</div>
 
-                    <div className="flex items-center gap-2">
-                      <Users size={16} className="text-vcf-orange" />
-                      <span className="font-bold text-black">
-                        {trivia.participants}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <Users size={16} className="text-vcf-orange" />
+                        <span className="font-bold text-black">
+                          {trivia.participants}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-600 mb-1">
+                          Promedio de Puntuación
+                        </div>
+
+                        <div className="w-full bg-gray-300 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="h-full bg-vcf-orange"
+                            style={{ width: `${trivia.avgScore}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-xl font-black text-vcf-orange">
+                        {trivia.avgScore}%
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <div className="text-xs text-gray-600 mb-1">
-                        Promedio de Puntuación
-                      </div>
-
-                      <div className="w-full bg-gray-300 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="h-full bg-vcf-orange"
-                          style={{ width: `${trivia.avgScore}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="text-xl font-black text-vcf-orange">
-                      {trivia.avgScore}%
-                    </div>
+                ))
+              ) : (
+                <div className="p-4 bg-gray-100 rounded-lg">
+                  <div className="font-black text-black">
+                    Sin trivias con participación registrada
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Promedio de Puntuación
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           </section>
         </div>
@@ -320,25 +350,25 @@ export function AdminStatistics() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <MetricCard
             icon={Activity}
-            title="Tasa de Retención"
-            value="0%"
-            description="Usuarios que regresan después de 7 días"
+            title="Tasa de Finalización"
+            value={`${summary.completionRate}%`}
+            description="Trivias terminadas por usuarios"
             color="bg-vcf-orange"
           />
 
           <MetricCard
             icon={Calendar}
-            title="Sesiones Diarias"
-            value="0"
-            description="Promedio de sesiones por usuario"
+            title="Promedio de Puntuación"
+            value={`${summary.averageScore}%`}
+            description="Promedio general de respuestas correctas"
             color="bg-purple-600"
           />
 
           <MetricCard
             icon={Eye}
-            title="Tiempo Promedio"
-            value="0m"
-            description="Duración promedio de sesión"
+            title="Participaciones"
+            value={`${summary.triviasPlayed}`}
+            description="Intentos registrados en trivias"
             color="bg-green-600"
           />
         </div>
@@ -379,7 +409,7 @@ function StatCard({ icon: Icon, title, value, color }: StatCardProps) {
       <div className="text-sm font-bold text-gray-600">{title}</div>
 
       <div className="mt-2 text-xs text-green-600 font-bold">
-        Sin datos comparativos
+        Datos actualizados automáticamente
       </div>
     </div>
   );

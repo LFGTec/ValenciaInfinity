@@ -15,8 +15,7 @@ import {
   type TriviaQuestion,
 } from "../../services/triviasService";
 
-import { addRewardToCurrentUser } from "@/services/rewardsService";
-
+import { addTriviaRewardToCurrentUser } from "@/services/rewardsService";
 
 export function TriviasQuizzes() {
   const [activeTab, setActiveTab] = useState<"active" | "leaderboard">(
@@ -160,8 +159,11 @@ export function TriviasQuizzes() {
             (percentage / 100) * selectedTrivia.reward
           );
 
-          await addRewardToCurrentUser({
-            reward: earnedPoints,
+          await addTriviaRewardToCurrentUser({
+            triviaId: selectedTrivia.id,
+            score: nextScore,
+            totalQuestions: quizQuestions.length,
+            earnedPoints,
           });
 
           saveCompletedTrivia(selectedTrivia.id);
