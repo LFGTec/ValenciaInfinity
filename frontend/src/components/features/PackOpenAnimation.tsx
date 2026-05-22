@@ -92,7 +92,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
           {packOpened && <Confetti />}
 
           <motion.div
-            className="relative w-full max-w-3xl px-4"
+            className="relative w-full max-w-3xl px-4 mx-auto"
             initial={{ scale: 0.8, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.8, y: 20 }}
@@ -188,7 +188,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                   initial={{ opacity: 0 }}
                   animate={{ opacity: showCards ? 1 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="grid grid-cols-3 gap-3 px-4 mb-6"
+                  className="grid grid-cols-5 gap-2 px-4 mb-6 max-w-4xl mx-auto"
                 >
                   {cards.map((card, index) => {
                     const rotation = cardRotations[card.id] || { x: 0, y: 0 };

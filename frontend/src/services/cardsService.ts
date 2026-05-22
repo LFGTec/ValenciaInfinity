@@ -28,7 +28,7 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
     .from("user_cards")
     .select(`
       quantity,
-      card:card_id (
+      Cards (
         *,
         categories!fk_category (
           id,
@@ -46,7 +46,7 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
   }
 
   return (data ?? []).reduce<Card[]>((accumulator, row: any) => {
-    const cardData = Array.isArray(row.card) ? row.card[0] : row.card;
+    const cardData = Array.isArray(row.Cards) ? row.Cards[0] : row.Cards;
     const card = cardData as Card | null | undefined;
 
     if (!card || card.is_deleted) {
@@ -55,6 +55,7 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
 
     accumulator.push({
       ...card,
+      rarity: card.categories?.name || card.rarity || null,
       quantity: row.quantity ?? 0,
       obtained: true,
     });
@@ -85,7 +86,10 @@ export const getCards = async (): Promise<Card[]> => {
     return [];
   }
 
-  return data as Card[];
+  return (data ?? []).map((card: any) => ({
+    ...card,
+    rarity: card.categories?.name || card.rarity || null,
+  })) as Card[];
 };
 
 export const getAllCards = async (): Promise<Card[]> => {
