@@ -265,7 +265,7 @@ export function ManageCards(){
                             } text-white px-3 py-1 rounded-full text-xs font-black flex items-center gap-1`}
                             >
                             <CategoryIcon size={14} />
-                            {(card.categories?.label || card.rareza)?.toUpperCase()}
+                            {(card.categories?.label || card.rarity)?.toUpperCase()}
                             </div>
                         </div>
 
