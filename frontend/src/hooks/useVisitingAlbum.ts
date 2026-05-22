@@ -7,7 +7,7 @@ export interface VisitingProfile {
   full_name: string;
   avatar_url?: string;
 
-  points: number;
+  puntos: number;
   level: number;
 
   friendship_status:
