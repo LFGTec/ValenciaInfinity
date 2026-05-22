@@ -178,7 +178,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
-                  className="text-center text-white font-black text-3xl mb-8 drop-shadow-lg"
+                  className="text-center text-white font-black text-2xl mb-6 drop-shadow-lg"
                 >
                   ¡{cards.length} cartas reveladas!
                 </motion.h2>
@@ -188,7 +188,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                   initial={{ opacity: 0 }}
                   animate={{ opacity: showCards ? 1 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="grid grid-cols-2 gap-6 px-4 mb-12"
+                  className="grid grid-cols-3 gap-3 px-4 mb-6"
                 >
                   {cards.map((card, index) => {
                     const rotation = cardRotations[card.id] || { x: 0, y: 0 };

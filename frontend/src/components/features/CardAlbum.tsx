@@ -4,7 +4,7 @@ import { useSetAtom } from "jotai";
 import { pageAtom } from "../UI";
 import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
-import { getAlbumCardsByUser, getUserPacks, openPack, createUserPack, getAllCards, type Card, type UserPack } from "../../services/cardsService";
+import { getAlbumCardsByUser, getUserPacks, openPack, createUserPack, type Card, type UserPack } from "../../services/cardsService";
 import { PackOpenAnimation } from "./PackOpenAnimation";
 import { useVisitingAlbum } from "@/hooks/useVisitingAlbum";
 import { Star, Trophy } from "lucide-react";
@@ -35,7 +35,6 @@ export function CardAlbum({ userId }: Props) {
 
   // Album cards state
   const [cards, setCards] = useState<Card[]>([]);
-  const [allCards, setAllCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,7 +70,6 @@ export function CardAlbum({ userId }: Props) {
 
       try {
         const data = await getAlbumCardsByUser(targetUserId);
-        console.log("Cartas obtenidas (usuario):", data.length, "userId:", targetUserId);
         setCards(data);
       } catch (err) {
         const message = err instanceof Error ? err.message : "No se pudo cargar el album";
@@ -83,22 +81,6 @@ export function CardAlbum({ userId }: Props) {
 
     loadAlbum();
   }, [targetUserId]);
-
-  // Load full catalog of cards to compute progress
-  useEffect(() => {
-    const loadAll = async () => {
-      try {
-        const catalog = await getAllCards();
-        console.log("Total cartas catálogo:", catalog.length);
-        setAllCards(catalog);
-      } catch (err) {
-        console.error("Error loading full card catalog:", err);
-        setAllCards([]);
-      }
-    };
-
-    loadAll();
-  }, []);
 
   // Load user's unopened packs
   useEffect(() => {
@@ -124,8 +106,11 @@ export function CardAlbum({ userId }: Props) {
   }, [user?.id]);
 
   // Calculate album progress metrics
-  const totalCards = allCards.length;
-  const obtainedCards = cards.length;
+  const totalCards = cards.length;
+  const obtainedCards = useMemo(
+    () => cards.filter((card) => card.obtained).length,
+    [cards]
+  );
   const missingCards = Math.max(totalCards - obtainedCards, 0);
   const progress = totalCards > 0 ? Math.round((obtainedCards / totalCards) * 100) : 0;
 
@@ -263,15 +248,10 @@ export function CardAlbum({ userId }: Props) {
               <p className="text-2xl font-black text-vcf-orange">{progress}%</p>
             </div>
             <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
-              <div className="relative w-full h-4 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
-                  style={{ width: `${progress}%`, backgroundColor: "#FF6F1E" }}
-                />
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xs font-black text-white pointer-events-none">
-                  {progress}%
-                </div>
-              </div>
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-vcf-orange to-vcf-yellow transition-all duration-700 ease-out"
+                style={{ width: `${progress}%` }}
+              />
             </div>
             <div className="grid grid-cols-4 gap-3">
               <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
