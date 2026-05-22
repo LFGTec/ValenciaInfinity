@@ -315,17 +315,16 @@ export function TriviasQuizzes() {
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
                   disabled={selectedAnswer !== null}
-                  className={`w-full p-6 text-left rounded-lg border-2 font-bold transition-all ${
-                    selectedAnswer === null
-                      ? "border-border bg-card hover:border-vcf-orange hover:bg-muted text-foreground"
-                      : selectedAnswer === index
-                        ? index === currentQ.correct_answer
-                          ? "border-green-500 bg-green-100 text-black"
-                          : "border-red-500 bg-red-100 text-black"
-                        : index === currentQ.correct_answer
-                          ? "border-green-500 bg-green-100 text-black"
-                          : "border-border bg-muted text-muted-foreground"
-                  }`}
+                  className={`w-full p-6 text-left rounded-lg border-2 font-bold transition-all ${selectedAnswer === null
+                    ? "border-border bg-card hover:border-vcf-orange hover:bg-muted text-foreground"
+                    : selectedAnswer === index
+                      ? index === currentQ.correct_answer
+                        ? "border-green-500 bg-green-100 text-black"
+                        : "border-red-500 bg-red-100 text-black"
+                      : index === currentQ.correct_answer
+                        ? "border-green-500 bg-green-100 text-black"
+                        : "border-border bg-muted text-muted-foreground"
+                    }`}
                 >
                   <div className="flex items-center justify-between gap-4">
                     <span>{option}</span>
@@ -371,22 +370,20 @@ export function TriviasQuizzes() {
       <div className="flex gap-2 mb-8 border-b-2 border-border">
         <button
           onClick={() => setActiveTab("active")}
-          className={`px-6 py-3 font-black transition-all text-base ${
-            activeTab === "active"
-              ? "border-b-4 border-vcf-orange text-vcf-orange"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          className={`px-6 py-3 font-black transition-all text-base ${activeTab === "active"
+            ? "border-b-4 border-vcf-orange text-vcf-orange"
+            : "text-muted-foreground hover:text-foreground"
+            }`}
         >
           DESAFÍOS ACTIVOS
         </button>
 
         <button
           onClick={() => setActiveTab("leaderboard")}
-          className={`px-6 py-3 font-black transition-all text-base ${
-            activeTab === "leaderboard"
-              ? "border-b-4 border-vcf-orange text-vcf-orange"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          className={`px-6 py-3 font-black transition-all text-base ${activeTab === "leaderboard"
+            ? "border-b-4 border-vcf-orange text-vcf-orange"
+            : "text-muted-foreground hover:text-foreground"
+            }`}
         >
           CLASIFICACIÓN
         </button>
@@ -413,18 +410,16 @@ export function TriviasQuizzes() {
               return (
                 <div
                   key={trivia.id}
-                  className={`bg-card border-2 rounded-xl p-8 transition-all shadow-md ${
-                    isCompleted
-                      ? "border-green-500 opacity-80"
-                      : "border-border hover:border-vcf-orange hover:shadow-lg"
-                  }`}
+                  className={`bg-card border-2 rounded-xl p-8 transition-all shadow-md ${isCompleted
+                    ? "border-green-500 opacity-80"
+                    : "border-border hover:border-vcf-orange hover:shadow-lg"
+                    }`}
                 >
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-md ${
-                          isCompleted ? "bg-green-500" : "bg-vcf-orange"
-                        }`}
+                        className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-md ${isCompleted ? "bg-green-500" : "bg-vcf-orange"
+                          }`}
                       >
                         {isCompleted ? (
                           <CheckCircle size={24} className="text-white" />
@@ -512,7 +507,7 @@ export function TriviasQuizzes() {
           </h2>
 
           <p className="text-muted-foreground font-bold">
-            Aquí después puedes conectar tu ranking real.
+
           </p>
         </div>
       )}
