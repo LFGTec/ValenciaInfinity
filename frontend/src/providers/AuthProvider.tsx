@@ -5,6 +5,7 @@ import { finishLoadingAtom } from "../stores/authStore";
 import type { User } from "../services/authService";
 import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { getUserProfile } from "../services/authService";
+import { checkAndUpdateStreak } from "../services/streakService";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const finishLoading = useSetAtom(finishLoadingAtom);
@@ -40,7 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const applySession = async (session: Session | null) => {
       const callId = ++latestCallId;
-      const mappedUser = await mapUser(session?.user ?? null);
+      let mappedUser = await mapUser(session?.user ?? null);
+      if (mappedUser?.id) {
+        const streak = checkAndUpdateStreak(mappedUser.id);
+        mappedUser = { ...mappedUser, ...streak };
+      }
       if (mounted && callId === latestCallId) {
         finishLoading(mappedUser);
       }

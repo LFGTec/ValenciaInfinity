@@ -8,6 +8,10 @@ export interface User {
   role: string;
   full_name?: string;
   avatar_url?: string;
+  puntos?: number;
+  current_streak?: number;
+  longest_streak?: number;
+  total_days?: number;
   user_metadata?: {
     full_name?: string;
     avatar_url?: string;
@@ -181,6 +185,7 @@ export async function getUserProfile(userId: string): Promise<User | null> {
       role: data.role,
       full_name: data.full_name,
       avatar_url: data.avatar_url,
+      puntos: (data.puntos as number) ?? 0,
       user_metadata: {  },
     };
   } catch (error) {
@@ -360,7 +365,7 @@ export async function requestPasswordReset(
 
 export async function updateProfile(
   userId: string,
-  updates: { full_name?: string; avatar_url?: string }
+  updates: { full_name?: string; avatar_url?: string; puntos?: number }
 ): Promise<{ error: string | null }> {
   try {
     const { error } = await supabase.from("profiles").update(updates).eq("id", userId);
@@ -368,6 +373,45 @@ export async function updateProfile(
     return { error: null };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Update failed";
+    return { error: message };
+  }
+}
+
+export async function addUserPoints(
+  userId: string,
+  points: number
+): Promise<{ error: string | null }> {
+  try {
+    const { data: profile, error: fetchError } = await supabase
+      .from("profiles")
+      .select("puntos")
+      .eq("id", userId)
+      .single();
+
+    if (fetchError) {
+      console.error("❌ [addUserPoints] Error leyendo puntos:", fetchError.message);
+      return { error: fetchError.message };
+    }
+
+    const newPoints = ((profile?.puntos as number) ?? 0) + points;
+
+    const { data: updated, error } = await supabase
+      .from("profiles")
+      .update({ puntos: newPoints })
+      .eq("id", userId)
+      .select("puntos")
+      .single();
+
+    if (error) {
+      console.error("❌ [addUserPoints] Error guardando puntos:", error.message);
+      return { error: error.message };
+    }
+
+    console.log("✅ [addUserPoints] Puntos en Supabase:", updated?.puntos);
+    return { error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to add points";
+    console.error("❌ [addUserPoints] Excepción:", message);
     return { error: message };
   }
 }
