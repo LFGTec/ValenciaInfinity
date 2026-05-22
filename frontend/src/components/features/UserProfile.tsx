@@ -16,6 +16,7 @@ import { ToggleItem } from "@/components/ToggleItem";
 import { useAuth } from "@/hooks/useAuth";
 import { setUserAtom } from "@/stores/authStore";
 import { uploadAvatar, updateProfile } from "@/services/authService";
+import { Toast } from "../ui.disabled/Toast";
 
 export function UserProfile() {
   const [activeTab, setActiveTab] = useState<
@@ -35,6 +36,12 @@ export function UserProfile() {
   const [nameValue, setNameValue] = useState(user?.full_name ?? "");
   const [saving, setSaving] = useState(false);
 
+  // Toast
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
   const avatarSrc = user?.avatar_url ?? user?.user_metadata?.avatar_url ?? null;
   const initials = (user?.full_name ?? user?.email ?? "?")
     .split(" ")
@@ -51,9 +58,20 @@ export function UserProfile() {
     const { url, error } = await uploadAvatar(user.id, file);
     if (error) {
       setUploadError(error);
+
+      setToast({
+        message: "No se pudo actualizar la foto de perfil.",
+        type: "error",
+      });
     } else if (url) {
       setUser({ ...user, avatar_url: url });
+
+      setToast({
+        message: "Foto de perfil actualizada correctamente.",
+        type: "success",
+      });
     }
+    
     setUploading(false);
     e.target.value = "";
   };
@@ -65,6 +83,16 @@ export function UserProfile() {
     if (!error) {
       setUser({ ...user, full_name: nameValue });
       setEditing(false);
+
+      setToast({
+        message: "Nombre actualizado correctamente.",
+        type: "success",
+      });
+    } else {
+      setToast({
+        message: "No se pudo actualizar el nombre.",
+        type: "error",
+      });
     }
     setSaving(false);
   };
@@ -314,6 +342,14 @@ export function UserProfile() {
             </div>
           </div>
         </div>
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );
