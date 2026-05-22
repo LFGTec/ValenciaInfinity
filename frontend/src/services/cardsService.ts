@@ -3,11 +3,7 @@ import { supabase } from "./supabaseClient";
 export interface Category {
   id: string;
   name: string;
-  label: string;
   color: string;
-  border_color: string;
-  text_color: string;
-  icon: string;
 }
 
 export interface Card {
@@ -28,39 +24,47 @@ export interface Card {
 
 
 export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
-  const { data: catalog, error: catalogError } = await supabase
-    .from("Cards")
-    .select("*")
-    .eq("is_deleted", false)
-    .order("season", { ascending: true });
+  const { data, error } = await supabase
+    .from("user_cards")
+    .select(`
+      quantity,
+      card:card_id (
+        *,
+        categories!fk_category (
+          id,
+          name,
+          color
+        )
+      )
+    `)
+    .eq("user_id", userId)
+    .gt("quantity", 0);
 
-  if (catalogError) {
-    console.error("Error al obtener el catalogo de cartas:", catalogError);
+  if (error) {
+    console.error("Error al obtener cartas del usuario:", error);
     return [];
   }
 
-  const { data: userCards, error: userCardsError } = await supabase
-    .from("user_cards")
-    .select("card_id, quantity")
-    .eq("user_id", userId);
+  return (data ?? []).reduce<Card[]>((accumulator, row: any) => {
+    const cardData = Array.isArray(row.card) ? row.card[0] : row.card;
+    const card = cardData as Card | null | undefined;
 
-  if (userCardsError) {
-    console.warn("No se pudo consultar user_cards:", userCardsError.message);
-  }
+    if (!card || card.is_deleted) {
+      return accumulator;
+    }
 
-  const quantityByCardId = new Map<string, number>();
-  for (const row of userCards ?? []) {
-    quantityByCardId.set(row.card_id, row.quantity ?? 0);
-  }
-
-  return (catalog as Card[]).map((card) => {
-    const quantity = card.id ? quantityByCardId.get(card.id) ?? 0 : 0;
-    return {
+    accumulator.push({
       ...card,
-      quantity,
-      obtained: quantity > 0,
-    };
-  });
+      quantity: row.quantity ?? 0,
+      obtained: true,
+    });
+
+    return accumulator;
+  }, []).sort((left, right) => {
+      const leftSeason = left.season ?? 0;
+      const rightSeason = right.season ?? 0;
+      return leftSeason - rightSeason;
+    });
 };
 
 export const getCards = async (): Promise<Card[]> => {
@@ -71,11 +75,7 @@ export const getCards = async (): Promise<Card[]> => {
       categories!fk_category (
         id,
         name,
-        label,
-        color,
-        border_color,
-        text_color,
-        icon
+        color
       )
     `)
     .eq("is_deleted", false);
@@ -86,6 +86,27 @@ export const getCards = async (): Promise<Card[]> => {
   }
 
   return data as Card[];
+};
+
+export const getAllCards = async (): Promise<Card[]> => {
+  try {
+    const { data, error } = await supabase
+      .from("Cards")
+      .select("*")
+      .eq("is_deleted", false)
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error al obtener todas las cartas:", error);
+      return [];
+    }
+
+    console.log("Cartas obtenidas:", data);
+    return (data || []) as Card[];
+  } catch (err) {
+    console.error("Excepción al obtener cartas:", err);
+    return [];
+  }
 };
 
 export interface UserPack {
@@ -308,32 +329,35 @@ export const openPack = async (packId: string): Promise<Card[] | null> => {
       return null;
     }
 
-    // Upsert cards into user_cards table
+    // Persist every selected card before closing the pack.
     for (const card of selectedCards) {
       const { data: existingCard, error: fetchError } = await supabase
         .from("user_cards")
         .select("quantity")
         .eq("user_id", userId)
         .eq("card_id", card.id)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== "PGRST116") {
+      if (fetchError) {
         console.error("Error fetching existing card:", fetchError);
-        continue;
+        throw new Error(`Error fetching existing card: ${fetchError.message || fetchError}`);
       }
 
       const newQuantity = (existingCard?.quantity || 0) + 1;
 
       if (existingCard) {
-        // Update existing record
-        await supabase
+        const { error: updateError } = await supabase
           .from("user_cards")
           .update({ quantity: newQuantity })
           .eq("user_id", userId)
           .eq("card_id", card.id);
+
+        if (updateError) {
+          console.error("Error updating card quantity:", updateError);
+          throw new Error(`Error updating card quantity: ${updateError.message || updateError}`);
+        }
       } else {
-        // Insert new record
-        await supabase
+        const { error: insertError } = await supabase
           .from("user_cards")
           .insert([
             {
@@ -342,6 +366,11 @@ export const openPack = async (packId: string): Promise<Card[] | null> => {
               quantity: 1,
             },
           ]);
+
+        if (insertError) {
+          console.error("Error inserting card:", insertError);
+          throw new Error(`Error inserting card: ${insertError.message || insertError}`);
+        }
       }
     }
 
@@ -349,11 +378,12 @@ export const openPack = async (packId: string): Promise<Card[] | null> => {
     const { error: updateError } = await supabase
       .from("user_packs")
       .update({ opened_at: new Date().toISOString() })
-      .eq("id", packId);
+      .eq("id", packId)
+      .eq("user_id", userId);
 
     if (updateError) {
       console.error("Error al marcar sobre como abierto:", updateError);
-      return null;
+      throw new Error(`Error marking pack opened: ${updateError.message || updateError}`);
     }
 
     return selectedCards;
