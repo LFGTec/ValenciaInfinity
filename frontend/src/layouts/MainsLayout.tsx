@@ -81,7 +81,7 @@ export default function MainLayout() {
                   <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-vcf-orange/10 border border-vcf-orange/30 rounded-lg whitespace-nowrap">
                     <img src={valenciaPointsIcon} alt="" className="w-5 h-5 flex-shrink-0" />
                     <span className="text-vcf-orange font-black text-sm tabular-nums">
-                      {(user?.points ?? 0).toLocaleString("es-ES")}
+                      {(user?.puntos ?? 0).toLocaleString("es-ES")}
                     </span>
                     <span className="text-white/40 text-[10px] font-bold uppercase">pts</span>
                   </div>

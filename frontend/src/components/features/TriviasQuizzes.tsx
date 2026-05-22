@@ -14,7 +14,6 @@ import {
   type Trivia,
   type TriviaQuestion,
 } from "../../services/triviasService";
-import { addUserPoints } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 
 import { addTriviaRewardToCurrentUser } from "@/services/rewardsService";
@@ -162,28 +161,23 @@ export function TriviasQuizzes() {
             (newScore / quizQuestions.length) * 100
           );
 
-          const earnedPoints = Math.round(
+          const points = Math.round(
             (percentage / 100) * selectedTrivia.reward
           );
 
-          setEarnedPoints(earnedPoints);
+          setEarnedPoints(points);
 
           await addTriviaRewardToCurrentUser({
             triviaId: selectedTrivia.id,
             score: newScore,
             totalQuestions: quizQuestions.length,
-            earnedPoints,
+            earnedPoints: points,
           });
 
           saveCompletedTrivia(selectedTrivia.id);
 
-        
-
-          if (user && earnedPoints > 0) {
-            updatePoints(earnedPoints);
-            addUserPoints(user.id, earnedPoints).catch((err) =>
-              console.error("Error guardando puntos:", err)
-            );
+          if (user && points > 0) {
+            updatePoints(points);
           }
         }
 

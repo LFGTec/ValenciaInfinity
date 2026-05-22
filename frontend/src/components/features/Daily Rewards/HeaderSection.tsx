@@ -7,6 +7,37 @@ type HeaderSectionProps = {
     currentStreak: number;
     longestStreak: number;
     totalDays: number;
+    puntos: number;
+    lastLoginDate: string | null;
+}
+
+/** Devuelve un array de 7 booleanos (L-D) marcando qué días de la semana actual se logueó el usuario */
+function getWeeklyDays(streak: number, lastLoginDate: string | null): boolean[] {
+    const days = Array(7).fill(false) as boolean[];
+    if (!lastLoginDate || streak === 0) return days;
+
+    const now = new Date();
+    const todayIdx = (now.getDay() + 6) % 7; // 0=Lun, 6=Dom
+
+    // Primer día de la semana actual (lunes a las 00:00 local)
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - todayIdx);
+    weekStart.setHours(0, 0, 0, 0);
+
+    // Parsear lastLoginDate como fecha local evitando desfase de timezone
+    const [y, m, d] = lastLoginDate.split("-").map(Number);
+    const lastLogin = new Date(y, m - 1, d, 12, 0, 0);
+
+    for (let i = 0; i < streak; i++) {
+        const date = new Date(lastLogin);
+        date.setDate(lastLogin.getDate() - i);
+        date.setHours(12, 0, 0, 0);
+        if (date < weekStart) break; // llegamos a la semana anterior
+        const dayIdx = (date.getDay() + 6) % 7;
+        days[dayIdx] = true;
+    }
+
+    return days;
 }
 
 type OpenCard = "longest" | "total" | null;
@@ -20,25 +51,21 @@ function getBadge(totalDays: number): { label: string; color: string; next: numb
     return                       { label: "FAN NUEVO",       color: "text-gray-400",     next: 7    };
 }
 
-function HeaderSection({ currentStreak, longestStreak, totalDays }: HeaderSectionProps) {
+function HeaderSection({ currentStreak, longestStreak, totalDays, puntos, lastLoginDate }: HeaderSectionProps) {
     const [openCard, setOpenCard] = useState<OpenCard>(null);
     const toggle = (card: Exclude<OpenCard, null>) =>
         setOpenCard(prev => prev === card ? null : card);
 
-    // Últimos 14 días: los últimos min(streak, 14) están activos
-    const clampedStreak = Math.min(currentStreak, 14);
-    const calendarDays = Array.from({ length: 14 }, (_, i) => ({
-        pos: i + 1,
-        active: i + 1 > 14 - clampedStreak,
-        isToday: i + 1 === 14,
-    }));
-
     const daysUntilRecord = longestStreak - currentStreak;
     const isBreakingRecord = currentStreak > 0 && currentStreak >= longestStreak;
-    const daysUntilWeeklyBonus = currentStreak % 7 === 0 && currentStreak > 0 ? 0 : 7 - (currentStreak % 7);
     const cyclesCompleted = Math.floor(totalDays / 14);
-    const estimatedPoints = totalDays * 150;
     const badge = getBadge(totalDays);
+
+    // Progreso semanal real: qué días de esta semana (lun-dom) se logueó el usuario
+    const todayIdx = (new Date().getDay() + 6) % 7; // 0=Lun, 6=Dom
+    const weeklyDays = getWeeklyDays(currentStreak, lastLoginDate);
+    const daysThisWeek = weeklyDays.filter(Boolean).length;
+    const weekLabels = ["L", "M", "X", "J", "V", "S", "D"];
 
     const panelVariants = {
         hidden: { opacity: 0, height: 0 },
@@ -219,8 +246,8 @@ function HeaderSection({ currentStreak, longestStreak, totalDays }: HeaderSectio
                                     <p className="text-xs font-black text-muted-foreground mt-1 tracking-wide">CICLOS DE 14 DÍAS</p>
                                 </div>
                                 <div className="bg-muted/50 rounded-xl p-4 text-center">
-                                    <p className="text-4xl font-black text-vcf-orange">~{estimatedPoints.toLocaleString()}</p>
-                                    <p className="text-xs font-black text-muted-foreground mt-1 tracking-wide">PUNTOS GANADOS</p>
+                                    <p className="text-4xl font-black text-vcf-orange">{puntos.toLocaleString()}</p>
+                                    <p className="text-xs font-black text-muted-foreground mt-1 tracking-wide">PUNTOS TOTALES</p>
                                 </div>
                             </div>
 
@@ -246,33 +273,36 @@ function HeaderSection({ currentStreak, longestStreak, totalDays }: HeaderSectio
             </AnimatePresence>
 
             {/* Progress Bar */}
-            {(() => {
-                const daysInWeek = currentStreak % 7 === 0 && currentStreak > 0 ? 7 : currentStreak % 7;
-                return (
-                    <div className="bg-card border-2 border-border rounded-2xl p-8 mb-12 shadow-lg">
-                        <div className="flex items-center justify-between mb-5">
-                            <h2 className="text-2xl font-black text-foreground">PROGRESO SEMANAL</h2>
-                            <span className="text-lg font-bold text-vcf-orange">{daysInWeek}/7 días</span>
-                        </div>
-                        <div className="flex gap-2">
-                            {Array.from({ length: 7 }, (_, i) => (
-                                <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                                    <motion.div
-                                        className={`w-full h-8 rounded-md ${i < daysInWeek ? "bg-vcf-orange" : "bg-muted border border-border"}`}
-                                        initial={{ scaleY: 0 }}
-                                        animate={{ scaleY: 1 }}
-                                        transition={{ delay: i * 0.07, duration: 0.2, ease: "easeOut" }}
-                                        style={{ originY: 1 }}
-                                    />
-                                    <span className={`text-[11px] font-black ${i < daysInWeek ? "text-vcf-orange" : "text-muted-foreground"}`}>
-                                        {["L", "M", "X", "J", "V", "S", "D"][i]}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            })()}
+            <div className="bg-card border-2 border-border rounded-2xl p-8 mb-12 shadow-lg">
+                <div className="flex items-center justify-between mb-5">
+                    <h2 className="text-2xl font-black text-foreground">PROGRESO SEMANAL</h2>
+                    <span className="text-lg font-bold text-vcf-orange">{daysThisWeek}/7 días</span>
+                </div>
+                <div className="flex gap-2">
+                    {weekLabels.map((label, i) => {
+                        const isFilled = weeklyDays[i];
+                        const isToday = i === todayIdx;
+                        return (
+                            <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                                <motion.div
+                                    className={`w-full h-8 rounded-md ${
+                                        isFilled ? "bg-vcf-orange" : "bg-muted border border-border"
+                                    } ${isToday ? "ring-2 ring-white ring-offset-1 ring-offset-card" : ""}`}
+                                    initial={{ scaleY: 0 }}
+                                    animate={{ scaleY: 1 }}
+                                    transition={{ delay: i * 0.07, duration: 0.2, ease: "easeOut" }}
+                                    style={{ originY: 1 }}
+                                />
+                                <span className={`text-[11px] font-black ${
+                                    isToday ? "text-vcf-orange" : isFilled ? "text-vcf-orange" : "text-muted-foreground"
+                                }`}>
+                                    {label}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </>
     );
 }
