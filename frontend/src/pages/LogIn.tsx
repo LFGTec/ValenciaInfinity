@@ -62,7 +62,7 @@ export default function LogInn() {
   useEffect(() => {
     if (isAuthenticated && user) { // Añade 'user' a la condición
       if (user.role?.toLowerCase() === 'admin') {
-        navigate("/admin/cards", { replace: true });
+        navigate("/admin/statistics", { replace: true });
       } else {
         navigate("/home", { replace: true });
       }
@@ -124,7 +124,7 @@ export default function LogInn() {
       setIsLoading(false);
 
       if (user.role?.toLowerCase() === 'admin') {
-        navigate("/admin/cards", { replace: true });
+        navigate("/admin/statistics", { replace: true });
       } else {
         navigate("/home", { replace: true });
       }

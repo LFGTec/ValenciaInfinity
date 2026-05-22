@@ -24,7 +24,7 @@ export default function AuthCallback() {
             const profile = await getUserProfile(session.user.id);
             if (profile) setUser(profile);
             const role = profile?.role ?? session.user.user_metadata?.role ?? "fan";
-            navigate(role?.toLowerCase() === "admin" ? "/admin/cards" : "/home", { replace: true });
+            navigate(role?.toLowerCase() === "admin" ? "/admin/statistics" : "/home", { replace: true });
           } else {
             navigate("/login", { replace: true });
           }
@@ -55,7 +55,7 @@ export default function AuthCallback() {
 
           // Redirección inteligente basada en el rol
           if (user.role?.toLowerCase() === 'admin') {
-            navigate("/admin/cards", { replace: true });
+            navigate("/admin/statistics", { replace: true });
           } else {
             navigate("/home", { replace: true });
           }
