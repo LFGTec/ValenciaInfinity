@@ -7,6 +7,7 @@ type GridSectionProps = {
   rewards: DayReward[];
   setToast: React.Dispatch<React.SetStateAction<ToastState>>;
   onClaim: (day: number) => void;
+  cycleDay: number;
 }
 
 const REWARD_COLOR: Record<DayReward["type"], string> = {
@@ -30,11 +31,10 @@ function getDayState(reward: DayReward): DayState {
   return "future";
 }
 
-function GridSection({ rewards, setToast, onClaim }: GridSectionProps) {
+function GridSection({ rewards, setToast, onClaim, cycleDay }: GridSectionProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  const todayReward  = rewards.find(r => r.available || r.claimed);
-  const cycleDay     = todayReward?.day ?? rewards.findIndex(r => !r.claimed) + 1;
+  const todayReward  = rewards.find(r => r.day === cycleDay);
   const upcoming     = rewards.filter(r => !r.claimed && !r.available && r.active).slice(0, 4);
   const claimedCount = rewards.filter(r => r.claimed).length;
 
