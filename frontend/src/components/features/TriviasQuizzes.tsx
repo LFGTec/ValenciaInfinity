@@ -16,6 +16,8 @@ import {
 } from "../../services/triviasService";
 import { useAuth } from "../../hooks/useAuth";
 
+import { addTriviaRewardToCurrentUser } from "@/services/rewardsService";
+
 export function TriviasQuizzes() {
   const { user, updatePoints } = useAuth();
 
@@ -148,18 +150,31 @@ export function TriviasQuizzes() {
       setScore(newScore);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestion < quizQuestions.length - 1) {
         setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer(null);
         setShowResult(false);
       } else {
         if (selectedTrivia) {
-          saveCompletedTrivia(selectedTrivia.id);
+          const percentage = Math.round(
+            (newScore / quizQuestions.length) * 100
+          );
 
-          const percentage = Math.round((newScore / quizQuestions.length) * 100);
-          const points = Math.round((percentage / 100) * selectedTrivia.reward);
+          const points = Math.round(
+            (percentage / 100) * selectedTrivia.reward
+          );
+
           setEarnedPoints(points);
+
+          await addTriviaRewardToCurrentUser({
+            triviaId: selectedTrivia.id,
+            score: newScore,
+            totalQuestions: quizQuestions.length,
+            earnedPoints: points,
+          });
+
+          saveCompletedTrivia(selectedTrivia.id);
 
           if (user && points > 0) {
             updatePoints(points);

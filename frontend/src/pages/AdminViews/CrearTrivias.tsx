@@ -23,6 +23,7 @@ import {
 
 import { supabase } from "@/services/supabaseClient";
 import { Toast } from "@/components/ui.disabled/Toast";
+import { AdminTriviaHistory } from "./AdminTriviaHistory";
 
 export function CrearTrivias() {
   const [view, setView] = useState<"list" | "create" | "edit">("list");
@@ -32,6 +33,7 @@ export function CrearTrivias() {
   const [now, setNow] = useState(Date.now());
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [showHistory, setShowHistory] = useState(false);
 
   const [toast, setToast] = useState<{
     message: string;
@@ -785,12 +787,23 @@ export function CrearTrivias() {
           </p>
         </div>
 
-        <button
-          onClick={() => setView("create")}
-          className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all shadow-md"
-        >
-          + CREAR TRIVIA
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setShowHistory((prev) => !prev)}
+            className="bg-black text-white px-6 py-3 rounded-lg font-black shadow-md hover:bg-vcf-orange transition-all"
+          >
+            {showHistory ? "OCULTAR HISTORIAL" : "HISTORIAL"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setView("create")}
+            className="bg-vcf-orange text-white px-6 py-3 rounded-lg font-black shadow-md hover:bg-orange-600 transition-all"
+          >
+            + CREAR TRIVIA
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -836,6 +849,10 @@ export function CrearTrivias() {
           </div>
         ))}
       </div>
+
+      {showHistory && (
+        <AdminTriviaHistory onClose={() => setShowHistory(false)} />
+      )}
 
       <div className="bg-card border-2 border-border rounded-lg overflow-hidden">
         <div className="p-6 border-b-2 border-border bg-muted">
