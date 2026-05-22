@@ -4,7 +4,7 @@ import HeaderSection from "@/components/features/Daily Rewards/HeaderSection";
 import GridSection from "@/components/features/Daily Rewards/GridSection";
 import { Toast } from "@/components/features/Daily Rewards/Toast";
 import { useAuth } from "@/hooks/useAuth";
-import { getCycleDay, hasClaimedRewardToday, markRewardClaimed } from "@/services/streakService";
+import { getLocalStreak, getCycleDay, hasClaimedRewardToday, markRewardClaimed } from "@/services/streakService";
 
 export interface DayReward {
   day: number;
@@ -38,6 +38,7 @@ export function DailyRewards() {
   const currentStreak = user?.current_streak ?? 0;
   const longestStreak = user?.longest_streak ?? 0;
   const totalDays     = user?.total_days ?? 0;
+  const lastLoginDate = user ? (getLocalStreak(user.id).last_login_date ?? null) : null;
 
   const cycleDay = getCycleDay(totalDays);
   const [claimedToday, setClaimedToday] = useState(false);
@@ -78,6 +79,8 @@ export function DailyRewards() {
         currentStreak={currentStreak}
         longestStreak={longestStreak}
         totalDays={totalDays}
+        puntos={user?.puntos ?? 0}
+        lastLoginDate={lastLoginDate}
       />
 
       <GridSection rewards={rewards} setToast={setToast} onClaim={handleClaim} />
