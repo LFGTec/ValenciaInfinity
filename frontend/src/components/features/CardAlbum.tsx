@@ -283,7 +283,7 @@ export function CardAlbum({ userId }: Props) {
                 {packsLoading ? "Cargando..." : `Tienes ${packs.length} ${packs.length === 1 ? "sobre" : "sobres"} esperando ser ${packs.length === 1 ? "abierto" : "abiertos"}`}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 px-6 py-4">
               {packs.length > 0 && packs.map((pack) => (
                 <div
                   key={pack.id}
