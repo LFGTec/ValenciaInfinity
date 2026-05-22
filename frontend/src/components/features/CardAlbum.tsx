@@ -247,9 +247,9 @@ export function CardAlbum({ userId }: Props) {
               <p className="font-bold text-lg text-black">Progreso del Álbum</p>
               <p className="text-2xl font-black text-vcf-orange">{progress}%</p>
             </div>
-            <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
+            <div className="w-full h-8 bg-gray-300 rounded-full overflow-hidden mb-4 shadow-md border border-gray-400">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-vcf-orange to-vcf-yellow transition-all duration-700 ease-out"
+                className="h-full rounded-full bg-vcf-orange shadow-inner transition-all duration-700 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
