@@ -158,9 +158,7 @@ export function Friends() {
                                 <div className="flex items-center gap-1 mt-1">
                                     <MapPin size={12} className="text-vcf-orange" />
                                     <span className="text-xs text-muted-foreground">
-                                        {friend.location === "NOT_SHOWING"
-                                            ? "No mostrando ubicación"
-                                            : friend.location}
+                                        {friend.location || "No mostrando ubicación"}
                                     </span>
                                 </div>
                             </div>
@@ -172,7 +170,7 @@ export function Friends() {
                                 <div className="flex items-center justify-center gap-1 mb-1">
                                     <Trophy size={16} className="text-vcf-orange" />
                                     <span className="text-xl font-black text-foreground">
-                                    {friend.points}
+                                    {friend.puntos}
                                     </span>
                                 </div>
                                 <div className="text-xs text-muted-foreground font-bold">
@@ -419,24 +417,27 @@ export function Friends() {
                                     <div className="flex items-center gap-1 mt-1">
                                         <MapPin size={12} className="text-vcf-orange" />
                                         <span className="text-xs text-muted-foreground">
-                                            {user.location}
+                                            {user.location || "No mostrando ubicación"}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                            <div className="bg-muted rounded-lg p-3 text-center">
-                                <div className="flex items-center justify-center gap-1 mb-1">
-                                <Trophy size={16} className="text-vcf-orange" />
+                            <div className="flex justify-center mb-4">
+                            <div className="bg-muted rounded-lg p-3 text-center min-w-[140px]">
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                                <Trophy
+                                size={16}
+                                className="text-vcf-orange"
+                                />
                                 <span className="text-xl font-black text-foreground">
-                                    {user.points}
+                                {user.puntos}
                                 </span>
-                                </div>
-                                <div className="text-xs text-muted-foreground font-bold">
+                            </div>
+                            <div className="text-xs text-muted-foreground font-bold">
                                 Puntos
-                                </div>
+                            </div>
                             </div>
                             
                             </div>
@@ -532,7 +533,7 @@ export function Friends() {
                                 <div className="flex items-center gap-1 mt-1">
                                     <MapPin size={12} className="text-vcf-orange" />
                                     <span className="text-xs text-muted-foreground">
-                                    {user.location}
+                                    {user.location || "No mostrando ubicación"}
                                     </span>
                                 </div>     
                             </div>
@@ -547,7 +548,7 @@ export function Friends() {
                                 className="text-vcf-orange"
                                 />
                                 <span className="text-xl font-black text-foreground">
-                                {user.points}
+                                {user.puntos}
                                 </span>
                             </div>
                             <div className="text-xs text-muted-foreground font-bold">
