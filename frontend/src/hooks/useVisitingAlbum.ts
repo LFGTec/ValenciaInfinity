@@ -64,7 +64,7 @@ export function useVisitingAlbum(
           friendship_status:
             foundUser.friendship_status,
           friendship_id: foundUser.friendship_id,
-        });
+        } as VisitingProfile);
       } else {
         setProfile(null);
       }
