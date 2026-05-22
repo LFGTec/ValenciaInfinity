@@ -29,6 +29,9 @@ import { Friends } from "@/pages/Friends.tsx";
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
 import Album from "@/pages/Album.tsx";
 import { EstadisticasPage } from "@/pages/EstadisticasPage";
+import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
+
+
 import { DailyRewards } from "@/pages/DailyRewards";
 
 export default function AppRoutes() {
@@ -68,10 +71,12 @@ export default function AppRoutes() {
 
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
+        <Route path="/admin/statistics" element={<AdminStatistics />} />
         <Route path="/admin/trivias" element={<CrearTrivias />} />
         <Route path="/admin/timeline" element={<TimelineAdmin />} />
         <Route path="/admin/cards" element={<ManageCards />} />
         <Route path="/admin/rewards" element={<ManageRewards />} />
+
         <Route element={<ProtectedRoute adminOnly={true} />}>
           <Route
             path="/admin"
