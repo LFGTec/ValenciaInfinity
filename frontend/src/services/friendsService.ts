@@ -14,7 +14,7 @@ export interface FriendUser {
   avatar_url?: string;
 
   level: number;
-  points: number;
+  puntos: number;
   location: string;
   friend_pin: string;
 
