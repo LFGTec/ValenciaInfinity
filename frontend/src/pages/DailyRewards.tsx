@@ -88,7 +88,7 @@ export function DailyRewards() {
         lastLoginDate={lastLoginDate}
       />
 
-      <GridSection rewards={rewards} setToast={setToast} onClaim={handleClaim} />
+      <GridSection rewards={rewards} setToast={setToast} onClaim={handleClaim} cycleDay={cycleDay} />
 
       <TipsSection />
 
