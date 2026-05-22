@@ -3,7 +3,8 @@
 /* @import "shadcn/tailwind.css";
  */@import "@fontsource-variable/geist";
 
-@custom-variant dark (&:is(.dark *));
+@layer utilities {
+}
 
 :root {
   /* Valencia CF Official Colors */
@@ -122,7 +123,7 @@
   --gray-900: #fafafa;
 }
 
-@theme inline {
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -189,11 +190,15 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: rgba(var(--ring), 0.5);
   }
 
   body {
-    @apply bg-background text-foreground;
+    /* Replaced Tailwind @apply to avoid unknown at-rule in plain CSS build
+       Use the corresponding CSS custom properties for background and text */
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
