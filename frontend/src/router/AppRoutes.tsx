@@ -18,10 +18,11 @@ import ForgotPassword from "../pages/ForgotPassword";
 import { Juego } from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
-import  AdminLayout  from "@/layouts/AdminLayout"
-import { TriviasQuizzes } from  "../components/features/TriviasQuizzes"
+import AdminLayout from "@/layouts/AdminLayout"
+import { TriviasQuizzes } from "../components/features/TriviasQuizzes"
 import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
+import { ManageRewards } from "@/pages/AdminViews/ManageRewards";
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 import { Friends } from "@/pages/Friends.tsx";
 
@@ -29,6 +30,10 @@ import { MatchRooms } from "@/pages/MatchRooms.tsx";
 import Album from "@/pages/Album.tsx";
 import { EstadisticasPage } from "@/pages/EstadisticasPage";
 import { CardExchange } from "@/components/features/CardExchange";
+import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
+
+
+import { DailyRewards } from "@/pages/DailyRewards";
 
 export default function AppRoutes() {
   return (
@@ -48,6 +53,7 @@ export default function AppRoutes() {
         <Route path="/estadisticas" element={<EstadisticasPage />} />
         <Route path="/news" element={<News />} />
         <Route path="/nou-mestalla" element={<NouMestellaPage />} />
+        <Route path="/daily-rewards" element={<DailyRewards />} />
 
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
@@ -66,9 +72,12 @@ export default function AppRoutes() {
 
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
-      <Route path="/admin/trivias" element={<CrearTrivias/>} />
-      <Route path="/admin/timeline" element={<TimelineAdmin />} />
+        <Route path="/admin/statistics" element={<AdminStatistics />} />
+        <Route path="/admin/trivias" element={<CrearTrivias />} />
+        <Route path="/admin/timeline" element={<TimelineAdmin />} />
         <Route path="/admin/cards" element={<ManageCards />} />
+        <Route path="/admin/rewards" element={<ManageRewards />} />
+
         <Route element={<ProtectedRoute adminOnly={true} />}>
           <Route
             path="/admin"

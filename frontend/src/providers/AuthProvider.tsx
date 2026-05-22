@@ -5,6 +5,7 @@ import { finishLoadingAtom } from "../stores/authStore";
 import type { User } from "../services/authService";
 import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { getUserProfile } from "../services/authService";
+import { checkAndUpdateStreak } from "../services/streakService";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const finishLoading = useSetAtom(finishLoadingAtom);
@@ -12,23 +13,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const mapUser = async (user: SupabaseUser | null): Promise<User | null> => {
     if (!user) return null;
     try {
-      const profile = await getUserProfile(user.id);
+      let profile = await getUserProfile(user.id);
+
+      // Usuario nuevo sin fila en profiles → crearla con valores por defecto
+      if (!profile) {
+        await supabase.from("profiles").upsert({
+          id:             user.id,
+          email:          user.email ?? "",
+          role:           (user.user_metadata?.role as User["role"]) || "fan",
+          full_name:      user.user_metadata?.full_name ?? null,
+          avatar_url:     user.user_metadata?.avatar_url ?? null,
+          puntos:         0,
+          current_streak: 0,
+          longest_streak: 0,
+          total_days:     0,
+          last_login_date:  null,
+          last_reward_date: null,
+        }, { onConflict: "id" });
+
+        profile = await getUserProfile(user.id);
+      }
+
       if (profile) {
+        const streak = await checkAndUpdateStreak(user.id, {
+          current_streak:  profile.current_streak  ?? 0,
+          longest_streak:  profile.longest_streak  ?? 0,
+          total_days:      profile.total_days       ?? 0,
+          last_login_date: profile.last_login_date  ?? null,
+        });
         return {
           ...profile,
-          avatar_url: profile.avatar_url ?? user.user_metadata?.avatar_url,
+          ...streak,
+          avatar_url:    profile.avatar_url ?? user.user_metadata?.avatar_url,
           user_metadata: user.user_metadata,
         };
       }
     } catch (error) {
-      console.warn("⚠️ Error fetching profile, using fallback", error);
+      console.error("❌ Error en mapUser:", error);
     }
+
+    // Fallback mínimo si todo falla
     return {
-      id: user.id,
-      email: user.email ?? "",
-      role: (user.user_metadata?.role as User["role"]) || "fan",
-      full_name: user.user_metadata?.full_name,
-      avatar_url: user.user_metadata?.avatar_url,
+      id:            user.id,
+      email:         user.email ?? "",
+      role:          (user.user_metadata?.role as User["role"]) || "fan",
+      full_name:     user.user_metadata?.full_name,
+      avatar_url:    user.user_metadata?.avatar_url,
       user_metadata: user.user_metadata,
     };
   };
