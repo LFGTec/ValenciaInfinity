@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { userAtom, loadingAtom, errorAtom, setUserAtom } from "../stores/authStore";
 import { signOut as signOutService } from "../services/authService";
+import { supabase } from "../services/supabaseClient";
 import { useCallback, useState } from "react";
 
 export function useAuth() {
@@ -33,6 +34,36 @@ export function useAuth() {
     }
   }, [setUser]);
 
+  const updatePoints = useCallback((delta: number) => {
+    if (!user) return;
+    const newPoints = (user.puntos ?? 0) + delta;
+    setUser({ ...user, puntos: newPoints });
+    supabase
+      .from("profiles")
+      .update({ puntos: newPoints })
+      .eq("id", user.id)
+      .then(({ error }) => {
+        if (error) console.error("❌ Error sincronizando puntos:", error.message);
+        else console.log("✅ Puntos sincronizados en Supabase:", newPoints);
+      });
+  }, [user, setUser]);
+
+  // pointsDelta: puntos a sumar al reclamar (0 si es carta)
+  const claimReward = useCallback((pointsDelta = 0) => {
+    if (!user) return;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const newPoints = (user.puntos ?? 0) + pointsDelta;
+    setUser({ ...user, last_reward_date: today, puntos: newPoints });
+    supabase
+      .from("profiles")
+      .update({ last_reward_date: today, puntos: newPoints })
+      .eq("id", user.id)
+      .then(({ error }) => {
+        if (error) console.error("❌ Error guardando reward:", error.message);
+      });
+  }, [user, setUser]);
+
   return {
     user,
     loading,
@@ -40,6 +71,8 @@ export function useAuth() {
     isSigningOut,
     isAuthenticated: user !== null,
     signOut,
+    updatePoints,
+    claimReward,
   };
 }
 

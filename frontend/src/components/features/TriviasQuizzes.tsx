@@ -14,8 +14,13 @@ import {
   type Trivia,
   type TriviaQuestion,
 } from "../../services/triviasService";
+import { useAuth } from "../../hooks/useAuth";
+
+import { addTriviaRewardToCurrentUser } from "@/services/rewardsService";
 
 export function TriviasQuizzes() {
+  const { user, updatePoints } = useAuth();
+
   const [activeTab, setActiveTab] = useState<"active" | "leaderboard">(
     "active"
   );
@@ -32,6 +37,7 @@ export function TriviasQuizzes() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
+  const [earnedPoints, setEarnedPoints] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [quizComplete, setQuizComplete] = useState(false);
 
@@ -91,6 +97,7 @@ export function TriviasQuizzes() {
     setQuizQuestions([]);
     setCurrentQuestion(0);
     setScore(0);
+    setEarnedPoints(0);
     setSelectedAnswer(null);
     setShowResult(false);
     setQuizComplete(false);
@@ -136,18 +143,42 @@ export function TriviasQuizzes() {
     setSelectedAnswer(answerIndex);
     setShowResult(true);
 
-    if (answerIndex === currentQ.correct_answer) {
-      setScore((prev) => prev + 1);
+    const isCorrect = answerIndex === currentQ.correct_answer;
+    const newScore = isCorrect ? score + 1 : score;
+
+    if (isCorrect) {
+      setScore(newScore);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestion < quizQuestions.length - 1) {
         setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer(null);
         setShowResult(false);
       } else {
         if (selectedTrivia) {
+          const percentage = Math.round(
+            (newScore / quizQuestions.length) * 100
+          );
+
+          const points = Math.round(
+            (percentage / 100) * selectedTrivia.reward
+          );
+
+          setEarnedPoints(points);
+
+          await addTriviaRewardToCurrentUser({
+            triviaId: selectedTrivia.id,
+            score: newScore,
+            totalQuestions: quizQuestions.length,
+            earnedPoints: points,
+          });
+
           saveCompletedTrivia(selectedTrivia.id);
+
+          if (user && points > 0) {
+            updatePoints(points);
+          }
         }
 
         setQuizComplete(true);
@@ -157,7 +188,6 @@ export function TriviasQuizzes() {
 
   if (quizComplete && selectedTrivia) {
     const percentage = Math.round((score / quizQuestions.length) * 100);
-    const earnedPoints = Math.round((percentage / 100) * selectedTrivia.reward);
 
     return (
       <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
