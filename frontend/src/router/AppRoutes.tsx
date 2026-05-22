@@ -29,6 +29,7 @@ import { Friends } from "@/pages/Friends.tsx";
 import { MatchRooms } from "@/pages/MatchRooms.tsx";
 import Album from "@/pages/Album.tsx";
 import { EstadisticasPage } from "@/pages/EstadisticasPage";
+import { CardExchange } from "@/components/features/CardExchange";
 import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
 
@@ -57,10 +58,10 @@ export default function AppRoutes() {
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/fanzone" element={<FansZonePage />} />
-          {/*Rutas dentro de FAN ZONE*/}
           <Route path="/virtual-world" element={<VirtualWorld />} />
           <Route path="/album" element={<Album />} />
           <Route path="/album/:userId" element={<Album />} />
+          <Route path="/exchange" element={<CardExchange />} />
           <Route path="/match-rooms" element={<MatchRooms />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/juego" element={<Juego />} />

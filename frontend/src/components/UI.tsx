@@ -37,7 +37,7 @@ export function buildPages(cards: Card[]): AlbumPage[] {
 function pageLabel(pageData: AlbumPage, index: number): string {
   if (index === 0) return "Portada";
   if (Array.isArray(pageData.front) && pageData.front.length > 0) {
-    const tipos = [...new Set((pageData.front as Card[]).map((c) => c.tipo))];
+    const tipos = [...new Set((pageData.front as Card[]).map((c) => c.type))];
     return tipos.slice(0, 2).join(" / ");
   }
   return `Pág ${index}`;

@@ -178,7 +178,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
-                  className="text-center text-white font-black text-3xl mb-8 drop-shadow-lg"
+                  className="text-center text-white font-black text-2xl mb-6 drop-shadow-lg"
                 >
                   ¡{cards.length} cartas reveladas!
                 </motion.h2>
@@ -188,7 +188,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                   initial={{ opacity: 0 }}
                   animate={{ opacity: showCards ? 1 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="grid grid-cols-2 gap-6 px-4 mb-12"
+                  className="grid grid-cols-3 gap-3 px-4 mb-6"
                 >
                   {cards.map((card, index) => {
                     const rotation = cardRotations[card.id] || { x: 0, y: 0 };
@@ -241,7 +241,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                             {card.image_url && (
                               <motion.img
                                 src={card.image_url}
-                                alt={card.nombre}
+                                alt={card.name}
                                 className="w-full h-full object-cover"
                                 animate={{ scale: [1, 1.02] }}
                                 transition={{ duration: 0.3 }}
@@ -252,9 +252,9 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                             {!card.image_url && (
                               <div className="w-full h-full bg-gradient-to-br from-vcf-orange/40 to-vcf-yellow/40 flex flex-col items-center justify-center p-4">
                                 <p className="font-black text-center text-gray-800 text-sm break-words">
-                                  {card.nombre}
+                                  {card.name}
                                 </p>
-                                <p className="text-xs text-gray-600 font-bold mt-2">#{card.numero}</p>
+                                <p className="text-xs text-gray-600 font-bold mt-2">#{card.season}</p>
                               </div>
                             )}
 
@@ -323,23 +323,23 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                             />
 
                             {/* Rarity Badge with glow */}
-                            {card.rareza && (
+                            {card.rarity && (
                               <motion.div
                                 className={`absolute top-3 right-3 px-4 py-2 rounded-xl text-xs font-black text-white shadow-lg backdrop-blur-sm ${
-                                  card.rareza === "legendary" || card.rareza === "legendaria"
+                                  card.rarity === "legendary" || card.rarity === "legendaria"
                                     ? "bg-gradient-to-r from-yellow-400 to-yellow-500"
-                                    : card.rareza === "epic" || card.rareza === "epica"
+                                    : card.rarity === "epic" || card.rarity === "epica"
                                     ? "bg-gradient-to-r from-purple-500 to-purple-600"
-                                    : card.rareza === "rare" || card.rareza === "rara"
+                                    : card.rarity === "rare" || card.rarity === "rara"
                                     ? "bg-gradient-to-r from-blue-400 to-blue-500"
                                     : "bg-gradient-to-r from-gray-400 to-gray-500"
                                 }`}
                                 style={{
-                                  boxShadow: card.rareza === "legendary" || card.rareza === "legendaria"
+                                  boxShadow: card.rarity === "legendary" || card.rarity === "legendaria"
                                     ? "0 0 20px rgba(255, 215, 0, 0.6)"
-                                    : card.rareza === "epic" || card.rareza === "epica"
+                                    : card.rarity === "epic" || card.rarity === "epica"
                                     ? "0 0 20px rgba(147, 51, 234, 0.6)"
-                                    : card.rareza === "rare" || card.rareza === "rara"
+                                    : card.rarity === "rare" || card.rarity === "rara"
                                     ? "0 0 20px rgba(59, 130, 246, 0.6)"
                                     : "0 0 20px rgba(156, 163, 175, 0.4)",
                                 }}
@@ -351,7 +351,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                                   stiffness: 150,
                                 }}
                               >
-                                {card.rareza}
+                                {card.rarity}
                               </motion.div>
                             )}
                           </div>

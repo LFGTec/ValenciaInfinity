@@ -49,6 +49,7 @@ export function CardAlbum({ userId }: Props) {
   const [revealedCards, setRevealedCards] = useState<Card[]>([]);
   const [showPackAnimation, setShowPackAnimation] = useState(false);
   const [buyingPacks, setBuyingPacks] = useState(false);
+  const [packError, setPackError] = useState<string | null>(null);
 
   // Reset page on component mount
   useEffect(() => {
@@ -116,6 +117,7 @@ export function CardAlbum({ userId }: Props) {
   // Handle pack opening and card reveal
   const handleOpenPack = async (packId: string) => {
     setOpeningPackId(packId);
+    setPackError(null);
     try {
       const revealedCards = await openPack(packId);
       if (revealedCards) {
@@ -131,9 +133,13 @@ export function CardAlbum({ userId }: Props) {
         // Display pack opening animation
         setRevealedCards(revealedCards);
         setShowPackAnimation(true);
+      } else {
+        setPackError("No se pudo guardar el sobre abierto en la base de datos. Intenta de nuevo.");
       }
     } catch (err) {
       console.error("Error opening pack:", err);
+      const message = err instanceof Error ? err.message : "No se pudo abrir el sobre.";
+      setPackError(message);
     } finally {
       setOpeningPackId(null);
     }
@@ -148,7 +154,7 @@ export function CardAlbum({ userId }: Props) {
 
     setBuyingPacks(true);
     try {
-      const newPack = await createUserPack(user.id, "standard");
+      const newPack = await createUserPack(user.id);
 
       if (newPack) {
         // Reload packs list
@@ -220,6 +226,11 @@ export function CardAlbum({ userId }: Props) {
                 </button>
               </div>
             )}
+            {packError && (
+              <p className="mt-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                {packError}
+              </p>
+            )}
           </div>
           {isVisiting && friend && (
 
@@ -263,43 +274,36 @@ export function CardAlbum({ userId }: Props) {
           </div>
 
           {/* Unopened packs section */}
-          {!isVisiting && (
-            <div className="bg-white border-2 border-vcf-orange backdrop-blur-sm rounded-lg px-6 py-4 mb-6">
-              <div className="mb-4">
-                <p className="text-xl font-black text-black">
-                  SOBRES <span className="text-vcf-orange">SIN ABRIR</span>
-                </p>
-                <p className="text-sm text-gray-600">
-                  {packsLoading ? "Cargando..." : `Tienes ${packs.length} ${packs.length === 1 ? "sobre" : "sobres"} esperando ser ${packs.length === 1 ? "abierto" : "abiertos"}`}
-                </p>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                {packs.length > 0 ? (
-                  packs.map((pack) => (
-                    <div
-                      key={pack.id}
-                      onClick={() => handleOpenPack(pack.id)}
-                      className="border-2 border-vcf-orange rounded-lg aspect-square bg-gray-50 hover:bg-vcf-orange/10 transition-colors cursor-pointer flex items-center justify-center"
-                    >
-                      {openingPackId === pack.id ? (
-                        <div className="text-center">
-                          <div className="animate-spin mb-2">📦</div>
-                          <p className="text-xs font-bold text-vcf-orange">Abriendo...</p>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <p className="text-4xl">📦</p>
-                          <p className="text-xs font-bold text-gray-600 mt-2">{pack.pack_type}</p>
-                        </div>
-                      )}
+          <div className="bg-white border-2 border-vcf-orange backdrop-blur-sm rounded-lg px-6 py-4 mb-6">
+            <div className="mb-4">
+              <p className="text-xl font-black text-black">
+                SOBRES <span className="text-vcf-orange">SIN ABRIR</span>
+              </p>
+              <p className="text-sm text-gray-600">
+                {packsLoading ? "Cargando..." : `Tienes ${packs.length} ${packs.length === 1 ? "sobre" : "sobres"} esperando ser ${packs.length === 1 ? "abierto" : "abiertos"}`}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {packs.length > 0 && packs.map((pack) => (
+                <div
+                  key={pack.id}
+                  onClick={() => handleOpenPack(pack.id)}
+                  className="border-2 border-vcf-orange rounded-lg aspect-square bg-gray-50 hover:bg-vcf-orange/10 transition-colors cursor-pointer flex items-center justify-center"
+                >
+                  {openingPackId === pack.id ? (
+                    <div className="text-center">
+                      <div className="animate-spin mb-2">📦</div>
+                      <p className="text-xs font-bold text-vcf-orange">Abriendo...</p>
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-3 text-center py-8">
-                    <p className="text-gray-500">No tienes sobres sin abrir</p>
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <div className="text-center">
+                      <p className="text-4xl">📦</p>
+                      <p className="text-xs font-bold text-gray-600 mt-2">Sobre</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
 
               {/* Search and filter section */}
               <div className="mb-6">
@@ -318,46 +322,34 @@ export function CardAlbum({ userId }: Props) {
                     </svg>
                   </div>
 
-                  {/* Filter button */}
-                  <button className="flex items-center justify-center gap-2 bg-white border-2 border-gray-200 hover:border-vcf-orange text-black hover:text-vcf-orange font-bold px-6 py-3 rounded-lg transition-all whitespace-nowrap">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M3 6a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v5.172a1 1 0 01-1.447.894l-2-1A1 1 0 018 17.118v-4.414a1 1 0 00-.293-.707L1.293 8.707A1 1 0 011 8V6z" />
-                    </svg>
-                    FILTROS
-                  </button>
-                </div>
-
-                {/* Category filter tabs */}
-                <div className="flex overflow-x-auto gap-3 pb-2">
-                  {[
-                    { id: "todas", label: "TODAS", count: cards.length },
-                    { id: "jugadores", label: "JUGADORES", count: cards.filter(c => c.tipo === "player").length },
-                    { id: "leyendas", label: "LEYENDAS", count: cards.filter(c => c.rareza === "legendary").length },
-                    { id: "estadio", label: "ESTADIO", count: cards.filter(c => c.tipo === "stadium").length },
-                    { id: "histor", label: "HISTOR", count: cards.filter(c => c.tipo === "historic").length }
-                  ].map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all ${
-                        selectedCategory === category.id
-                          ? "bg-vcf-orange text-white shadow-lg"
-                          : "bg-white border-2 border-gray-200 text-black hover:border-vcf-orange"
-                      }`}
-                    >
-                      {category.label} ({category.count})
-                    </button>
-                  ))}
-                </div>
-                
-              </div>
+            {/* Category filter tabs */}
+            <div className="flex overflow-x-auto gap-3 pb-2">
+              {[
+                { id: "todas", label: "TODAS", count: cards.length },
+                { id: "jugadores", label: "JUGADORES", count: cards.filter(c => c.type === "jugador").length },
+                { id: "leyendas", label: "LEYENDAS", count: cards.filter(c => c.rarity === "legendaria").length },
+                { id: "estadio", label: "ESTADIO", count: cards.filter(c => c.type === "estadio").length },
+                { id: "aficion", label: "AFICIÓN", count: cards.filter(c => c.type === "aficion").length }
+              ].map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all ${
+                    selectedCategory === category.id
+                      ? "bg-vcf-orange text-white shadow-lg"
+                      : "bg-white border-2 border-gray-200 text-black hover:border-vcf-orange"
+                  }`}
+                >
+                  {category.label} ({category.count})
+                </button>
+              ))}
             </div>
-          )}
-          
-          
-          
+          </div>
         </div>
       </div>
+
+      </div>
+    </div>
 
       {/* 3D Book canvas container */}
       <div className="album-canvas-wrapper">

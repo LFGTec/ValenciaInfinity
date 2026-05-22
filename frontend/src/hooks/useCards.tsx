@@ -31,24 +31,22 @@ export const useCards = () => {
 
  
   const createCard = async (
-    nombre: string,
-    tipo: string,
-    temporada: number,
-    numero: number,
+    name: string,
+    type: string,
+    season: number,
     category_id: string,
     file?: File
   ) => {
     const category = categories.find((c) => c.id === category_id);
 
-    const rareza = category?.name ?? null;
+    const rarity = category?.name ?? null;
 
     await addCard(
-      nombre,
-      tipo,
-      temporada,
-      numero,
+      name,
+      type,
+      season,
       category_id,
-      rareza, 
+      rarity,
       file
     );
 
@@ -58,26 +56,24 @@ export const useCards = () => {
 
   const editCard = async (
     id: string,
-    nombre: string,
-    tipo: string,
-    temporada: number,
-    numero: number,
+    name: string,
+    type: string,
+    season: number,
     category_id: string,
     existing_image_url: string | null,
     file?: File
   ) => {
     const category = categories.find((c) => c.id === category_id);
 
-    const rareza = category?.name || null;
+    const rarity = category?.name || null;
 
     await updateCard(
       id,
-      nombre,
-      tipo,
-      temporada,
-      numero,
+      name,
+      type,
+      season,
       category_id,
-      rareza,
+      rarity,
       existing_image_url,
       file
     );
