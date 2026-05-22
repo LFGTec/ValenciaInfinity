@@ -140,7 +140,7 @@ function drawCard(ctx: CanvasRenderingContext2D, card: Card, x: number, y: numbe
     ctx.font = `bold ${Math.round(CARD_H * 0.1)}px Arial`;
     ctx.fillText("FALTANTE", x + CARD_W / 2, y + CARD_H * 0.62, CARD_W - 8);
 
-    const numberLabel = card.numero ? `#${card.numero}` : "SIN NUM";
+    const numberLabel = card.numero ? `#${card.number}` : "SIN NUM";
     ctx.fillStyle = "#9ca3af";
     ctx.font = `${Math.round(CARD_H * 0.08)}px Arial`;
     ctx.fillText(numberLabel, x + CARD_W / 2, y + CARD_H * 0.76, CARD_W - 8);

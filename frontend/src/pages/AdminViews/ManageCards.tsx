@@ -223,7 +223,7 @@ export function ManageCards(){
                     {/* Category Filters */}
                     <div className="flex flex-wrap gap-2 mt-4">
                         {allCategories.map((cat) => {
-                        const Icon = iconMap[cat.icon || "Star"];
+                        const Icon = iconMap[ "Star"];
                         return (
                             <button
                             key={cat.id}
@@ -235,7 +235,7 @@ export function ManageCards(){
                             }`}
                             >
                             <Icon size={16} />
-                            {cat.label}
+                            {Icon}
                             </button>
                         );
                         })}
@@ -245,7 +245,7 @@ export function ManageCards(){
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredCards.map((card) => {
-                    const CategoryIcon = iconMap[card.categories?.icon || "Star"];
+                    const CategoryIcon = iconMap[ "Star"];
 
                     return (
                         <div key={card.id} className="bg-card border-2 rounded-lg">
@@ -254,7 +254,7 @@ export function ManageCards(){
                         <div className="relative aspect-[2/3]">
                             <img
                             src={card.image_url || "/placeholder.png"}
-                            alt={card.nombre}
+                            alt={card.name}
                             className="w-full h-full object-cover"
                             />
 
@@ -265,7 +265,7 @@ export function ManageCards(){
                             } text-white px-3 py-1 rounded-full text-xs font-black flex items-center gap-1`}
                             >
                             <CategoryIcon size={14} />
-                            {(card.categories?.label || card.rarity)?.toUpperCase()}
+                            {( card.rarity)?.toUpperCase()}
                             </div>
                         </div>
 
@@ -401,7 +401,7 @@ export function ManageCards(){
                         </label>
                         <div className="grid grid-cols-2 gap-3">
                         {categories.map((cat) => {
-                        const Icon = iconMap[cat.icon] || Star;
+                        const Icon = iconMap[ "Star"];
 
                         return (
                             <button
@@ -417,7 +417,7 @@ export function ManageCards(){
                             }`}
                             >
                             <Icon size={20} />
-                            <span>{cat.label}</span>
+                            <span>{Icon}</span>
                             </button>
                         );
                         })}
