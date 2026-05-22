@@ -361,13 +361,15 @@ export function CardExchange() {
             value: trades.filter((t) => t.status === "pending").length,
             icon: Share2,
             color: "bg-vcf-orange",
+            borderColor: "border-vcf-orange",
           },
           {
             id: "accepted",
             label: "Intercambios Aceptados",
             value: trades.filter((t) => t.status === "accepted").length,
             icon: Check,
-            color: "bg-vcf-orange",
+            color: "bg-green-600",
+            borderColor: "border-green-600",
           },
           {
             id: "all",
@@ -375,6 +377,7 @@ export function CardExchange() {
             value: trades.length,
             icon: MessageSquare,
             color: "bg-black",
+            borderColor: "border-black",
           },
         ].map((stat, i) => (
           <button
@@ -382,7 +385,7 @@ export function CardExchange() {
             onClick={() => setTradeFilter(stat.id as "all" | "pending" | "accepted")}
             className={`bg-card border-2 rounded-lg p-4 shadow-md transition-all text-left ${
               tradeFilter === stat.id
-                ? "border-vcf-orange bg-vcf-orange/5"
+                ? `${stat.borderColor} bg-opacity-10`
                 : "border-border hover:border-vcf-orange"
             }`}
           >
@@ -435,9 +438,24 @@ export function CardExchange() {
             <div className="text-center py-8 text-muted-foreground">
               Cargando intercambios...
             </div>
-          ) : trades.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No tienes solicitudes de intercambio
+          ) : trades.length === 0 || trades.filter((t) => {
+            if (tradeFilter === "all") return true;
+            return t.status === tradeFilter;
+          }).length === 0 ? (
+            <div className="text-center py-12">
+              <MessageSquare size={48} className="mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="text-2xl font-bold mb-2 text-foreground">
+                No hay intercambios
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                ¡Crea uno ahora y comienza a intercambiar cartas con otros fans!
+              </p>
+              <button
+                onClick={() => setActiveTab("propose")}
+                className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all shadow-lg hover:shadow-xl"
+              >
+                Proponer Intercambio
+              </button>
             </div>
           ) : (
             <div className="space-y-6">
@@ -451,7 +469,6 @@ export function CardExchange() {
                 const otherPartyProfile = isRequester
                   ? trade.receiver_profile
                   : trade.requester_profile;
-                const otherPartyName = otherPartyProfile?.full_name || otherPartyProfile?.email?.split("@")[0];
                 const offeredCards = trade.trade_items?.filter(
                   (item) => item.side === "offered"
                 ) || [];
@@ -469,7 +486,7 @@ export function CardExchange() {
                         <h3 className="text-xl font-black mb-1 text-foreground">
                           Intercambio con{" "}
                           <span className="text-vcf-orange">
-                            {otherPartyName || "Usuario"}
+                            {otherPartyProfile?.full_name || otherPartyProfile?.email || "Usuario"}
                           </span>
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -481,8 +498,8 @@ export function CardExchange() {
                           trade.status === "pending"
                             ? "bg-vcf-orange/20 text-vcf-orange"
                             : trade.status === "accepted"
-                              ? "bg-vcf-orange/20 text-vcf-orange"
-                              : "bg-black/20 text-black"
+                              ? "bg-green-500/20 text-green-600"
+                              : "bg-red-500/20 text-red-600"
                         }`}
                       >
                         {trade.status === "pending"
