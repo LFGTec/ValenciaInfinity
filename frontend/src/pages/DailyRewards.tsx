@@ -4,7 +4,8 @@ import HeaderSection from "@/components/features/Daily Rewards/HeaderSection";
 import GridSection from "@/components/features/Daily Rewards/GridSection";
 import { Toast } from "@/components/features/Daily Rewards/Toast";
 import { useAuth } from "@/hooks/useAuth";
-import { getLocalStreak, getCycleDay, hasClaimedRewardToday, markRewardClaimed } from "@/services/streakService";
+import { getCycleDay, getDaysInCurrentMonth, todayISO } from "@/services/streakService";
+import { getDailyRewards, type DailyRewardDef } from "@/services/dailyRewardsService";
 
 export interface DayReward {
   day: number;
@@ -13,62 +14,66 @@ export interface DayReward {
   claimed: boolean;
   available: boolean;
   description: string;
+  active: boolean;
 }
 
-const REWARD_CATALOG: Omit<DayReward, "claimed" | "available">[] = [
-  { day: 1,  reward: 50,   type: "points", description: "50 Puntos Valencia"     },
-  { day: 2,  reward: 75,   type: "points", description: "75 Puntos Valencia"     },
-  { day: 3,  reward: 100,  type: "points", description: "100 Puntos Valencia"    },
-  { day: 4,  reward: 150,  type: "card",   description: "Carta Aleatoria Rara"   },
-  { day: 5,  reward: 200,  type: "points", description: "200 Puntos Valencia"    },
-  { day: 6,  reward: 250,  type: "points", description: "250 Puntos Valencia"    },
-  { day: 7,  reward: 500,  type: "bonus",  description: "BONO SEMANAL"           },
-  { day: 8,  reward: 100,  type: "points", description: "100 Puntos Valencia"    },
-  { day: 9,  reward: 125,  type: "points", description: "125 Puntos Valencia"    },
-  { day: 10, reward: 150,  type: "points", description: "150 Puntos Valencia"    },
-  { day: 11, reward: 200,  type: "card",   description: "Carta Aleatoria Épica"  },
-  { day: 12, reward: 250,  type: "points", description: "250 Puntos Valencia"    },
-  { day: 13, reward: 300,  type: "points", description: "300 Puntos Valencia"    },
-  { day: 14, reward: 1000, type: "bonus",  description: "MEGA BONO QUINCENAL"    },
-];
+const emptyRow = (day: number): DailyRewardDef => ({
+  day,
+  type: "points",
+  reward: 0,
+  description: "",
+  active: false,
+});
 
 export function DailyRewards() {
-  const { user, updatePoints } = useAuth();
+  const { user, claimReward } = useAuth();
 
   const currentStreak = user?.current_streak ?? 0;
   const longestStreak = user?.longest_streak ?? 0;
   const totalDays     = user?.total_days ?? 0;
-  const lastLoginDate = user ? (getLocalStreak(user.id).last_login_date ?? null) : null;
+  const lastLoginDate = user?.last_login_date ?? null;
 
-  const cycleDay = getCycleDay(totalDays);
-  const [claimedToday, setClaimedToday] = useState(false);
+  const daysInCycle  = getDaysInCurrentMonth();          // 30 o 31 según el mes
+  const cycleDay     = getCycleDay(currentStreak, daysInCycle); // posición en el ciclo
+  const claimedToday = user?.last_reward_date === todayISO();
 
-  useEffect(() => {
-    if (user) setClaimedToday(hasClaimedRewardToday(user.id));
-  }, [user?.id]);
-
+  const [catalog, setCatalog] = useState<DailyRewardDef[]>([]);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  const rewards: DayReward[] = REWARD_CATALOG.map((def) => ({
-    ...def,
-    claimed:   def.day < cycleDay || (def.day === cycleDay && claimedToday),
-    available: def.day === cycleDay && !claimedToday,
-  }));
+  useEffect(() => {
+    getDailyRewards()
+      .then((data) => {
+        // Genera los 31 slots; usa datos de BD donde existan, vacíos donde no
+        const byDay = Object.fromEntries(data.map((r) => [r.day, r]));
+        const full = Array.from({ length: 31 }, (_, i) => {
+          const day = i + 1;
+          return byDay[day] ?? emptyRow(day);
+        });
+        setCatalog(full);
+      })
+      .catch(() => setToast({ message: "Error cargando recompensas", type: "error" }));
+  }, []);
+
+  const rewards: DayReward[] = catalog
+    .filter((def) => def.day <= daysInCycle)
+    .map((def) => ({
+      ...def,
+      // Días anteriores al ciclo actual = ya reclamados esta racha
+      claimed:   def.day < cycleDay || (def.day === cycleDay && claimedToday),
+      available: def.day === cycleDay && !claimedToday && def.active,
+    }));
 
   const handleClaim = (day: number) => {
     if (!user) return;
-    const reward = REWARD_CATALOG.find((r) => r.day === day);
+    const reward = catalog.find((r) => r.day === day);
     if (!reward) return;
 
-    markRewardClaimed(user.id);
-    setClaimedToday(true);
-
-    if (reward.type !== "card") {
-      updatePoints(reward.reward);
-    }
+    claimReward(reward.type !== "card" ? reward.reward : 0);
 
     setToast({
-      message: `¡Recompensa reclamada! +${reward.reward} ${reward.type === "points" ? "puntos" : reward.type === "bonus" ? "bono" : "carta"}`,
+      message: `¡Recompensa reclamada! +${reward.reward} ${
+        reward.type === "points" ? "puntos" : reward.type === "bonus" ? "bono" : "carta"
+      }`,
       type: "success",
     });
   };

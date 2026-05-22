@@ -12,6 +12,8 @@ export interface User {
   current_streak?: number;
   longest_streak?: number;
   total_days?: number;
+  last_login_date?: string | null;
+  last_reward_date?: string | null;
   user_metadata?: {
     full_name?: string;
     avatar_url?: string;
@@ -186,7 +188,12 @@ export async function getUserProfile(userId: string): Promise<User | null> {
       full_name: data.full_name,
       avatar_url: data.avatar_url,
       puntos: (data.puntos as number) ?? 0,
-      user_metadata: {  },
+      current_streak: (data.current_streak as number) ?? 0,
+      longest_streak: (data.longest_streak as number) ?? 0,
+      total_days: (data.total_days as number) ?? 0,
+      last_login_date: (data.last_login_date as string) ?? null,
+      last_reward_date: (data.last_reward_date as string) ?? null,
+      user_metadata: {},
     };
   } catch (error) {
     console.error("❌ [authService] Exception en getUserProfile:", error);

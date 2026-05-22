@@ -48,6 +48,22 @@ export function useAuth() {
       });
   }, [user, setUser]);
 
+  // pointsDelta: puntos a sumar al reclamar (0 si es carta)
+  const claimReward = useCallback((pointsDelta = 0) => {
+    if (!user) return;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const newPoints = (user.puntos ?? 0) + pointsDelta;
+    setUser({ ...user, last_reward_date: today, puntos: newPoints });
+    supabase
+      .from("profiles")
+      .update({ last_reward_date: today, puntos: newPoints })
+      .eq("id", user.id)
+      .then(({ error }) => {
+        if (error) console.error("❌ Error guardando reward:", error.message);
+      });
+  }, [user, setUser]);
+
   return {
     user,
     loading,
@@ -56,6 +72,7 @@ export function useAuth() {
     isAuthenticated: user !== null,
     signOut,
     updatePoints,
+    claimReward,
   };
 }
 
