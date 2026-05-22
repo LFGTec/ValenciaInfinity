@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TipsSection from "@/components/features/Daily Rewards/TipsSection";
 import HeaderSection from "@/components/features/Daily Rewards/HeaderSection";
 import GridSection from "@/components/features/Daily Rewards/GridSection";
 import { Toast } from "@/components/features/Daily Rewards/Toast";
 import { useAuth } from "@/hooks/useAuth";
 import { getCycleDay, hasClaimedRewardToday, markRewardClaimed } from "@/services/streakService";
-import { addUserPoints } from "@/services/authService";
 
 export interface DayReward {
   day: number;
@@ -41,9 +40,11 @@ export function DailyRewards() {
   const totalDays     = user?.total_days ?? 0;
 
   const cycleDay = getCycleDay(totalDays);
-  const [claimedToday, setClaimedToday] = useState(
-    () => (user ? hasClaimedRewardToday(user.id) : false)
-  );
+  const [claimedToday, setClaimedToday] = useState(false);
+
+  useEffect(() => {
+    if (user) setClaimedToday(hasClaimedRewardToday(user.id));
+  }, [user?.id]);
 
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -63,7 +64,6 @@ export function DailyRewards() {
 
     if (reward.type !== "card") {
       updatePoints(reward.reward);
-      addUserPoints(user.id, reward.reward).catch(console.error);
     }
 
     setToast({

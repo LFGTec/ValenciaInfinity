@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { userAtom, loadingAtom, errorAtom, setUserAtom } from "../stores/authStore";
 import { signOut as signOutService } from "../services/authService";
+import { supabase } from "../services/supabaseClient";
 import { useCallback, useState } from "react";
 
 export function useAuth() {
@@ -35,9 +36,16 @@ export function useAuth() {
 
   const updatePoints = useCallback((delta: number) => {
     if (!user) return;
-    const newPoints = (user.points ?? 0) + delta;
-    setUser({ ...user, points: newPoints });
-    localStorage.setItem(`vcf_pts_${user.id}`, String(newPoints));
+    const newPoints = (user.puntos ?? 0) + delta;
+    setUser({ ...user, puntos: newPoints });
+    supabase
+      .from("profiles")
+      .update({ puntos: newPoints })
+      .eq("id", user.id)
+      .then(({ error }) => {
+        if (error) console.error("❌ Error sincronizando puntos:", error.message);
+        else console.log("✅ Puntos sincronizados en Supabase:", newPoints);
+      });
   }, [user, setUser]);
 
   return {

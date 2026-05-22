@@ -14,7 +14,6 @@ import {
   type Trivia,
   type TriviaQuestion,
 } from "../../services/triviasService";
-import { addUserPoints } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 
 export function TriviasQuizzes() {
@@ -164,9 +163,6 @@ export function TriviasQuizzes() {
 
           if (user && points > 0) {
             updatePoints(points);
-            addUserPoints(user.id, points).catch((err) =>
-              console.error("Error guardando puntos:", err)
-            );
           }
         }
 

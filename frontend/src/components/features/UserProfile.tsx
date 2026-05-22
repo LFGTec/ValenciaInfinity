@@ -259,7 +259,7 @@ export function UserProfile() {
         const streak  = user?.current_streak ?? 0;
         const longest = user?.longest_streak ?? 0;
         const total   = user?.total_days ?? 0;
-        const points  = user?.points ?? 0;
+        const points  = user?.puntos ?? 0;
 
         const badge = (() => {
           if (total >= 100) return { label: "FAN LEGENDARIO", color: "text-yellow-400" };
