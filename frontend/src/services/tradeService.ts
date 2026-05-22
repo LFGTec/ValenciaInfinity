@@ -171,10 +171,7 @@ export const getMyTradeRequests = async (
     .from("trade_requests")
     .select(`
       *,
-      trade_items(
-        *,
-        card:card_id(id, name, type, season, rarity, image_url)
-      )
+      trade_items(*)
     `)
     .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
 
@@ -187,8 +184,44 @@ export const getMyTradeRequests = async (
   const profileIds = [...new Set(trades.flatMap((trade) => [trade.requester_id, trade.receiver_id]))];
   const profiles = await getProfilesByIds(profileIds);
 
+  // Fetch card data separately
+  const allCardIds = new Set<string>();
+  trades.forEach((trade) => {
+    trade.trade_items?.forEach((item) => {
+      if (item.card_id) allCardIds.add(item.card_id);
+    });
+  });
+
+  let cardsMap = new Map<string, any>();
+  if (allCardIds.size > 0) {
+    const { data: cardsData, error: cardsError } = await supabase
+      .from("Cards")
+      .select(`
+        id,
+        name,
+        type,
+        season,
+        image_url,
+        categories(id, name, color)
+      `)
+      .in("id", Array.from(allCardIds));
+
+    if (!cardsError && cardsData) {
+      cardsMap = new Map(cardsData.map((card: any) => [card.id, card]));
+      console.log("✅ Fetched cards:", cardsMap.size);
+    } else {
+      console.error("❌ Error fetching cards:", cardsError);
+    }
+  }
+
+  console.log("Cards map size:", cardsMap.size, "All card IDs:", allCardIds.size);
+
   return trades.map((trade) => ({
     ...trade,
+    trade_items: trade.trade_items?.map((item) => ({
+      ...item,
+      card: cardsMap.get(item.card_id) || { id: item.card_id, name: "Carta" },
+    })),
     requester_profile: profiles.get(trade.requester_id) || null,
     receiver_profile: profiles.get(trade.receiver_id) || null,
   }));
@@ -199,15 +232,10 @@ export const getTradeRequestById = async (
 ): Promise<TradeRequest | null> => {
   const { data, error } = await supabase
     .from("trade_requests")
-    .select(
-      `
+    .select(`
       *,
-      trade_items(
-        *,
-        card:card_id(id, name, type, season, rarity, image_url)
-      )
-    `
-    )
+      trade_items(*)
+    `)
     .eq("id", tradeId)
     .single();
 
@@ -219,8 +247,40 @@ export const getTradeRequestById = async (
   const trade = data as TradeRequest;
   const profiles = await getProfilesByIds([trade.requester_id, trade.receiver_id]);
 
+  // Fetch card data separately
+  const allCardIds = new Set<string>();
+  trade.trade_items?.forEach((item) => {
+    if (item.card_id) allCardIds.add(item.card_id);
+  });
+
+  let cardsMap = new Map<string, any>();
+  if (allCardIds.size > 0) {
+    const { data: cardsData, error: cardsError } = await supabase
+      .from("Cards")
+      .select(`
+        id,
+        name,
+        type,
+        season,
+        image_url,
+        categories(id, name, color)
+      `)
+      .in("id", Array.from(allCardIds));
+
+    if (!cardsError && cardsData) {
+      cardsMap = new Map(cardsData.map((card: any) => [card.id, card]));
+      console.log("✅ Fetched cards:", cardsMap.size);
+    } else {
+      console.error("❌ Error fetching cards:", cardsError);
+    }
+  }
+
   return {
     ...trade,
+    trade_items: trade.trade_items?.map((item) => ({
+      ...item,
+      card: cardsMap.get(item.card_id) || { id: item.card_id, name: "Carta" },
+    })),
     requester_profile: profiles.get(trade.requester_id) || null,
     receiver_profile: profiles.get(trade.receiver_id) || null,
   };

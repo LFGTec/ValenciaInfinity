@@ -19,6 +19,7 @@ export function CardExchange() {
   const [activeTab, setActiveTab] = useState<
     "trades" | "propose"
   >("trades");
+  const [tradeFilter, setTradeFilter] = useState<"all" | "pending" | "accepted">("all");
 
   // Propose form state
   const [userCards, setUserCards] = useState<Card[]>([]);
@@ -355,27 +356,35 @@ export function CardExchange() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         {[
           {
+            id: "pending",
             label: "Intercambios Activos",
             value: trades.filter((t) => t.status === "pending").length,
             icon: Share2,
             color: "bg-vcf-orange",
           },
           {
+            id: "accepted",
             label: "Intercambios Aceptados",
             value: trades.filter((t) => t.status === "accepted").length,
             icon: Check,
             color: "bg-vcf-orange",
           },
           {
+            id: "all",
             label: "Total de Intercambios",
             value: trades.length,
             icon: MessageSquare,
             color: "bg-black",
           },
         ].map((stat, i) => (
-          <div
+          <button
             key={i}
-            className="bg-card border-2 border-border rounded-lg p-4 shadow-md hover:border-vcf-orange transition-all"
+            onClick={() => setTradeFilter(stat.id as "all" | "pending" | "accepted")}
+            className={`bg-card border-2 rounded-lg p-4 shadow-md transition-all text-left ${
+              tradeFilter === stat.id
+                ? "border-vcf-orange bg-vcf-orange/5"
+                : "border-border hover:border-vcf-orange"
+            }`}
           >
             <div className="flex items-center justify-between mb-2">
               <div
@@ -390,7 +399,7 @@ export function CardExchange() {
             <div className="text-sm text-muted-foreground font-bold">
               {stat.label}
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -432,7 +441,12 @@ export function CardExchange() {
             </div>
           ) : (
             <div className="space-y-6">
-              {trades.map((trade) => {
+              {trades
+                .filter((trade) => {
+                  if (tradeFilter === "all") return true;
+                  return trade.status === tradeFilter;
+                })
+                .map((trade) => {
                 const isRequester = trade.requester_id === user?.id;
                 const otherPartyProfile = isRequester
                   ? trade.receiver_profile
@@ -501,17 +515,23 @@ export function CardExchange() {
                                 )}
                               </div>
                               <div className="flex-1">
-                                <div className="font-bold text-sm text-foreground">
+                                <div className="font-bold text-sm text-foreground mb-1">
                                   {item.card?.name || "Carta"}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {item.card?.type || "Carta"} {item.quantity > 1 && `x${item.quantity}`}
+                                <div className="text-xs text-muted-foreground space-y-0.5">
+                                  {item.card?.type && (
+                                    <div>Tipo: {item.card.type}</div>
+                                  )}
+                                  {item.card?.season && (
+                                    <div>Temporada: {item.card.season}</div>
+                                  )}
+                                  {item.card?.rarity && (
+                                    <div>Categoría: {item.card.rarity}</div>
+                                  )}
+                                  {item.quantity > 1 && (
+                                    <div className="font-bold text-vcf-orange">x{item.quantity}</div>
+                                  )}
                                 </div>
-                                {item.card?.rarity && (
-                                  <span className={`text-xs font-bold ${rarityColors[item.card.rarity]} text-white px-2 py-0.5 rounded mt-1 inline-block`}>
-                                    {rarityLabels[item.card.rarity]}
-                                  </span>
-                                )}
                               </div>
                             </div>
                           ))}
@@ -546,17 +566,23 @@ export function CardExchange() {
                                 )}
                               </div>
                               <div className="flex-1">
-                                <div className="font-bold text-sm text-foreground">
+                                <div className="font-bold text-sm text-foreground mb-1">
                                   {item.card?.name || "Carta"}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {item.card?.type || "Carta"} {item.quantity > 1 && `x${item.quantity}`}
+                                <div className="text-xs text-muted-foreground space-y-0.5">
+                                  {item.card?.type && (
+                                    <div>Tipo: {item.card.type}</div>
+                                  )}
+                                  {item.card?.season && (
+                                    <div>Temporada: {item.card.season}</div>
+                                  )}
+                                  {item.card?.rarity && (
+                                    <div>Rareza: {item.card.rarity}</div>
+                                  )}
+                                  {item.quantity > 1 && (
+                                    <div className="font-bold text-vcf-orange">x{item.quantity}</div>
+                                  )}
                                 </div>
-                                {item.card?.rarity && (
-                                  <span className={`text-xs font-bold ${rarityColors[item.card.rarity]} text-white px-2 py-0.5 rounded mt-1 inline-block`}>
-                                    {rarityLabels[item.card.rarity]}
-                                  </span>
-                                )}
                               </div>
                             </div>
                           ))}
