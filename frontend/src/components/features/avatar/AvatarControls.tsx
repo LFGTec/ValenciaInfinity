@@ -75,6 +75,7 @@ function getPaletteCategory(categoryId: string) {
     category === "barba" ||
     category === "hair" ||
     category === "eyebrow" ||
+    category === "eyebrows" ||
     category === "facialhair"
   ) {
     return "Cabello";
@@ -90,12 +91,28 @@ function getPaletteCategory(categoryId: string) {
     return "Cabeza";
   }
 
+  if (category === "nariz" || category === "nose") {
+    return "Cabeza";
+  }
+
   if (category === "pantalon" || category === "bottom") {
     return "Pantalón";
   }
 
   if (category === "playera" || category === "top") {
     return "Playera";
+  }
+
+  if (category === "lentes" || category === "glasses") {
+    return "Lentes";
+  }
+
+  if (category === "sombrero" || category === "hat") {
+    return "Sombrero";
+  }
+
+  if (category === "zapatos" || category === "shoes") {
+    return "Zapatos";
   }
 
   return categoryId;
@@ -120,12 +137,31 @@ function canPaintAsset(categoryId: string, asset?: any) {
 
   const position = getAssetPosition(asset);
 
-  if (category === "pantalon" || category === "bottom") {
-    return position <= 3;
+  
+  if (
+    category === "ojos" ||
+    category === "eyes" ||
+    category === "rostro" ||
+    category === "face" ||
+    category === "cara"
+  ) {
+    return false;
+  }
+
+  if (category === "lentes" || category === "glasses") {
+    return position === 1 || position === 4;
+  }
+
+  if (category === "sombrero" || category === "hat") {
+    return position === 2;
   }
 
   if (category === "playera" || category === "top") {
-    return position <= 5;
+    return position <= 3;
+  }
+
+  if (category === "pantalon" || category === "bottom") {
+    return position <= 3;
   }
 
   return true;
@@ -162,13 +198,24 @@ export function AvatarControls({
       sameCategory(palette?.nombre, selectedCategory) ||
       sameCategory(palette?.categoria, currentCategory?.id) ||
       sameCategory(palette?.nombre, currentCategory?.id) ||
-      sameCategory(palette?.categoria, (currentCategory as any)?.etiqueta_categoria) ||
-      sameCategory(palette?.nombre, (currentCategory as any)?.etiqueta_categoria)
+      sameCategory(
+        palette?.categoria,
+        (currentCategory as any)?.etiqueta_categoria
+      ) ||
+      sameCategory(
+        palette?.nombre,
+        (currentCategory as any)?.etiqueta_categoria
+      )
     );
   });
 
   const paletteColors = getPaletteColors(currentPalette?.colores);
   const paletteCategory = currentPalette?.categoria || colorCategory;
+
+  const selectedColor =
+    selectedColors[paletteCategory] ||
+    selectedColors[colorCategory] ||
+    selectedColors[selectedCategory];
 
   const canShowColors =
     paletteColors.length > 0 &&
@@ -181,16 +228,13 @@ export function AvatarControls({
           {canShowColors && (
             <div className="mb-5 flex gap-3">
               {paletteColors.map((color: string) => {
-                const isSelected =
-                  selectedColors[paletteCategory] === color ||
-                  selectedColors[colorCategory] === color ||
-                  selectedColors[selectedCategory] === color;
+                const isSelected = selectedColor === color;
 
                 return (
                   <button
                     key={color}
                     type="button"
-                    onClick={() => onSelectColor(paletteCategory, color)}
+                    onClick={() => onSelectColor(colorCategory, color)}
                     style={{ backgroundColor: color }}
                     className={`w-8 h-8 rounded-md border-2 transition ${
                       isSelected

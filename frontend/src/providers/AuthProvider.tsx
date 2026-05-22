@@ -5,6 +5,7 @@ import { finishLoadingAtom } from "../stores/authStore";
 import type { User } from "../services/authService";
 import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { getUserProfile } from "../services/authService";
+import { checkAndUpdateStreak } from "../services/streakService";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const finishLoading = useSetAtom(finishLoadingAtom);
@@ -14,8 +15,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const profile = await getUserProfile(user.id);
       if (profile) {
+        const cachedPoints = parseInt(localStorage.getItem(`vcf_pts_${user.id}`) ?? "0", 10);
+        const points = Math.max(profile.points ?? 0, cachedPoints);
+        localStorage.setItem(`vcf_pts_${user.id}`, String(points));
         return {
           ...profile,
+          points,
           avatar_url: profile.avatar_url ?? user.user_metadata?.avatar_url,
           user_metadata: user.user_metadata,
         };
@@ -40,7 +45,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const applySession = async (session: Session | null) => {
       const callId = ++latestCallId;
-      const mappedUser = await mapUser(session?.user ?? null);
+      let mappedUser = await mapUser(session?.user ?? null);
+      if (mappedUser?.id) {
+        const streak = checkAndUpdateStreak(mappedUser.id);
+        mappedUser = { ...mappedUser, ...streak };
+      }
       if (mounted && callId === latestCallId) {
         finishLoading(mappedUser);
       }

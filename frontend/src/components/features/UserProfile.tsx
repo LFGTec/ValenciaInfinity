@@ -9,6 +9,10 @@ import {
   Edit,
   Save,
   X,
+  Flame,
+  Trophy,
+  Calendar,
+  Star,
 } from "lucide-react";
 import { useAtom } from "jotai";
 import { usePrivacySettings } from "@/hooks/useUserPreferences";
@@ -249,6 +253,71 @@ export function UserProfile() {
           </div>
         </div>
       )}
+
+      {/* ── Pestaña ESTADÍSTICAS ── */}
+      {activeTab === "stats" && (() => {
+        const streak  = user?.current_streak ?? 0;
+        const longest = user?.longest_streak ?? 0;
+        const total   = user?.total_days ?? 0;
+        const points  = user?.points ?? 0;
+
+        const badge = (() => {
+          if (total >= 100) return { label: "FAN LEGENDARIO", color: "text-yellow-400" };
+          if (total >= 60)  return { label: "FAN VETERANO",   color: "text-purple-400" };
+          if (total >= 30)  return { label: "FAN DEDICADO",   color: "text-blue-400"   };
+          if (total >= 14)  return { label: "FAN CONSTANTE",  color: "text-green-400"  };
+          if (total >= 7)   return { label: "FAN ACTIVO",     color: "text-vcf-orange" };
+          return                   { label: "FAN NUEVO",      color: "text-gray-400"   };
+        })();
+
+        return (
+          <div className="max-w-2xl mx-auto space-y-6">
+            {/* Badge */}
+            <div className="bg-card border-2 border-vcf-orange rounded-xl p-6 flex items-center gap-5">
+              <div className="w-16 h-16 rounded-full bg-vcf-orange/10 border-2 border-vcf-orange/40 flex items-center justify-center flex-shrink-0">
+                <Trophy size={32} className="text-vcf-orange" />
+              </div>
+              <div>
+                <p className="text-xs font-black tracking-widest text-muted-foreground mb-1">TU TÍTULO</p>
+                <p className={`text-3xl font-black ${badge.color}`}>{badge.label}</p>
+              </div>
+            </div>
+
+            {/* Stats grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-card border-2 border-border rounded-xl p-6 text-center">
+                <Flame size={32} className="mx-auto mb-3 text-orange-400" />
+                <p className="text-4xl font-black text-foreground tabular-nums">{streak}</p>
+                <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">Racha actual</p>
+              </div>
+
+              <div className="bg-card border-2 border-border rounded-xl p-6 text-center">
+                <Trophy size={32} className="mx-auto mb-3 text-vcf-orange" />
+                <p className="text-4xl font-black text-foreground tabular-nums">{longest}</p>
+                <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">Racha más larga</p>
+              </div>
+
+              <div className="bg-card border-2 border-border rounded-xl p-6 text-center">
+                <Calendar size={32} className="mx-auto mb-3 text-vcf-orange" />
+                <p className="text-4xl font-black text-foreground tabular-nums">{total}</p>
+                <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">Días totales</p>
+              </div>
+
+              <div className="bg-card border-2 border-border rounded-xl p-6 text-center">
+                <Star size={32} className="mx-auto mb-3 text-vcf-orange" />
+                <p className="text-4xl font-black text-vcf-orange tabular-nums">{points.toLocaleString("es-ES")}</p>
+                <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">Puntos Valencia</p>
+              </div>
+            </div>
+
+            {streak === 0 && (
+              <p className="text-center text-muted-foreground text-sm">
+                Inicia sesión cada día para construir tu racha y ganar recompensas.
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Pestaña PRIVACIDAD ── */}
       {activeTab === "privacy" && (

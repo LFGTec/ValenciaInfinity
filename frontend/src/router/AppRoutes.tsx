@@ -18,8 +18,8 @@ import ForgotPassword from "../pages/ForgotPassword";
 import { Juego } from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
-import  AdminLayout  from "@/layouts/AdminLayout"
-import { TriviasQuizzes } from  "../components/features/TriviasQuizzes"
+import AdminLayout from "@/layouts/AdminLayout"
+import { TriviasQuizzes } from "../components/features/TriviasQuizzes"
 import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
@@ -31,6 +31,7 @@ import { EstadisticasPage } from "@/pages/EstadisticasPage";
 import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
 
+import { DailyRewards } from "@/pages/DailyRewards";
 
 export default function AppRoutes() {
   return (
@@ -50,6 +51,7 @@ export default function AppRoutes() {
         <Route path="/estadisticas" element={<EstadisticasPage />} />
         <Route path="/news" element={<News />} />
         <Route path="/nou-mestalla" element={<NouMestellaPage />} />
+        <Route path="daily-rewards" element={<DailyRewards />} />
 
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
