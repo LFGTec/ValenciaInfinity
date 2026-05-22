@@ -22,6 +22,7 @@ import AdminLayout from "@/layouts/AdminLayout"
 import { TriviasQuizzes } from "../components/features/TriviasQuizzes"
 import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
+import { ManageRewards } from "@/pages/AdminViews/ManageRewards";
 import { VirtualWorld } from "@/components/VirtualWorld.tsx";
 import { Friends } from "@/pages/Friends.tsx";
 
@@ -51,7 +52,7 @@ export default function AppRoutes() {
         <Route path="/estadisticas" element={<EstadisticasPage />} />
         <Route path="/news" element={<News />} />
         <Route path="/nou-mestalla" element={<NouMestellaPage />} />
-        <Route path="daily-rewards" element={<DailyRewards />} />
+        <Route path="/daily-rewards" element={<DailyRewards />} />
 
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
@@ -70,10 +71,11 @@ export default function AppRoutes() {
 
       {/*Rutas de Admin*/}
       <Route element={<AdminLayout />}>
-      <Route path="/admin/statistics" element={<AdminStatistics />} />
-      <Route path="/admin/trivias" element={<CrearTrivias/>} />
-      <Route path="/admin/timeline" element={<TimelineAdmin />} />
+        <Route path="/admin/statistics" element={<AdminStatistics />} />
+        <Route path="/admin/trivias" element={<CrearTrivias />} />
+        <Route path="/admin/timeline" element={<TimelineAdmin />} />
         <Route path="/admin/cards" element={<ManageCards />} />
+        <Route path="/admin/rewards" element={<ManageRewards />} />
 
         <Route element={<ProtectedRoute adminOnly={true} />}>
           <Route
