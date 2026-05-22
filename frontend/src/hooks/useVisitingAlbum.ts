@@ -55,18 +55,7 @@ export function useVisitingAlbum(
         );
 
       if (foundUser) {
-        setProfile({
-          id: foundUser.id,
-          full_name: foundUser.full_name,
-          avatar_url: foundUser.avatar_url,
-          points: foundUser.puntos,
-          level: foundUser.level,
-          friendship_status:
-            foundUser.friendship_status,
-          friendship_id: foundUser.friendship_id,
-        } as VisitingProfile);
-      } else {
-        setProfile(null);
+        setProfile(foundUser);
       }
 
     } catch (error) {
