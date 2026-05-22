@@ -274,7 +274,7 @@ export function CardAlbum({ userId }: Props) {
           </div>
 
           {/* Unopened packs section */}
-          <div className="bg-white border-2 border-vcf-orange backdrop-blur-sm rounded-lg px-6 py-4 mb-6">
+          <div className="bg-white border-2 border-vcf-orange backdrop-blur-sm rounded-lg px-6 py-4 mb-12">
             <div className="mb-4">
               <p className="text-xl font-black text-black">
                 SOBRES <span className="text-vcf-orange">SIN ABRIR</span>
