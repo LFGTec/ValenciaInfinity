@@ -68,6 +68,61 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
     });
 };
 
+export const getFullAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
+  const [{ data: allCards, error: allCardsError }, { data: userCards, error: userCardsError }] = await Promise.all([
+    supabase
+      .from("Cards")
+      .select(`
+        *,
+        categories!fk_category (
+          id,
+          name,
+          color
+        )
+      `)
+      .eq("is_deleted", false),
+    supabase
+      .from("user_cards")
+      .select("card_id, quantity")
+      .eq("user_id", userId)
+      .gt("quantity", 0),
+  ]);
+
+  if (allCardsError) {
+    throw new Error(allCardsError.message);
+  }
+
+  if (userCardsError) {
+    throw new Error(userCardsError.message);
+  }
+
+  const ownedQuantities = new Map<string, number>(
+    (userCards ?? []).map((row: any) => [row.card_id as string, Number(row.quantity ?? 0)])
+  );
+
+  return (allCards ?? [])
+    .map((card: any) => {
+      const quantity = ownedQuantities.get(card.id) ?? 0;
+
+      return {
+        ...card,
+        rarity: card.categories?.name || card.rarity || null,
+        quantity,
+        obtained: quantity > 0,
+      } as Card;
+    })
+    .sort((left, right) => {
+      const leftSeason = left.season ?? 0;
+      const rightSeason = right.season ?? 0;
+
+      if (leftSeason !== rightSeason) {
+        return leftSeason - rightSeason;
+      }
+
+      return left.name.localeCompare(right.name);
+    });
+};
+
 export const getCards = async (): Promise<Card[]> => {
   const { data, error } = await supabase
     .from("Cards")

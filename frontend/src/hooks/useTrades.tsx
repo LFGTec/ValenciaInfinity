@@ -5,6 +5,7 @@ import {
   updateTradeStatus,
   createTradeRequest,
   getUserIdByEmail,
+  acceptTradeWithInventoryUpdate,
   type TradeRequest,
 } from "../services/tradeService";
 
@@ -33,7 +34,7 @@ export const useTrades = () => {
   }, [user?.id]);
 
   const acceptTrade = async (tradeId: string) => {
-    const success = await updateTradeStatus(tradeId, "accepted");
+    const success = await acceptTradeWithInventoryUpdate(tradeId);
     if (success) {
       setTrades((prev) =>
         prev.map((t) =>

@@ -4,7 +4,7 @@ import { useSetAtom } from "jotai";
 import { pageAtom } from "../UI";
 import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
-import { getAlbumCardsByUser, getUserPacks, openPack, createUserPack, type Card, type UserPack } from "../../services/cardsService";
+import { getFullAlbumCardsByUser, getUserPacks, openPack, createUserPack, type Card, type UserPack } from "../../services/cardsService";
 import { PackOpenAnimation } from "./PackOpenAnimation";
 import { useVisitingAlbum } from "@/hooks/useVisitingAlbum";
 import { Star, Trophy } from "lucide-react";
@@ -69,7 +69,7 @@ export function CardAlbum({ userId }: Props) {
       setError(null);
 
       try {
-        const data = await getAlbumCardsByUser(targetUserId);
+        const data = await getFullAlbumCardsByUser(targetUserId);
         setCards(data);
       } catch (err) {
         const message = err instanceof Error ? err.message : "No se pudo cargar el album";
@@ -126,7 +126,7 @@ export function CardAlbum({ userId }: Props) {
 
         // Refresh cards to display newly obtained ones
         if (user?.id) {
-          const updatedCards = await getAlbumCardsByUser(user.id);
+          const updatedCards = await getFullAlbumCardsByUser(user.id);
           setCards(updatedCards);
         }
 
@@ -256,7 +256,7 @@ export function CardAlbum({ userId }: Props) {
             <div className="grid grid-cols-4 gap-3">
               <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
                 <p className="text-2xl md:text-3xl font-black text-vcf-orange">{obtainedCards}</p>
-                <p className="text-xs text-gray-600 font-medium">Total</p>
+                <p className="text-xs text-gray-600 font-medium">Obtenidas</p>
               </div>
               <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
                 <p className="text-2xl md:text-3xl font-black text-black">{missingCards}</p>
@@ -283,7 +283,7 @@ export function CardAlbum({ userId }: Props) {
                 {packsLoading ? "Cargando..." : `Tienes ${packs.length} ${packs.length === 1 ? "sobre" : "sobres"} esperando ser ${packs.length === 1 ? "abierto" : "abiertos"}`}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 px-6 py-4">
               {packs.length > 0 && packs.map((pack) => (
                 <div
                   key={pack.id}
