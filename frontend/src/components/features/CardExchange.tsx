@@ -1,25 +1,57 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Share2,
+  UsersRound,
   MessageSquare,
   Check,
   X,
   Plus,
   Trash2,
   Search,
+  ShoppingCart,
+  Gift,
+  TrendingUp,
 } from "lucide-react";
 import { useTrades } from "../../hooks/useTrades";
 import { useAuth } from "../../hooks/useAuth";
-import { getAlbumCardsByUser, type Card } from "../../services/cardsService";
+import { useMarketplace } from "../../hooks/useMarketplace";
+import { getAlbumCardsByUser, getCards, type Card } from "../../services/cardsService";
 import { getFriendsByName, type FriendSuggestion } from "../../services/tradeService";
+
+type MarketplaceSelectionItem = {
+  card_id: string;
+  quantity: number;
+  points_amount?: number;
+};
+
+type PendingCancelOffer = {
+  id: string;
+  title: string;
+};
 
 export function CardExchange() {
   const { user } = useAuth();
   const { trades, loading: tradesLoading, acceptTrade, rejectTrade, createTrade } = useTrades();
+  const { listings, userOffers, loading: marketplaceLoading, postOffer, acceptOffer, cancelOffer } = useMarketplace();
   const [activeTab, setActiveTab] = useState<
-    "trades" | "propose"
+    "trades" | "propose" | "marketplace" | "my_offers"
   >("trades");
   const [tradeFilter, setTradeFilter] = useState<"all" | "pending" | "accepted">("all");
+
+  // Marketplace form state
+  const [marketplaceOfferType, setMarketplaceOfferType] = useState<"card_for_card" | "card_for_points" | "points_for_card">("card_for_card");
+  const [offerTitle, setOfferTitle] = useState("");
+  const [offerExpiresAt, setOfferExpiresAt] = useState("");
+  const [creatingMarketplaceOffer, setCreatingMarketplaceOffer] = useState(false);
+  const [acceptingOffer, setAcceptingOffer] = useState<string | null>(null);
+  const [loadingMarketplaceCards, setLoadingMarketplaceCards] = useState(false);
+  const [marketplaceCards, setMarketplaceCards] = useState<Card[]>([]);
+  const [marketplaceOfferingPoints, setMarketplaceOfferingPoints] = useState<number | null>(null);
+  const [marketplaceWantedPoints, setMarketplaceWantedPoints] = useState<number | null>(null);
+
+  // Marketplace cards selection
+  const [marketplaceOfferingCards, setMarketplaceOfferingCards] = useState<MarketplaceSelectionItem[]>([]);
+  const [marketplaceWantedCards, setMarketplaceWantedCards] = useState<MarketplaceSelectionItem[]>([]);
+  const [marketplaceSelectedTab, setMarketplaceSelectedTab] = useState<"offering" | "wanted">("offering");
 
   // Propose form state
   const [userCards, setUserCards] = useState<Card[]>([]);
@@ -34,6 +66,7 @@ export function CardExchange() {
   const [wantedCards, setWantedCards] = useState<Array<{ card_id: string; quantity: number }>>([]);
   const [selectedCardTab, setSelectedCardTab] = useState<"offered" | "wanted">("offered");
   const [creatingTrade, setCreatingTrade] = useState(false);
+  const [offerToCancel, setOfferToCancel] = useState<PendingCancelOffer | null>(null);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error" | "warning";
     message: string;
@@ -64,7 +97,7 @@ export function CardExchange() {
 
   // Load only current user cards when entering propose tab
   useEffect(() => {
-    if (user?.id && activeTab === "propose") {
+    if (user?.id && (activeTab === "propose" || activeTab === "my_offers")) {
       const loadCards = async () => {
         setLoadingCards(true);
         try {
@@ -79,6 +112,39 @@ export function CardExchange() {
       };
       loadCards();
     }
+  }, [user?.id, activeTab]);
+
+  useEffect(() => {
+    if (!user?.id || activeTab !== "my_offers") {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadMarketplaceCards = async () => {
+      setLoadingMarketplaceCards(true);
+      try {
+        const cardsData = await getCards();
+        if (!isCancelled) {
+          setMarketplaceCards(cardsData);
+        }
+      } catch (err) {
+        console.error("Error loading marketplace cards:", err);
+        if (!isCancelled) {
+          setMarketplaceCards([]);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoadingMarketplaceCards(false);
+        }
+      }
+    };
+
+    loadMarketplaceCards();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [user?.id, activeTab]);
 
   useEffect(() => {
@@ -176,20 +242,6 @@ export function CardExchange() {
     }
   }, [showSuggestions]);
 
-  const rarityColors = {
-    common: "bg-muted",
-    rare: "bg-vcf-orange",
-    epic: "bg-black",
-    legendary: "bg-vcf-orange",
-  };
-
-  const rarityLabels = {
-    common: "Común",
-    rare: "Rara",
-    epic: "Épica",
-    legendary: "Legendaria",
-  };
-
   const handleAcceptTrade = async (tradeId: string) => {
     const success = await acceptTrade(tradeId);
     if (success) {
@@ -208,6 +260,64 @@ export function CardExchange() {
       showFeedback("Intercambio rechazado.", "warning");
     } else {
       showFeedback("No se pudo rechazar el intercambio.", "error");
+    }
+  };
+
+  const marketplaceOfferingUsesPoints = marketplaceOfferType === "points_for_card";
+  const marketplaceWantedUsesPoints = marketplaceOfferType === "card_for_points";
+
+  const getMarketplaceCardById = (cardId: string) =>
+    marketplaceCards.find((card) => card.id === cardId) ||
+    userCards.find((card) => card.id === cardId) ||
+    null;
+
+  const updateMarketplaceSelection = (
+    side: "offering" | "wanted",
+    cardId: string,
+    quantity: number,
+    pointsAmount?: number
+  ) => {
+    const safeQuantity = Math.max(1, Number.isFinite(quantity) ? quantity : 1);
+    const safePointsAmount =
+      pointsAmount === undefined ? undefined : Math.max(1, Number.isFinite(pointsAmount) ? pointsAmount : 1);
+
+    const updateItems = (items: MarketplaceSelectionItem[]) => {
+      const existing = items.find((item) => item.card_id === cardId);
+
+      if (existing) {
+        return items.map((item) =>
+          item.card_id === cardId
+            ? {
+                ...item,
+                quantity: safeQuantity,
+                ...(safePointsAmount !== undefined ? { points_amount: safePointsAmount } : {}),
+              }
+            : item
+        );
+      }
+
+      return [
+        ...items,
+        {
+          card_id: cardId,
+          quantity: safeQuantity,
+          ...(safePointsAmount !== undefined ? { points_amount: safePointsAmount } : {}),
+        },
+      ];
+    };
+
+    if (side === "offering") {
+      setMarketplaceOfferingCards((prev) => updateItems(prev));
+    } else {
+      setMarketplaceWantedCards((prev) => updateItems(prev));
+    }
+  };
+
+  const removeMarketplaceSelection = (side: "offering" | "wanted", cardId: string) => {
+    if (side === "offering") {
+      setMarketplaceOfferingCards((prev) => prev.filter((item) => item.card_id !== cardId));
+    } else {
+      setMarketplaceWantedCards((prev) => prev.filter((item) => item.card_id !== cardId));
     }
   };
 
@@ -325,7 +435,7 @@ export function CardExchange() {
           <span className="text-vcf-orange">CARTAS</span>
         </h1>
         <p className="text-xl text-muted-foreground">
-          Intercambia cartas con otros fans
+Compra, vende e intercambia cartas con otros fans
         </p>
       </div>
 
@@ -353,21 +463,23 @@ export function CardExchange() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           {
             id: "pending",
             label: "Intercambios Activos",
             value: trades.filter((t) => t.status === "pending").length,
-            icon: Share2,
+            icon: UsersRound,
             color: "bg-vcf-orange",
+            borderColor: "border-vcf-orange",
           },
           {
             id: "accepted",
             label: "Intercambios Aceptados",
             value: trades.filter((t) => t.status === "accepted").length,
             icon: Check,
-            color: "bg-vcf-orange",
+            color: "bg-green-600",
+            borderColor: "border-green-600",
           },
           {
             id: "all",
@@ -375,14 +487,31 @@ export function CardExchange() {
             value: trades.length,
             icon: MessageSquare,
             color: "bg-black",
+            borderColor: "border-black",
+          },
+          {
+            id: "offers",
+            label: "Ofertas Publicadas",
+            value: userOffers.filter((offer) => offer.status === "active").length,
+            icon: TrendingUp,
+            color: "bg-vcf-orange",
+            borderColor: "border-vcf-orange",
           },
         ].map((stat, i) => (
           <button
             key={i}
-            onClick={() => setTradeFilter(stat.id as "all" | "pending" | "accepted")}
+            onClick={() =>
+              stat.id === "offers"
+                ? setActiveTab("my_offers")
+                : setTradeFilter(stat.id as "all" | "pending" | "accepted")
+            }
             className={`bg-card border-2 rounded-lg p-4 shadow-md transition-all text-left ${
-              tradeFilter === stat.id
-                ? "border-vcf-orange bg-vcf-orange/5"
+              stat.id === "offers"
+                ? activeTab === "my_offers"
+                  ? `${stat.borderColor} bg-opacity-10`
+                  : "border-border hover:border-vcf-orange"
+                : tradeFilter === stat.id
+                ? `${stat.borderColor} bg-opacity-10`
                 : "border-border hover:border-vcf-orange"
             }`}
           >
@@ -404,20 +533,23 @@ export function CardExchange() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-8 border-b-2 border-border">
+      <div className="flex gap-2 mb-8 border-b-2 border-border overflow-x-auto">
         {[
-          { id: "trades", label: "INTERCAMBIOS" },
-          { id: "propose", label: "PROPONER INTERCAMBIO" },
+          { id: "trades", label: "INTERCAMBIOS", icon: UsersRound },
+          { id: "propose", label: "CREAR INTERCAMBIO", icon: Gift },
+          { id: "marketplace", label: "MARKETPLACE", icon: ShoppingCart },
+          { id: "my_offers", label: "MIS OFERTAS", icon: TrendingUp },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-6 py-3 font-bold transition-all ${
+                  onClick={() => setActiveTab(tab.id as "trades" | "propose" | "marketplace" | "my_offers")}
+            className={`px-6 py-3 font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === tab.id
                 ? "border-b-4 border-vcf-orange text-vcf-orange"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
+            <tab.icon size={16} />
             {tab.label}
           </button>
         ))}
@@ -435,9 +567,24 @@ export function CardExchange() {
             <div className="text-center py-8 text-muted-foreground">
               Cargando intercambios...
             </div>
-          ) : trades.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No tienes solicitudes de intercambio
+          ) : trades.length === 0 || trades.filter((t) => {
+            if (tradeFilter === "all") return true;
+            return t.status === tradeFilter;
+          }).length === 0 ? (
+            <div className="text-center py-12">
+              <MessageSquare size={48} className="mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="text-2xl font-bold mb-2 text-foreground">
+                No hay intercambios
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                ¡Crea uno ahora y comienza a intercambiar cartas con otros fans!
+              </p>
+              <button
+                onClick={() => setActiveTab("propose")}
+                className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all shadow-lg hover:shadow-xl"
+              >
+                Proponer Intercambio
+              </button>
             </div>
           ) : (
             <div className="space-y-6">
@@ -451,7 +598,6 @@ export function CardExchange() {
                 const otherPartyProfile = isRequester
                   ? trade.receiver_profile
                   : trade.requester_profile;
-                const otherPartyName = otherPartyProfile?.full_name || otherPartyProfile?.email?.split("@")[0];
                 const offeredCards = trade.trade_items?.filter(
                   (item) => item.side === "offered"
                 ) || [];
@@ -469,7 +615,7 @@ export function CardExchange() {
                         <h3 className="text-xl font-black mb-1 text-foreground">
                           Intercambio con{" "}
                           <span className="text-vcf-orange">
-                            {otherPartyName || "Usuario"}
+                            {otherPartyProfile?.full_name || otherPartyProfile?.email || "Usuario"}
                           </span>
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -481,8 +627,8 @@ export function CardExchange() {
                           trade.status === "pending"
                             ? "bg-vcf-orange/20 text-vcf-orange"
                             : trade.status === "accepted"
-                              ? "bg-vcf-orange/20 text-vcf-orange"
-                              : "bg-black/20 text-black"
+                              ? "bg-green-500/20 text-green-600"
+                              : "bg-red-500/20 text-red-600"
                         }`}
                       >
                         {trade.status === "pending"
@@ -632,9 +778,9 @@ export function CardExchange() {
           <div className="bg-card border-2 border-vcf-orange rounded-lg p-8 shadow-lg">
             <div className="space-y-6">
               {/* Friend Search */}
-            <div>
-              <label className="block font-bold mb-2 text-foreground">
-                Selecciona un amigo para intercambiar
+              <div>
+                <label className="block font-bold mb-2 text-foreground">
+                Selecciona un amigo para intercambiar <span className="text-red-500">*</span>
               </label>
               <div className="relative" ref={suggestionsRef}>
                 <div className="relative">
@@ -739,6 +885,7 @@ export function CardExchange() {
                   <h3 className="font-bold mb-4 text-foreground text-lg">
                     CARTAS QUE{" "}
                     <span className="text-vcf-orange">OFRECES</span>
+                    <span className="text-red-500 ml-2">*</span>
                   </h3>
 
                   {/* Selected Offered Cards */}
@@ -891,6 +1038,7 @@ export function CardExchange() {
                   <h3 className="font-bold mb-4 text-foreground text-lg">
                     CARTAS QUE{" "}
                     <span className="text-vcf-orange">SOLICITAS</span>
+                    <span className="text-red-500 ml-2">*</span>
                   </h3>
 
                   {/* Selected Wanted Cards */}
@@ -1027,8 +1175,798 @@ export function CardExchange() {
                 disabled={creatingTrade}
                 className="w-full py-4 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
               >
-                <Share2 size={20} />
+                  <UsersRound size={20} />
                 {creatingTrade ? "Proponiendo..." : "PROPONER INTERCAMBIO"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Marketplace */}
+      {activeTab === "marketplace" && (
+        <div>
+          <h2 className="text-2xl font-black mb-6 text-foreground">
+            MARKETPLACE DE <span className="text-vcf-orange">CARTAS</span>
+          </h2>
+
+          {marketplaceLoading ? (
+            <div className="text-center py-12 text-muted-foreground">
+              Cargando ofertas del marketplace...
+            </div>
+          ) : listings.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <ShoppingCart size={48} className="mx-auto mb-4 opacity-50" />
+              <p>No hay ofertas activas en el marketplace</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {listings.map((listing) => {
+                const offeringItems = listing.trade_items?.filter((i) => i.side === "offering") || [];
+                const wantedItems = listing.trade_items?.filter((i) => i.side === "wanted") || [];
+
+                return (
+                  <div
+                    key={listing.id}
+                    className="bg-card border-2 border-border rounded-lg p-6 shadow-md hover:border-vcf-orange transition-all"
+                  >
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-lg font-black text-foreground">{listing.title}</h3>
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-vcf-orange/20 text-vcf-orange">
+                          {listing.type === "card_for_card"
+                            ? "CARTAS POR CARTAS"
+                            : listing.type === "card_for_points"
+                            ? "CARTAS POR PUNTOS"
+                            : "PUNTOS POR CARTAS"}
+                        </span>
+                      </div>
+                      {/* description removed */}
+                    </div>
+
+                    {listing.creator_profile && (
+                      <div className="mb-4 p-3 bg-muted rounded-lg flex items-center gap-3">
+                        {listing.creator_profile.avatar_url && (
+                          <img
+                            src={listing.creator_profile.avatar_url}
+                            alt={listing.creator_profile.full_name || "Usuario"}
+                            className="w-8 h-8 rounded-full"
+                          />
+                        )}
+                        <div className="text-sm">
+                          <div className="font-bold text-foreground">
+                            {listing.creator_profile.full_name || listing.creator_profile.email?.split("@")[0]}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Publicado: {new Date(listing.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      {/* Offering */}
+                      <div>
+                        <h4 className="font-bold mb-2 text-sm text-muted-foreground">OFRECE:</h4>
+                        <div className="space-y-2">
+                          {offeringItems.map((item) => (
+                            <div
+                              key={item.id}
+                              className="p-2 bg-muted rounded border border-border text-sm"
+                            >
+                              {item.card ? (
+                                <div className="flex items-center gap-2">
+                                  {item.card.image_url && (
+                                    <img
+                                      src={item.card.image_url}
+                                      alt={item.card.name}
+                                      className="w-6 h-8 object-contain"
+                                    />
+                                  )}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-bold text-foreground truncate text-xs">
+                                      {item.card.name}
+                                    </div>
+                                    {item.quantity && item.quantity > 1 && (
+                                      <div className="text-xs text-vcf-orange">x{item.quantity}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : item.points_amount ? (
+                                <div className="font-bold text-vcf-orange">💰 {item.points_amount} puntos</div>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Wanted */}
+                      <div>
+                        <h4 className="font-bold mb-2 text-sm text-muted-foreground">QUIERE:</h4>
+                        <div className="space-y-2">
+                          {wantedItems.map((item) => (
+                            <div
+                              key={item.id}
+                              className="p-2 bg-black/10 rounded border border-border text-sm"
+                            >
+                              {item.card ? (
+                                <div className="flex items-center gap-2">
+                                  {item.card.image_url && (
+                                    <img
+                                      src={item.card.image_url}
+                                      alt={item.card.name}
+                                      className="w-6 h-8 object-contain"
+                                    />
+                                  )}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-bold text-foreground truncate text-xs">
+                                      {item.card.name}
+                                    </div>
+                                    {item.quantity && item.quantity > 1 && (
+                                      <div className="text-xs text-vcf-orange">x{item.quantity}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : item.points_amount ? (
+                                <div className="font-bold text-vcf-orange">💰 {item.points_amount} puntos</div>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {user?.id !== listing.creator_id && (
+                      <button
+                        onClick={async () => {
+                          setAcceptingOffer(listing.id);
+                          const success = await acceptOffer(listing.id);
+                          setAcceptingOffer(null);
+                          if (success) {
+                            showFeedback(
+                              "Oferta aceptada correctamente. Los items se añadirán a tu inventario.",
+                              "success"
+                            );
+                          } else {
+                            showFeedback(
+                              "No se pudo aceptar la oferta. Verifica que tengas los items requeridos.",
+                              "error"
+                            );
+                          }
+                        }}
+                        disabled={acceptingOffer === listing.id}
+                        className="w-full py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        <Check size={16} />
+                        {acceptingOffer === listing.id ? "Aceptando..." : "ACEPTAR OFERTA"}
+                      </button>
+                    )}
+                    {user?.id === listing.creator_id && (
+                      <div className="text-center py-2 text-sm text-muted-foreground italic">
+                        Tu oferta
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* My Offers */}
+      {activeTab === "my_offers" && (
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black text-foreground">
+              MIS <span className="text-vcf-orange">OFERTAS</span>
+            </h2>
+            <button
+              onClick={() => {
+                setActiveTab("my_offers");
+                document.querySelector('[data-section="create-offer"]')?.scrollIntoView({
+                  behavior: "smooth",
+                });
+              }}
+              className="px-4 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all flex items-center gap-2"
+            >
+              <Plus size={18} />
+              CREAR OFERTA
+            </button>
+          </div>
+
+          {/* Create Offer Form */}
+          <div data-section="create-offer" className="bg-card border-2 border-vcf-orange rounded-lg p-8 shadow-lg mb-8">
+            <h3 className="text-lg font-black mb-6 text-foreground">
+              PUBLICAR NUEVA <span className="text-vcf-orange">OFERTA</span>
+            </h3>
+
+            <div className="space-y-6">
+              {/* Offer Type */}
+              <div>
+                <label className="block font-bold mb-2 text-foreground">Tipo de Oferta</label>
+                <select
+                  value={marketplaceOfferType}
+                  onChange={(e) =>
+                    setMarketplaceOfferType(
+                      e.target.value as "card_for_card" | "card_for_points" | "points_for_card"
+                    )
+                  }
+                  className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground rounded-lg focus:border-vcf-orange outline-none"
+                >
+                  <option value="card_for_card">Cartas por Cartas</option>
+                  <option value="card_for_points">Cartas por Puntos</option>
+                  <option value="points_for_card">Puntos por Cartas</option>
+                </select>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block font-bold mb-2 text-foreground">
+                  Título <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={offerTitle}
+                  onChange={(e) => setOfferTitle(e.target.value)}
+                  placeholder="Ej: Vendo Messi por 100 puntos"
+                  className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground rounded-lg focus:border-vcf-orange outline-none"
+                />
+              </div>
+
+              {/* Description removed per request */}
+
+              {/* Expiration */}
+              <div>
+                <label className="block font-bold mb-2 text-foreground">Expira en (opcional)</label>
+                <input
+                  type="datetime-local"
+                  value={offerExpiresAt}
+                  onChange={(e) => setOfferExpiresAt(e.target.value)}
+                  className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground rounded-lg focus:border-vcf-orange outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <h4 className="font-black text-foreground text-lg">
+                      {marketplaceOfferingUsesPoints ? (
+                          <>
+                            PUNTOS QUE <span className="text-vcf-orange">OFRECES</span>
+                          </>
+                        ) : (
+                          <>
+                            CARTAS QUE <span className="text-vcf-orange">OFRECES</span>
+                          </>
+                        )}
+                      <span className="text-red-500 ml-2">*</span>
+                    </h4>
+                    {!marketplaceOfferingUsesPoints && (
+                      <button
+                        type="button"
+                        onClick={() => setMarketplaceSelectedTab("offering")}
+                        className={`px-4 py-2 rounded-lg font-bold transition-colors ${
+                          marketplaceSelectedTab === "offering"
+                            ? "bg-vcf-orange text-white"
+                            : "bg-muted text-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        + Agregar carta
+                      </button>
+                    )}
+                  </div>
+
+                  {marketplaceOfferingUsesPoints ? (
+                    <div className="bg-muted rounded-lg border border-border p-4 space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Este tipo de oferta se paga con puntos, así que aquí solo indicas el monto total.
+                      </p>
+                      <label className="block font-bold text-foreground">Puntos que ofreces <span className="text-red-500">*</span></label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={marketplaceOfferingPoints ?? ""}
+                        onChange={(e) =>
+                          setMarketplaceOfferingPoints(
+                            e.target.value ? Math.max(1, Number(e.target.value)) : null
+                          )
+                        }
+                        placeholder="Ej: 100"
+                        className="w-full px-4 py-2 border-2 border-border bg-card text-foreground rounded-lg focus:border-vcf-orange outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mb-4 space-y-2">
+                      {marketplaceOfferingCards.length === 0 ? (
+                        <div className="text-sm text-muted-foreground italic p-3 bg-muted rounded-lg">
+                          Selecciona las cartas que vas a ofrecer
+                        </div>
+                      ) : (
+                        marketplaceOfferingCards.map((item) => {
+                          const card = getMarketplaceCardById(item.card_id);
+                          return (
+                            <div
+                              key={item.card_id}
+                              className="flex items-center gap-3 p-3 bg-muted rounded-lg border-l-4 border-vcf-orange"
+                            >
+                              <div className="w-14 h-20 rounded bg-white/80 border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                                {card?.image_url ? (
+                                  <img
+                                    src={card.image_url}
+                                    alt={card.name}
+                                    className="w-full h-full object-contain"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground px-1 text-center">
+                                    Sin imagen
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="font-bold text-foreground truncate">{card?.name || "Carta"}</div>
+                                <div className="text-xs text-muted-foreground space-y-0.5">
+                                  <div>Tipo: {card?.type || "N/A"} · Temporada: {card?.season ?? "N/A"}</div>
+                                  <div>Categoría: {card?.categories?.name || card?.rarity || "Sin categoría"}</div>
+                                  <div>Cantidad: {item.quantity}</div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => removeMarketplaceSelection("offering", item.card_id)}
+                                className="p-2 hover:bg-red-500/20 rounded transition-colors self-start"
+                              >
+                                <Trash2 size={16} className="text-red-500" />
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+
+                  {!marketplaceOfferingUsesPoints && marketplaceSelectedTab === "offering" && (
+                    <div className="border-2 border-vcf-orange/30 rounded-lg p-4 max-h-80 overflow-y-auto">
+                      {loadingCards || loadingMarketplaceCards ? (
+                        <div className="text-center text-muted-foreground">Cargando cartas...</div>
+                      ) : userCards.filter((card) => (card.quantity ?? 0) > 0).length === 0 ? (
+                        <div className="text-center text-muted-foreground">No tienes cartas disponibles</div>
+                      ) : (
+                        <div className="space-y-2">
+                          {userCards
+                            .filter((card) => (card.quantity ?? 0) > 0)
+                            .map((card) => (
+                              <div
+                                key={card.id}
+                                className="flex items-center justify-between p-2 bg-card rounded border border-border hover:border-vcf-orange transition-colors"
+                              >
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <div className="w-12 h-16 rounded bg-white/80 border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                                    {card.image_url ? (
+                                      <img
+                                        src={card.image_url}
+                                        alt={card.name}
+                                        className="w-full h-full object-contain"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground px-1 text-center">
+                                        Sin imagen
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    <div className="font-bold text-sm text-foreground truncate">{card.name}</div>
+                                    <div className="text-xs text-muted-foreground space-y-0.5">
+                                      <div>Tipo: {card.type || "N/A"} · Temporada: {card.season ?? "N/A"}</div>
+                                      <div>Categoría: {card.categories?.name || card.rarity || "Sin categoría"}</div>
+                                      <div>Tienes: {card.quantity}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max={card.quantity ?? 1}
+                                    defaultValue="1"
+                                    id={`marketplace-qty-offered-${card.id}`}
+                                    className="w-12 px-2 py-1 border border-border rounded text-center bg-muted text-foreground"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const qty = parseInt(
+                                        (document.getElementById(`marketplace-qty-offered-${card.id}`) as HTMLInputElement)
+                                          ?.value || "1"
+                                      );
+                                      updateMarketplaceSelection("offering", card.id, qty);
+                                    }}
+                                    className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors"
+                                  >
+                                    <Plus size={16} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <h4 className="font-black text-foreground text-lg">
+                      {marketplaceWantedUsesPoints ? (
+                          <>
+                            PUNTOS QUE <span className="text-vcf-orange">BUSCAS</span>
+                          </>
+                        ) : (
+                          <>
+                            CARTAS QUE <span className="text-vcf-orange">BUSCAS</span>
+                          </>
+                        )}
+                      <span className="text-red-500 ml-2">*</span>
+                    </h4>
+                    {!marketplaceWantedUsesPoints && (
+                      <button
+                        type="button"
+                        onClick={() => setMarketplaceSelectedTab("wanted")}
+                        className={`px-4 py-2 rounded-lg font-bold transition-colors ${
+                          marketplaceSelectedTab === "wanted"
+                            ? "bg-vcf-orange text-white"
+                            : "bg-muted text-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        + Buscar carta
+                      </button>
+                    )}
+                  </div>
+
+                  {marketplaceWantedUsesPoints ? (
+                    <div className="bg-muted rounded-lg border border-border p-4 space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Aquí solo indicas cuántos puntos quieres recibir.
+                      </p>
+                      <label className="block font-bold text-foreground">Puntos que buscas <span className="text-red-500">*</span></label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={marketplaceWantedPoints ?? ""}
+                        onChange={(e) =>
+                          setMarketplaceWantedPoints(
+                            e.target.value ? Math.max(1, Number(e.target.value)) : null
+                          )
+                        }
+                        placeholder="Ej: 100"
+                        className="w-full px-4 py-2 border-2 border-border bg-card text-foreground rounded-lg focus:border-vcf-orange outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mb-4 space-y-2">
+                      {marketplaceWantedCards.length === 0 ? (
+                        <div className="text-sm text-muted-foreground italic p-3 bg-muted rounded-lg">
+                          Selecciona las cartas que quieres recibir
+                        </div>
+                      ) : (
+                        marketplaceWantedCards.map((item) => {
+                          const card = getMarketplaceCardById(item.card_id);
+                          return (
+                            <div
+                              key={item.card_id}
+                              className="flex items-center gap-3 p-3 bg-muted rounded-lg border-l-4 border-vcf-orange"
+                            >
+                              <div className="w-14 h-20 rounded bg-white/80 border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                                {card?.image_url ? (
+                                  <img
+                                    src={card.image_url}
+                                    alt={card.name}
+                                    className="w-full h-full object-contain"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground px-1 text-center">
+                                    Sin imagen
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="font-bold text-foreground truncate">{card?.name || "Carta"}</div>
+                                <div className="text-xs text-muted-foreground space-y-0.5">
+                                  <div>Tipo: {card?.type || "N/A"} · Temporada: {card?.season ?? "N/A"}</div>
+                                  <div>Categoría: {card?.categories?.name || card?.rarity || "Sin categoría"}</div>
+                                  <div>Cantidad: {item.quantity}</div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => removeMarketplaceSelection("wanted", item.card_id)}
+                                className="p-2 hover:bg-red-500/20 rounded transition-colors self-start"
+                              >
+                                <Trash2 size={16} className="text-red-500" />
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+
+                  {!marketplaceWantedUsesPoints && marketplaceSelectedTab === "wanted" && (
+                    <div className="border-2 border-vcf-orange/30 rounded-lg p-4 max-h-80 overflow-y-auto">
+                      {loadingMarketplaceCards ? (
+                        <div className="text-center text-muted-foreground">Cargando catálogo de cartas...</div>
+                      ) : marketplaceCards.length === 0 ? (
+                        <div className="text-center text-muted-foreground">No hay cartas cargadas</div>
+                      ) : (
+                        <div className="space-y-2">
+                          {marketplaceCards.map((card) => (
+                            <div
+                              key={card.id}
+                              className="flex items-center justify-between p-2 bg-card rounded border border-border hover:border-vcf-orange transition-colors"
+                            >
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="w-12 h-16 rounded bg-white/80 border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                                  {card.image_url ? (
+                                    <img
+                                      src={card.image_url}
+                                      alt={card.name}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground px-1 text-center">
+                                      Sin imagen
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <div className="font-bold text-sm text-foreground truncate">{card.name}</div>
+                                  <div className="text-xs text-muted-foreground space-y-0.5">
+                                    <div>Tipo: {card.type || "N/A"} · Temporada: {card.season ?? "N/A"}</div>
+                                    <div>Categoría: {card.categories?.name || card.rarity || "Sin categoría"}</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  defaultValue="1"
+                                  id={`marketplace-qty-wanted-${card.id}`}
+                                  className="w-12 px-2 py-1 border border-border rounded text-center bg-muted text-foreground"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const qty = parseInt(
+                                      (document.getElementById(`marketplace-qty-wanted-${card.id}`) as HTMLInputElement)
+                                        ?.value || "1"
+                                    );
+                                    updateMarketplaceSelection("wanted", card.id, qty);
+                                  }}
+                                  className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors"
+                                >
+                                  <Plus size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={async () => {
+                  if (!offerTitle.trim()) {
+                    showFeedback("El título es obligatorio", "warning");
+                    return;
+                  }
+
+                  if (!marketplaceOfferingUsesPoints && !marketplaceOfferingCards.length) {
+                    showFeedback("Debes ofrecer al menos una carta", "warning");
+                    return;
+                  }
+
+                  if (!marketplaceWantedUsesPoints && !marketplaceWantedCards.length) {
+                    showFeedback("Debes solicitar al menos una carta", "warning");
+                    return;
+                  }
+
+                  if (marketplaceOfferingUsesPoints && !marketplaceOfferingPoints) {
+                    showFeedback("Debes indicar los puntos que ofreces", "warning");
+                    return;
+                  }
+
+                  if (marketplaceWantedUsesPoints && !marketplaceWantedPoints) {
+                    showFeedback("Debes indicar los puntos que buscas", "warning");
+                    return;
+                  }
+
+                  const offeringItems = marketplaceOfferingUsesPoints
+                    ? [{ points_amount: marketplaceOfferingPoints ?? undefined }]
+                    : marketplaceOfferingCards;
+
+                  const wantedItems = marketplaceWantedUsesPoints
+                    ? [{ points_amount: marketplaceWantedPoints ?? undefined }]
+                    : marketplaceWantedCards;
+
+                  const pointsSide = marketplaceOfferType === "card_for_points"
+                    ? wantedItems
+                    : marketplaceOfferType === "points_for_card"
+                      ? offeringItems
+                      : [];
+
+                  if (pointsSide.some((item) => !item.points_amount || item.points_amount < 1)) {
+                    showFeedback("Indica el monto de puntos en la parte que se paga con puntos.", "warning");
+                    return;
+                  }
+
+                  setCreatingMarketplaceOffer(true);
+                  const success = await postOffer(
+                    offerTitle,
+                    marketplaceOfferType,
+                    offeringItems,
+                    wantedItems,
+                    offerExpiresAt || undefined
+                  );
+
+                  if (success) {
+                    showFeedback("Oferta publicada correctamente", "success");
+                    setOfferTitle("");
+                    setOfferExpiresAt("");
+                    setMarketplaceOfferingCards([]);
+                    setMarketplaceWantedCards([]);
+                    setMarketplaceOfferingPoints(null);
+                    setMarketplaceWantedPoints(null);
+                    setMarketplaceSelectedTab("offering");
+                  } else {
+                    showFeedback("Error al publicar la oferta", "error");
+                  }
+                }}
+                disabled={creatingMarketplaceOffer}
+                className="w-full py-4 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Plus size={20} />
+                {creatingMarketplaceOffer ? "Publicando..." : "PUBLICAR OFERTA"}
+              </button>
+            </div>
+          </div>
+
+          {/* User's Offers List */}
+          <div>
+            <h3 className="text-lg font-black mb-4 text-foreground">
+              TUS OFERTAS <span className="text-vcf-orange">ACTIVAS</span>
+            </h3>
+
+            {marketplaceLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Cargando tus ofertas...
+              </div>
+            ) : userOffers.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground bg-card border-2 border-border rounded-lg">
+                No tienes ofertas activas
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {userOffers
+                  .filter((o) => o.status === "active")
+                  .map((offer) => {
+                    const offeringItems = offer.trade_items?.filter((i) => i.side === "offering") || [];
+                    const wantedItems = offer.trade_items?.filter((i) => i.side === "wanted") || [];
+
+                    return (
+                      <div
+                        key={offer.id}
+                        className="bg-card border-2 border-border rounded-lg p-4 shadow-md"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-bold text-foreground">{offer.title}</h4>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(offer.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={async () => {
+                              setOfferToCancel({ id: offer.id, title: offer.title });
+                            }}
+                            className="p-2 hover:bg-red-500/20 rounded transition-colors"
+                          >
+                            <Trash2 size={18} className="text-red-500" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <div className="font-bold mb-1 text-muted-foreground">OFRECES:</div>
+                            {offeringItems.map((item) => (
+                              <div key={item.id} className="text-foreground">
+                                {item.card ? `${item.card.name}${item.quantity ? ` x${item.quantity}` : ""}` : `💰 ${item.points_amount} puntos`}
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <div className="font-bold mb-1 text-muted-foreground">QUIERES:</div>
+                            {wantedItems.map((item) => (
+                              <div key={item.id} className="text-foreground">
+                                {item.card ? `${item.card.name}${item.quantity ? ` x${item.quantity}` : ""}` : `💰 ${item.points_amount} puntos`}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {offerToCancel && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-offer-title"
+          aria-describedby="cancel-offer-description"
+          onClick={() => setOfferToCancel(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border-2 border-vcf-orange bg-card p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h3 id="cancel-offer-title" className="text-2xl font-black text-foreground">
+                  ¿Estás seguro?
+                </h3>
+                <p id="cancel-offer-description" className="mt-2 text-sm text-muted-foreground">
+                  Vas a cancelar la oferta <span className="font-bold text-foreground">{offerToCancel.title}</span>.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOfferToCancel(null)}
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                aria-label="Cerrar"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  const currentOffer = offerToCancel;
+                  if (!currentOffer) return;
+
+                  setOfferToCancel(null);
+                  if (await cancelOffer(currentOffer.id)) {
+                    showFeedback("Oferta cancelada", "warning");
+                  } else {
+                    showFeedback("Error al cancelar la oferta", "error");
+                  }
+                }}
+                className="flex-1 rounded-lg bg-vcf-orange px-4 py-3 font-bold text-white transition-colors hover:bg-[#a86d12]"
+              >
+                CONTINUAR
+              </button>
+              <button
+                type="button"
+                onClick={() => setOfferToCancel(null)}
+                className="flex-1 rounded-lg border-2 border-border bg-muted px-4 py-3 font-bold text-foreground transition-colors hover:bg-muted/70"
+              >
+                CANCELAR
               </button>
             </div>
           </div>

@@ -10,7 +10,7 @@ export default function Album() {
        <div className="bg-content">
                 <CardAlbum userId={userId} />
 
-                <section className="mx-auto max-w-5xl px-4 pb-16 pt-2 md:px-8">
+                <section className="mx-auto max-w-5xl px-4 pb-16 pt-2 md:px-8 pt-10">
                     <div className="relative overflow-hidden rounded-2xl border-2 border-vcf-orange bg-gradient-to-br from-white via-orange-50 to-yellow-50 p-6 shadow-[0_18px_50px_rgba(255,103,31,0.16)] md:p-8">
                         <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-vcf-orange/15 blur-3xl" />
                         <div className="absolute -bottom-14 -left-10 h-40 w-40 rounded-full bg-vcf-yellow/30 blur-3xl" />

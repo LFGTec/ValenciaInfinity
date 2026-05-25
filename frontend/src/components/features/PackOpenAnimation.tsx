@@ -92,7 +92,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
           {packOpened && <Confetti />}
 
           <motion.div
-            className="relative w-full max-w-3xl px-4 mx-auto"
+            className="relative w-full max-w-3xl px-4 mx-auto flex justify-center"
             initial={{ scale: 0.8, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.8, y: 20 }}
@@ -102,7 +102,7 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
               // Pack Closed State
               <motion.button
                 onClick={handlePullTab}
-                className="relative mx-auto w-72 h-96 focus:outline-none"
+                className="relative block w-72 h-96 focus:outline-none"
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 whileHover={{ scale: 1.08 }}
@@ -110,17 +110,17 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
               >
                 {/* Main Pack */}
                 <div className="absolute inset-0 rounded-3xl shadow-2xl overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-vcf-orange via-vcf-orange to-red-600 flex flex-col items-center justify-center relative">
+                  <div className="w-full h-full bg-gradient-to-br from-[#ff8a1f] via-vcf-orange to-[#e85c17] flex flex-col items-center justify-center relative">
                     {/* Holographic shine effect */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent"
                       animate={{ x: [-500, 500], opacity: [0, 0.3, 0] }}
                       transition={{ duration: 2.5, repeat: Infinity }}
                     />
 
                     {/* Secondary shine */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent"
+                      className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent"
                       animate={{ opacity: [0.1, 0.2, 0.1] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     />
@@ -138,21 +138,21 @@ export function PackOpenAnimation({ isOpen, cards, onClose }: PackOpenAnimationP
                     </div>
 
                     {/* Decorative corner elements */}
-                    <div className="absolute top-4 left-4 w-12 h-12 border-2 border-white/40 rounded-lg" />
-                    <div className="absolute bottom-4 right-4 w-12 h-12 border-2 border-white/40 rounded-lg" />
+                    <div className="absolute top-4 left-4 w-12 h-12 border-2 border-white/45 rounded-lg" />
+                    <div className="absolute bottom-4 right-4 w-12 h-12 border-2 border-white/45 rounded-lg" />
                   </div>
                 </div>
 
                 {/* Secondary layer for depth */}
                 <motion.div
-                  className="absolute inset-0 rounded-3xl bg-gradient-to-t from-red-700/50 to-transparent"
+                  className="absolute inset-0 rounded-3xl bg-gradient-to-t from-[#c84d12]/55 to-transparent"
                   animate={{ opacity: [0.3, 0.5, 0.3] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 />
 
                 {/* Hint Text */}
                 <motion.p
-                  className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-white text-sm font-bold z-30"
+                  className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-vcf-orange text-sm font-bold z-30"
                   animate={{ opacity: [1, 0.6, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >

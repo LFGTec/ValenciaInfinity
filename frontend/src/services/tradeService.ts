@@ -355,6 +355,31 @@ export const updateTradeStatus = async (
   return true;
 };
 
+export const acceptTradeWithInventoryUpdate = async (
+  tradeId: string
+): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.rpc("accept_trade", {
+      trade_id: tradeId,
+    });
+
+    if (error) {
+      console.error("Error accepting trade:", error);
+      return false;
+    }
+
+    if (data && !data.success) {
+      console.error("Trade acceptance failed:", data.error);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Error in acceptTradeWithInventoryUpdate:", err);
+    return false;
+  }
+};
+
 export const addTradeItem = async (
   tradeId: string,
   cardId: string,
