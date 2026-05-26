@@ -344,8 +344,22 @@ export function Friends() {
                     </div>
 
                     <button
-                    onClick={() => {
-                        navigator.clipboard.writeText(selectedPin);
+                    onClick={async () => {
+                        try {
+                        await navigator.clipboard.writeText(selectedPin);
+
+                        setToast({
+                            message: "PIN copiado al portapapeles",
+                            type: "success",
+                        });
+
+                        setSelectedPin(null);
+                        } catch {
+                        setToast({
+                            message: "No se pudo copiar el PIN",
+                            type: "error",
+                        });
+                        }
                     }}
                     className="
                         w-full
