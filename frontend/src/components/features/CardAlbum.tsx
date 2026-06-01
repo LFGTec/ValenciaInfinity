@@ -352,7 +352,7 @@ export function CardAlbum({ userId }: Props) {
     </div>
 
       {/* 3D Book canvas container */}
-      <div className="album-canvas-wrapper">
+      <div id="album-book" className="album-canvas-wrapper">
         <Canvas
           camera={{ fov: 35, position: [1.7, 0.15, 3.4] }}
           dpr={[1, 1.8]}
