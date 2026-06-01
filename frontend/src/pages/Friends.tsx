@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   UserPlus,
@@ -22,12 +22,13 @@ export function Friends() {
         message: string;
         type: "success" | "error";
     } | null>(null);
-
+    const [searchQuery, setSearchQuery] =
+            useState("");
 
     const {
         myFriends,
         pendingRequests,
-
+        searchResults,
         searchUsers,
 
         sendRequest,
@@ -38,11 +39,15 @@ export function Friends() {
         loading,
     } = useFriends();
 
-    const [searchQuery, setSearchQuery] =
-        useState("");
+    
 
-    const searchResults =
-        searchUsers(searchQuery).filter((u) => u.friendship_status !== "FRIENDS");
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+        searchUsers(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+    }, [searchQuery]);
 
     if (loading) {
         return <div>Cargando...</div>;
@@ -344,8 +349,22 @@ export function Friends() {
                     </div>
 
                     <button
-                    onClick={() => {
-                        navigator.clipboard.writeText(selectedPin);
+                    onClick={async () => {
+                        try {
+                        await navigator.clipboard.writeText(selectedPin);
+
+                        setToast({
+                            message: "PIN copiado al portapapeles",
+                            type: "success",
+                        });
+
+                        setSelectedPin(null);
+                        } catch {
+                        setToast({
+                            message: "No se pudo copiar el PIN",
+                            type: "error",
+                        });
+                        }
                     }}
                     className="
                         w-full

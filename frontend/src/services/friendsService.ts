@@ -26,9 +26,38 @@ export interface FriendUser {
 }
 
 export const friendsService = {
-  async getUsersWithFriendship(): Promise<FriendUser[]> {
+   async getMyFriends(): Promise<FriendUser[]> {
     const { data, error } = await supabase.rpc(
-      "get_users_with_friendship"
+      "get_my_friends"
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data || [];
+  },
+
+  async getPendingRequests(): Promise<FriendUser[]> {
+    const { data, error } = await supabase.rpc(
+      "get_pending_requests"
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data || [];
+  },
+
+  async searchUsers(
+    searchTerm: string
+  ): Promise<FriendUser[]> {
+    const { data, error } = await supabase.rpc(
+      "search_users",
+      {
+        p_search: searchTerm,
+      }
     );
 
     if (error) {
@@ -39,11 +68,12 @@ export const friendsService = {
   },
 
   async sendFriendRequest(receiverId: string) {
-    const { error } = await supabase
-      .from("friend_requests")
-      .insert({
-        receiver_id: receiverId,
-      });
+    const { error } = await supabase.rpc(
+      "send_friend_request",
+      {
+        p_receiver_id: receiverId,
+      }
+    );
 
     if (error) {
       throw new Error(error.message);
@@ -87,5 +117,20 @@ export const friendsService = {
     if (error) {
       throw new Error(error.message);
     }
+  },
+
+  async getUserProfile(userId: string) {
+    const { data, error } = await supabase.rpc(
+      "get_user_profile",
+      {
+        p_user_id: userId,
+      }
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data?.[0] ?? null;
   },
 };
