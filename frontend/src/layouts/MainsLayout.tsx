@@ -40,7 +40,7 @@ export default function MainLayout() {
             </Link>
 
             {/* Navegación Desktop */}
-            <nav className="hidden lg:flex items-center gap-6">
+            <nav className="hidden xl:flex items-center gap-2 2xl:gap-4">
               {[
                 { path: "/home", label: "INICIO" },
                 { path: "/team", label: "EQUIPO" },
@@ -55,8 +55,18 @@ export default function MainLayout() {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) => `
-                    px-6 py-2 font-bold text-sm tracking-wide transition-all
-                    ${isActive ? "text-vcf-orange border-b-4 border-vcf-orange" : "text-white hover:text-vcf-orange"}
+                    px-2 xl:px-3 2xl:px-4
+                    py-2
+                    font-bold
+                    text-xs xl:text-sm
+                    tracking-wide
+                    transition-all
+                    whitespace-nowrap
+                    ${
+                      isActive
+                        ? "text-vcf-orange border-b-4 border-vcf-orange"
+                        : "text-white hover:text-vcf-orange"
+                    }
                   `}
                 >
                   {item.label}
@@ -65,7 +75,7 @@ export default function MainLayout() {
             </nav>
 
             {/* Acciones Derecha */}
-            <div className="flex items-center gap-2 flex-shrink-0 justify-end">
+            <div className="flex items-center gap-3 md:gap-4 flex-shrink-0 justify-end">
 
               {/* Puntos + Racha (Solo si está autenticado) */}
               {isAuthenticated && (
@@ -144,13 +154,49 @@ export default function MainLayout() {
               </div>
 
               {/* Mobile Menu Toggle */}
-              <button className="lg:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <button
+                className="xl:hidden text-white"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
           </div>
         </div>
       </header>
+
+      {mobileMenuOpen && (
+        <div className="xl:hidden bg-black border-t border-vcf-orange">
+          <nav className="flex flex-col py-2">
+            {[
+              { path: "/home", label: "INICIO" },
+              { path: "/team", label: "EQUIPO" },
+              { path: "/matches", label: "PARTIDOS" },
+              { path: "/news", label: "NOTICIAS" },
+              { path: "/fanzone", label: "ZONA FAN" },
+              { path: "/juego", label: "JUEGO" },
+              { path: "/nou-mestalla", label: "NOU MESTALLA" },
+              { path: "/tienda", label: "TIENDA" },
+            ].map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `px-6 py-4 text-sm font-bold border-l-4 transition-colors
+                  ${
+                    isActive
+                      ? "border-vcf-orange text-vcf-orange bg-white/5"
+                      : "border-transparent text-white hover:bg-white/5"
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {/* Main Content */}
       <main onClick={() => setShowDropdown(false)}>
