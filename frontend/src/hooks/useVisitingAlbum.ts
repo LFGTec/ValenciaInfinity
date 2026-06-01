@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { friendsService } from "@/services/friendsService";
 
@@ -22,7 +21,6 @@ export interface VisitingProfile {
 export function useVisitingAlbum(
   targetUserId?: string
 ) {
-
   const [profile, setProfile] =
     useState<VisitingProfile | null>(null);
 
@@ -30,33 +28,24 @@ export function useVisitingAlbum(
     useState(true);
 
   useEffect(() => {
-
     if (!targetUserId) {
       setLoading(false);
       return;
     }
 
     loadProfile();
-
   }, [targetUserId]);
 
   async function loadProfile() {
-
     setLoading(true);
 
     try {
-
-      const users =
-        await friendsService.getUsersWithFriendship();
-
-      const foundUser =
-        users.find(
-          (u) => u.id === targetUserId
+      const user =
+        await friendsService.getUserProfile(
+          targetUserId!
         );
 
-      if (foundUser) {
-        setProfile(foundUser);
-      }
+      setProfile(user);
 
     } catch (error) {
 
@@ -87,11 +76,8 @@ export function useVisitingAlbum(
   }
 
   return {
-
     profile,
-
     loadingVisiting,
-
     sendFriendRequest,
   };
 }

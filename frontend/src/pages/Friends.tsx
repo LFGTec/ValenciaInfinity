@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   UserPlus,
@@ -22,12 +22,13 @@ export function Friends() {
         message: string;
         type: "success" | "error";
     } | null>(null);
-
+    const [searchQuery, setSearchQuery] =
+            useState("");
 
     const {
         myFriends,
         pendingRequests,
-
+        searchResults,
         searchUsers,
 
         sendRequest,
@@ -38,11 +39,15 @@ export function Friends() {
         loading,
     } = useFriends();
 
-    const [searchQuery, setSearchQuery] =
-        useState("");
+    
 
-    const searchResults =
-        searchUsers(searchQuery).filter((u) => u.friendship_status !== "FRIENDS");
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+        searchUsers(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+    }, [searchQuery]);
 
     if (loading) {
         return <div>Cargando...</div>;
