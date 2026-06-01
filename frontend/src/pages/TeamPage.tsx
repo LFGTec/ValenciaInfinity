@@ -1,28 +1,17 @@
 import { TimelinePublic } from "./TimelinePublic";
 
-import player1 from "../assets/Jugador1.png";
-import player2 from "../assets/Jugador2.png";
-import player3 from "../assets/Jugador3.png";
-import player4 from "../assets/Jugador4.png";
-import player5 from "../assets/Jugador5.png";
-import player6 from "../assets/Jugador6.png";
-import player7 from "../assets/Jugador7.png";
-import player8 from "../assets/Jugador8.png";
-import player9 from "../assets/Jugador9.png";
-import player10 from "../assets/Jugador10.png";
-
 export function TeamPage() {
   const players = [
-    { id: 18, name: "Pepelu", position: "Mediocampista", image: player1 },
-    { id: 9, name: "Hugo Duro", position: "Delantero", image: player2 },
-    { id: 11, name: "Rafa Mir", position: "Delantero", image: player3 },
-    { id: 7, name: "Barrenechea", position: "Mediocampista", image: player4 },
-    { id: 22, name: "López", position: "Delantero", image: player5 },
-    { id: 8, name: "Javi Guerra", position: "Mediocampista", image: player6 },
-    { id: 15, name: "Centelles", position: "Defensa", image: player7 },
-    { id: 17, name: "Mosquera", position: "Mediocampista", image: player8 },
-    { id: 5, name: "Guillamón", position: "Defensa", image: player9 },
-    { id: 20, name: "Foulquier", position: "Defensa", image: player10 },
+    { id: 18, name: "Pepelu", position: "Mediocampista" },
+    { id: 9, name: "Hugo Duro", position: "Delantero" },
+    { id: 11, name: "Rafa Mir", position: "Delantero" },
+    { id: 7, name: "Barrenechea", position: "Mediocampista" },
+    { id: 22, name: "López", position: "Delantero" },
+    { id: 8, name: "Javi Guerra", position: "Mediocampista" },
+    { id: 15, name: "Centelles", position: "Defensa" },
+    { id: 17, name: "Mosquera", position: "Mediocampista" },
+    { id: 5, name: "Guillamón", position: "Defensa" },
+    { id: 20, name: "Foulquier", position: "Defensa" },
   ];
 
   const allPlayers = [...players, ...players, ...players.slice(0, 5)];
@@ -32,7 +21,6 @@ export function TeamPage() {
       {/* Equipo */}
       <section className="mx-auto max-w-[1400px] px-4 py-12">
         <div className="mb-8">
-
           <h1 className="mb-3 text-5xl font-black text-foreground">
             EL <span className="text-vcf-orange">EQUIPO</span>
           </h1>
@@ -50,8 +38,8 @@ export function TeamPage() {
             >
               <div className="relative mb-3 aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-muted to-card">
                 <img
-                  src={player.image}
-                  alt={player.name}
+                  /*                   src={}
+                   */ alt={player.name}
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
 
@@ -104,8 +92,8 @@ export function TeamPage() {
             </h2>
 
             <p className="mt-5 text-sm leading-relaxed text-white/90 md:text-base">
-              El equipo no solo se entiende por quienes lo representan hoy,
-              sino también por los momentos que han construido su identidad a lo
+              El equipo no solo se entiende por quienes lo representan hoy, sino
+              también por los momentos que han construido su identidad a lo
               largo del tiempo.
             </p>
           </div>

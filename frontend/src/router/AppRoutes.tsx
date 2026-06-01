@@ -11,15 +11,14 @@ import { FansZonePage } from "../pages/FansZonePage";
 import LogIn from "../pages/LogIn";
 import { UserProfile } from "../components/features/UserProfile";
 
-
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import { Juego } from "../pages/Juego";
 import { NouMestellaPage } from "../pages/NouMestellaPage";
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
-import AdminLayout from "@/layouts/AdminLayout"
-import { TriviasQuizzes } from "../components/features/TriviasQuizzes"
+import AdminLayout from "@/layouts/AdminLayout";
+import { TriviasQuizzes } from "../components/features/TriviasQuizzes";
 import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
 import { ManageRewards } from "@/pages/AdminViews/ManageRewards";
@@ -32,8 +31,8 @@ import { EstadisticasPage } from "@/pages/EstadisticasPage";
 import { CardExchange } from "@/components/features/CardExchange";
 import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
-
 import { DailyRewards } from "@/pages/DailyRewards";
+import { TicketPurchase } from "@/pages/TicketsPage";
 
 export default function AppRoutes() {
   return (
@@ -67,6 +66,7 @@ export default function AppRoutes() {
           <Route path="/juego" element={<Juego />} />
           <Route path="/trivias" element={<TriviasQuizzes />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/ticket" element={<TicketPurchase />} />
         </Route>
       </Route>
 
