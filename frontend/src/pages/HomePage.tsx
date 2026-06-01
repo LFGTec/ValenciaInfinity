@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getRanking, type Ranking } from "@/services/rankingService";
 import { getTrivias, type Trivia } from "@/services/triviasService";
 import { useNoticias } from "@/hooks/useNoticias";
 import {
@@ -26,13 +25,13 @@ import { usePartidosVCF } from "@/hooks/usePartidosVCF";
 import { useSeasonStatus } from "@/hooks/useSeasonStatus";
 import { countdownSeason } from "@/utils/countDownSeason";
 
+import { RankingPreview } from "@/components/RankingPreview";
+import { useRanking } from "@/hooks/useRanking";
+
 const fallbackImage =
   "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
 
 export default function HomePage() {
-  const [ranking, setRanking] = useState<Ranking[]>([]);
-  const [rankingLoading, setRankingLoading] = useState(true);
-
   const [homeTrivias, setHomeTrivias] = useState<Trivia[]>([]);
   const [triviasLoading, setTriviasLoading] = useState(true);
 
@@ -98,6 +97,10 @@ export default function HomePage() {
 
   const showMatch = inSeason && !!partidoDestacado;
   const showSeason = !inSeason;
+  const {
+    ranking,
+    rankingLoading,
+  } = useRanking();
 
   useEffect(() => {
     if (!showMatch || !partidoDestacado) return;
@@ -153,22 +156,6 @@ export default function HomePage() {
     };
 
     fetchHomeTrivias();
-  }, []);
-
-  useEffect(() => {
-    const fetchRanking = async () => {
-      try {
-        const fetchedData = await getRanking();
-        setRanking(fetchedData ?? []);
-      } catch (error) {
-        console.error("Error cargando ranking:", error);
-        setRanking([]);
-      } finally {
-        setRankingLoading(false);
-      }
-    };
-
-    fetchRanking();
   }, []);
 
   const formatDate = (dateStr: string) => {
@@ -597,115 +584,22 @@ export default function HomePage() {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl md:text-3xl font-black text-foreground">
-              RANKING <span className="text-vcf-orange">SEMANAL</span>
+              RANKING <span className="text-vcf-orange">GLOBAL</span>
             </h2>
 
             <Link
-              to="/fanzone"
+              to="/trivias"
               className="flex items-center gap-2 text-sm font-bold text-vcf-orange hover:text-vcf-blue hover:gap-3 transition-all"
             >
               VER COMPLETO <ArrowRight size={16} />
             </Link>
           </div>
 
-          <Link
-            to="/fanzone"
-            className="block bg-card border-2 border-vcf-orange rounded-lg overflow-hidden cursor-pointer hover:border-vcf-yellow hover:shadow-2xl transition-all"
-          >
-            {rankingLoading ? (
-              <div className="p-8 text-center text-muted-foreground font-bold">
-                Cargando ranking...
-              </div>
-            ) : ranking.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground font-bold">
-                No hay datos de ranking disponibles.
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 gap-4 px-6 pt-6 pb-2 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange items-end">
-                  {[1, 0, 2].map((rankIndex) => {
-                    const user = ranking[rankIndex];
-
-                    if (!user) return null;
-
-                    const place = rankIndex + 1;
-                    const colors = [
-                      "bg-vcf-yellow",
-                      "bg-gray-300",
-                      "bg-amber-600",
-                    ];
-                    const avatars = [avatar1, avatar2, avatar3];
-                    const podiumMb = ["mb-8", "mb-4", "mb-0"];
-                    const badgeSize =
-                      rankIndex === 0
-                        ? "w-20 h-20 text-2xl"
-                        : "w-16 h-16 text-xl";
-                    const imgSize = rankIndex === 0 ? "w-16 h-16" : "w-12 h-12";
-
-                    return (
-                      <div
-                        key={user.id}
-                        className={`text-center ${podiumMb[rankIndex]}`}
-                      >
-                        <div
-                          className={`${badgeSize} mx-auto rounded-full mb-3 flex items-center justify-center shadow-lg ${colors[rankIndex]} text-white`}
-                        >
-                          <span className="font-black">{place}</span>
-                        </div>
-
-                        <img
-                          src={avatars[rankIndex]}
-                          alt={user.fan_nombre}
-                          className={`${imgSize} rounded-full mx-auto mb-2 shadow-md object-cover`}
-                        />
-
-                        <div className="font-black mb-1 text-foreground text-sm">
-                          {user.fan_nombre}
-                        </div>
-
-                        <div className="text-sm text-vcf-orange font-bold">
-                          {user.puntos} pts
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="divide-y divide-border">
-                  {ranking.slice(3, 10).map((user, i) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-4 hover:bg-vcf-yellow/10 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-vcf-orange/20 rounded-full flex items-center justify-center font-black text-vcf-orange">
-                          {i + 4}
-                        </div>
-
-                        <div className="w-10 h-10 bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-full" />
-
-                        <div>
-                          <div className="font-black text-foreground">
-                            {user.fan_nombre}
-                          </div>
-
-                          <div className="text-sm text-muted-foreground">
-                            Nivel {user.nivel}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <div className="font-black text-foreground">
-                          {user.puntos} pts
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </Link>
+          <RankingPreview
+            ranking={ranking}
+            loading={rankingLoading}
+            preview
+          />
         </section>
       </div>
     </div>
