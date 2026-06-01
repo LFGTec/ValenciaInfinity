@@ -46,7 +46,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { noticias: news, cargando: newsLoading } = useNoticias();
   const { proximos } = usePartidosVCF();
-  
+
   // Temporizador fuera de temporada
   const { season } = useSeasonStatus();
   const inSeason = season?.in_season ?? true;
@@ -56,43 +56,39 @@ export default function HomePage() {
     minutos: 0,
     segundos: 0,
   });
-  const seasonTarget =
-  season?.in_season
-    ? null
-    : season?.next_season_start;
+  const seasonTarget = season?.in_season ? null : season?.next_season_start;
 
   useEffect(() => {
-  if (!seasonTarget) return;
+    if (!seasonTarget) return;
 
-  const target = new Date(seasonTarget).getTime();
+    const target = new Date(seasonTarget).getTime();
 
-  const tick = () => {
-    const diff = target - Date.now();
+    const tick = () => {
+      const diff = target - Date.now();
 
-    if (diff <= 0) {
+      if (diff <= 0) {
+        setSeasonCountdown({
+          dias: 0,
+          horas: 0,
+          minutos: 0,
+          segundos: 0,
+        });
+        return;
+      }
+
       setSeasonCountdown({
-        dias: 0,
-        horas: 0,
-        minutos: 0,
-        segundos: 0,
+        dias: Math.floor(diff / 86_400_000),
+        horas: Math.floor((diff % 86_400_000) / 3_600_000),
+        minutos: Math.floor((diff % 3_600_000) / 60_000),
+        segundos: Math.floor((diff % 60_000) / 1_000),
       });
-      return;
-    }
+    };
 
-    setSeasonCountdown({
-      dias: Math.floor(diff / 86_400_000),
-      horas: Math.floor((diff % 86_400_000) / 3_600_000),
-      minutos: Math.floor((diff % 3_600_000) / 60_000),
-      segundos: Math.floor((diff % 60_000) / 1_000),
-    });
-  };
+    tick();
+    const id = setInterval(tick, 1000);
 
-  tick();
-  const id = setInterval(tick, 1000);
-
-  return () => clearInterval(id);
-}, [seasonTarget]);
-  
+    return () => clearInterval(id);
+  }, [seasonTarget]);
 
   const partidoDestacado = proximos[0];
 
@@ -110,7 +106,7 @@ export default function HomePage() {
       partidoDestacado.mes,
       partidoDestacado.dia,
       hh,
-      mm
+      mm,
     );
 
     const calcular = () => {
@@ -202,10 +198,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative">
         <div className="h-[450px] md:h-[500px] flex items-center justify-center relative overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-black bg-center scale-105"
-
-          />
+          <div className="absolute inset-0 bg-cover bg-black bg-center scale-105" />
 
           <div className="absolute inset-0 bg-black/60" />
 
@@ -223,7 +216,6 @@ export default function HomePage() {
               background: "linear-gradient(90deg, #EE3524, #FFDF1B, #EE3524)",
             }}
           />
-          
 
           <div className="max-w-[1600px] mx-auto px-4 z-10 text-white text-center">
             <h1 className="text-5xl md:text-6xl font-black mb-3 tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
@@ -231,13 +223,13 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base md:text-lg mb-6 font-bold text-vcf-orange uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              {showMatch 
-              ? partidoDestacado
-                ? `VS ${partidoDestacado.rival.toUpperCase()}`
-                : "PRÓXIMO PARTIDO"
-              : "INICIO DE TEMPORADA"}
+              {showMatch
+                ? partidoDestacado
+                  ? `VS ${partidoDestacado.rival.toUpperCase()}`
+                  : "PRÓXIMO PARTIDO"
+                : "INICIO DE TEMPORADA"}
             </p>
-            
+
             {showMatch ? (
               <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
                 {[
@@ -266,13 +258,26 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              showSeason && seasonCountdown && (
+              showSeason &&
+              seasonCountdown && (
                 <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
                   {[
-                    { v: String(seasonCountdown.dias).padStart(2, "0"), l: "DÍAS" },
-                    { v: String(seasonCountdown.horas).padStart(2, "0"), l: "HORAS" },
-                    { v: String(seasonCountdown.minutos).padStart(2, "0"), l: "MIN" },
-                    { v: String(seasonCountdown.segundos).padStart(2, "0"), l: "SEG" },
+                    {
+                      v: String(seasonCountdown.dias).padStart(2, "0"),
+                      l: "DÍAS",
+                    },
+                    {
+                      v: String(seasonCountdown.horas).padStart(2, "0"),
+                      l: "HORAS",
+                    },
+                    {
+                      v: String(seasonCountdown.minutos).padStart(2, "0"),
+                      l: "MIN",
+                    },
+                    {
+                      v: String(seasonCountdown.segundos).padStart(2, "0"),
+                      l: "SEG",
+                    },
                   ].map((t, i, arr) => (
                     <div key={i} className="flex items-center gap-2 md:gap-4">
                       <div className="text-center bg-black/60 backdrop-blur-sm border border-white/20 px-3 md:px-6 py-3 md:py-4 rounded-xl shadow-lg">
@@ -314,7 +319,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -560,14 +564,15 @@ export default function HomePage() {
 
               <div className="flex gap-4">
                 <Link
-                  to="/fanzone"
+                  to="/album"
                   className="px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
+                  onClick={() => window.scrollTo(0, 0)}
                 >
                   ABRIR SOBRES
                 </Link>
 
                 <Link
-                  to="/fanzone"
+                  to="/album?scroll=album-book"
                   className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 hover:border-gray-100 transition-all shadow-md hover:shadow-lg hover:scale-105"
                 >
                   VER ÁLBUM
