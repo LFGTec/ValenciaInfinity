@@ -17,9 +17,17 @@ import {
 import { useAuth } from "../../hooks/useAuth";
 
 import { addTriviaRewardToCurrentUser } from "@/services/rewardsService";
+import { RankingPreview } from "../RankingPreview";
+import { useRanking } from "@/hooks/useRanking";
+
+
 
 export function TriviasQuizzes() {
   const { user, updatePoints } = useAuth();
+  const {
+    ranking,
+    rankingLoading,
+  } = useRanking();
 
   const [activeTab, setActiveTab] = useState<"active" | "leaderboard">(
     "active"
@@ -501,15 +509,16 @@ export function TriviasQuizzes() {
       )}
 
       {activeTab === "leaderboard" && (
-        <div>
-          <h2 className="text-3xl font-black mb-6 text-foreground">
-            CLASIFICACIÓN
-          </h2>
+        <section className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-black mb-6">
+            RANKING <span className="text-vcf-orange">GLOBAL</span>
+          </h1>
 
-          <p className="text-muted-foreground font-bold">
-
-          </p>
-        </div>
+          <RankingPreview
+            ranking={ranking}
+            loading={rankingLoading}
+          />
+        </section>
       )}
     </div>
   );
