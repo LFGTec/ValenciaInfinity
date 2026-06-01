@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getRanking, type Ranking } from "@/services/rankingService";
 import { getTrivias, type Trivia } from "@/services/triviasService";
 import { useNoticias } from "@/hooks/useNoticias";
 import {
@@ -26,13 +25,13 @@ import { usePartidosVCF } from "@/hooks/usePartidosVCF";
 import { useSeasonStatus } from "@/hooks/useSeasonStatus";
 import { countdownSeason } from "@/utils/countDownSeason";
 
+import { RankingPreview } from "@/components/RankingPreview";
+import { useRanking } from "@/hooks/useRanking";
+
 const fallbackImage =
   "https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&w=1200&q=80";
 
 export default function HomePage() {
-  const [ranking, setRanking] = useState<Ranking[]>([]);
-  const [rankingLoading, setRankingLoading] = useState(true);
-
   const [homeTrivias, setHomeTrivias] = useState<Trivia[]>([]);
   const [triviasLoading, setTriviasLoading] = useState(true);
 
@@ -46,7 +45,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { noticias: news, cargando: newsLoading } = useNoticias();
   const { proximos } = usePartidosVCF();
-  
+
   // Temporizador fuera de temporada
   const { season } = useSeasonStatus();
   const inSeason = season?.in_season ?? true;
@@ -56,48 +55,48 @@ export default function HomePage() {
     minutos: 0,
     segundos: 0,
   });
-  const seasonTarget =
-  season?.in_season
-    ? null
-    : season?.next_season_start;
+  const seasonTarget = season?.in_season ? null : season?.next_season_start;
 
   useEffect(() => {
-  if (!seasonTarget) return;
+    if (!seasonTarget) return;
 
-  const target = new Date(seasonTarget).getTime();
+    const target = new Date(seasonTarget).getTime();
 
-  const tick = () => {
-    const diff = target - Date.now();
+    const tick = () => {
+      const diff = target - Date.now();
 
-    if (diff <= 0) {
+      if (diff <= 0) {
+        setSeasonCountdown({
+          dias: 0,
+          horas: 0,
+          minutos: 0,
+          segundos: 0,
+        });
+        return;
+      }
+
       setSeasonCountdown({
-        dias: 0,
-        horas: 0,
-        minutos: 0,
-        segundos: 0,
+        dias: Math.floor(diff / 86_400_000),
+        horas: Math.floor((diff % 86_400_000) / 3_600_000),
+        minutos: Math.floor((diff % 3_600_000) / 60_000),
+        segundos: Math.floor((diff % 60_000) / 1_000),
       });
-      return;
-    }
+    };
 
-    setSeasonCountdown({
-      dias: Math.floor(diff / 86_400_000),
-      horas: Math.floor((diff % 86_400_000) / 3_600_000),
-      minutos: Math.floor((diff % 3_600_000) / 60_000),
-      segundos: Math.floor((diff % 60_000) / 1_000),
-    });
-  };
+    tick();
+    const id = setInterval(tick, 1000);
 
-  tick();
-  const id = setInterval(tick, 1000);
-
-  return () => clearInterval(id);
-}, [seasonTarget]);
-  
+    return () => clearInterval(id);
+  }, [seasonTarget]);
 
   const partidoDestacado = proximos[0];
 
   const showMatch = inSeason && !!partidoDestacado;
   const showSeason = !inSeason;
+  const {
+    ranking,
+    rankingLoading,
+  } = useRanking();
 
   useEffect(() => {
     if (!showMatch || !partidoDestacado) return;
@@ -110,7 +109,7 @@ export default function HomePage() {
       partidoDestacado.mes,
       partidoDestacado.dia,
       hh,
-      mm
+      mm,
     );
 
     const calcular = () => {
@@ -155,22 +154,6 @@ export default function HomePage() {
     fetchHomeTrivias();
   }, []);
 
-  useEffect(() => {
-    const fetchRanking = async () => {
-      try {
-        const fetchedData = await getRanking();
-        setRanking(fetchedData ?? []);
-      } catch (error) {
-        console.error("Error cargando ranking:", error);
-        setRanking([]);
-      } finally {
-        setRankingLoading(false);
-      }
-    };
-
-    fetchRanking();
-  }, []);
-
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
 
@@ -202,10 +185,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative">
         <div className="h-[450px] md:h-[500px] flex items-center justify-center relative overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-black bg-center scale-105"
-
-          />
+          <div className="absolute inset-0 bg-cover bg-black bg-center scale-105" />
 
           <div className="absolute inset-0 bg-black/60" />
 
@@ -223,7 +203,6 @@ export default function HomePage() {
               background: "linear-gradient(90deg, #EE3524, #FFDF1B, #EE3524)",
             }}
           />
-          
 
           <div className="max-w-[1600px] mx-auto px-4 z-10 text-white text-center">
             <h1 className="text-5xl md:text-6xl font-black mb-3 tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
@@ -231,13 +210,13 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base md:text-lg mb-6 font-bold text-vcf-orange uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              {showMatch 
-              ? partidoDestacado
-                ? `VS ${partidoDestacado.rival.toUpperCase()}`
-                : "PRÓXIMO PARTIDO"
-              : "INICIO DE TEMPORADA"}
+              {showMatch
+                ? partidoDestacado
+                  ? `VS ${partidoDestacado.rival.toUpperCase()}`
+                  : "PRÓXIMO PARTIDO"
+                : "INICIO DE TEMPORADA"}
             </p>
-            
+
             {showMatch ? (
               <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
                 {[
@@ -266,13 +245,26 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              showSeason && seasonCountdown && (
+              showSeason &&
+              seasonCountdown && (
                 <div className="flex items-center justify-center gap-2 md:gap-4 mb-6">
                   {[
-                    { v: String(seasonCountdown.dias).padStart(2, "0"), l: "DÍAS" },
-                    { v: String(seasonCountdown.horas).padStart(2, "0"), l: "HORAS" },
-                    { v: String(seasonCountdown.minutos).padStart(2, "0"), l: "MIN" },
-                    { v: String(seasonCountdown.segundos).padStart(2, "0"), l: "SEG" },
+                    {
+                      v: String(seasonCountdown.dias).padStart(2, "0"),
+                      l: "DÍAS",
+                    },
+                    {
+                      v: String(seasonCountdown.horas).padStart(2, "0"),
+                      l: "HORAS",
+                    },
+                    {
+                      v: String(seasonCountdown.minutos).padStart(2, "0"),
+                      l: "MIN",
+                    },
+                    {
+                      v: String(seasonCountdown.segundos).padStart(2, "0"),
+                      l: "SEG",
+                    },
                   ].map((t, i, arr) => (
                     <div key={i} className="flex items-center gap-2 md:gap-4">
                       <div className="text-center bg-black/60 backdrop-blur-sm border border-white/20 px-3 md:px-6 py-3 md:py-4 rounded-xl shadow-lg">
@@ -314,7 +306,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -560,14 +551,15 @@ export default function HomePage() {
 
               <div className="flex gap-4">
                 <Link
-                  to="/fanzone"
+                  to="/album"
                   className="px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
+                  onClick={() => window.scrollTo(0, 0)}
                 >
                   ABRIR SOBRES
                 </Link>
 
                 <Link
-                  to="/fanzone"
+                  to="/album?scroll=album-book"
                   className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 hover:border-gray-100 transition-all shadow-md hover:shadow-lg hover:scale-105"
                 >
                   VER ÁLBUM
@@ -597,115 +589,22 @@ export default function HomePage() {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl md:text-3xl font-black text-foreground">
-              RANKING <span className="text-vcf-orange">SEMANAL</span>
+              RANKING <span className="text-vcf-orange">GLOBAL</span>
             </h2>
 
             <Link
-              to="/fanzone"
+              to="/trivias"
               className="flex items-center gap-2 text-sm font-bold text-vcf-orange hover:text-vcf-blue hover:gap-3 transition-all"
             >
               VER COMPLETO <ArrowRight size={16} />
             </Link>
           </div>
 
-          <Link
-            to="/fanzone"
-            className="block bg-card border-2 border-vcf-orange rounded-lg overflow-hidden cursor-pointer hover:border-vcf-yellow hover:shadow-2xl transition-all"
-          >
-            {rankingLoading ? (
-              <div className="p-8 text-center text-muted-foreground font-bold">
-                Cargando ranking...
-              </div>
-            ) : ranking.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground font-bold">
-                No hay datos de ranking disponibles.
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 gap-4 px-6 pt-6 pb-2 bg-gradient-to-b from-vcf-yellow/20 to-transparent border-b-2 border-vcf-orange items-end">
-                  {[1, 0, 2].map((rankIndex) => {
-                    const user = ranking[rankIndex];
-
-                    if (!user) return null;
-
-                    const place = rankIndex + 1;
-                    const colors = [
-                      "bg-vcf-yellow",
-                      "bg-gray-300",
-                      "bg-amber-600",
-                    ];
-                    const avatars = [avatar1, avatar2, avatar3];
-                    const podiumMb = ["mb-8", "mb-4", "mb-0"];
-                    const badgeSize =
-                      rankIndex === 0
-                        ? "w-20 h-20 text-2xl"
-                        : "w-16 h-16 text-xl";
-                    const imgSize = rankIndex === 0 ? "w-16 h-16" : "w-12 h-12";
-
-                    return (
-                      <div
-                        key={user.id}
-                        className={`text-center ${podiumMb[rankIndex]}`}
-                      >
-                        <div
-                          className={`${badgeSize} mx-auto rounded-full mb-3 flex items-center justify-center shadow-lg ${colors[rankIndex]} text-white`}
-                        >
-                          <span className="font-black">{place}</span>
-                        </div>
-
-                        <img
-                          src={avatars[rankIndex]}
-                          alt={user.fan_nombre}
-                          className={`${imgSize} rounded-full mx-auto mb-2 shadow-md object-cover`}
-                        />
-
-                        <div className="font-black mb-1 text-foreground text-sm">
-                          {user.fan_nombre}
-                        </div>
-
-                        <div className="text-sm text-vcf-orange font-bold">
-                          {user.puntos} pts
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="divide-y divide-border">
-                  {ranking.slice(3, 10).map((user, i) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-4 hover:bg-vcf-yellow/10 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-vcf-orange/20 rounded-full flex items-center justify-center font-black text-vcf-orange">
-                          {i + 4}
-                        </div>
-
-                        <div className="w-10 h-10 bg-gradient-to-br from-vcf-orange to-vcf-yellow rounded-full" />
-
-                        <div>
-                          <div className="font-black text-foreground">
-                            {user.fan_nombre}
-                          </div>
-
-                          <div className="text-sm text-muted-foreground">
-                            Nivel {user.nivel}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <div className="font-black text-foreground">
-                          {user.puntos} pts
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </Link>
+          <RankingPreview
+            ranking={ranking}
+            loading={rankingLoading}
+            preview
+          />
         </section>
       </div>
     </div>

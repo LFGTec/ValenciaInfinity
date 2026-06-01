@@ -7,6 +7,7 @@ import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { getUserProfile } from "../services/authService";
 import { checkAndUpdateStreak } from "../services/streakService";
 
+//funcion para ver si inicia sesion
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const finishLoading = useSetAtom(finishLoadingAtom);
 
@@ -17,34 +18,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Usuario nuevo sin fila en profiles → crearla con valores por defecto
       if (!profile) {
-        await supabase.from("profiles").upsert({
-          id:             user.id,
-          email:          user.email ?? "",
-          role:           (user.user_metadata?.role as User["role"]) || "fan",
-          full_name:      user.user_metadata?.full_name ?? null,
-          avatar_url:     user.user_metadata?.avatar_url ?? null,
-          puntos:         0,
-          current_streak: 0,
-          longest_streak: 0,
-          total_days:     0,
-          last_login_date:  null,
-          last_reward_date: null,
-        }, { onConflict: "id" });
+        await supabase.from("profiles").upsert(
+          {
+            id: user.id,
+            email: user.email ?? "",
+            role: (user.user_metadata?.role as User["role"]) || "fan",
+            full_name: user.user_metadata?.full_name ?? null,
+            avatar_url: user.user_metadata?.avatar_url ?? null,
+            puntos: 0,
+            current_streak: 0,
+            longest_streak: 0,
+            total_days: 0,
+            last_login_date: null,
+            last_reward_date: null,
+          },
+          { onConflict: "id" },
+        );
 
         profile = await getUserProfile(user.id);
       }
 
       if (profile) {
         const streak = await checkAndUpdateStreak(user.id, {
-          current_streak:  profile.current_streak  ?? 0,
-          longest_streak:  profile.longest_streak  ?? 0,
-          total_days:      profile.total_days       ?? 0,
-          last_login_date: profile.last_login_date  ?? null,
+          current_streak: profile.current_streak ?? 0,
+          longest_streak: profile.longest_streak ?? 0,
+          total_days: profile.total_days ?? 0,
+          last_login_date: profile.last_login_date ?? null,
         });
         return {
           ...profile,
           ...streak,
-          avatar_url:    profile.avatar_url ?? user.user_metadata?.avatar_url,
+          avatar_url: profile.avatar_url ?? user.user_metadata?.avatar_url,
           user_metadata: user.user_metadata,
         };
       }
@@ -54,11 +58,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Fallback mínimo si todo falla
     return {
-      id:            user.id,
-      email:         user.email ?? "",
-      role:          (user.user_metadata?.role as User["role"]) || "fan",
-      full_name:     user.user_metadata?.full_name,
-      avatar_url:    user.user_metadata?.avatar_url,
+      id: user.id,
+      email: user.email ?? "",
+      role: (user.user_metadata?.role as User["role"]) || "fan",
+      full_name: user.user_metadata?.full_name,
+      avatar_url: user.user_metadata?.avatar_url,
       user_metadata: user.user_metadata,
     };
   };
@@ -92,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           latestCallId++; // cancela cualquier update async pendiente
           finishLoading(null);
         }
-      }
+      },
     );
 
     return () => {

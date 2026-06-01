@@ -6,121 +6,83 @@ import {
 } from "@/services/friendsService";
 
 export function useFriends() {
-  const [users, setUsers] = useState<FriendUser[]>([]);
+  const [myFriends, setMyFriends] = useState<FriendUser[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<FriendUser[]>([]);
+  const [searchResults, setSearchResults] = useState<FriendUser[]>([]);
+
   const [loading, setLoading] = useState(true);
 
-  const [error, setError] = useState<string | null>(
-    null
-  );
-
-  const loadUsers = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
 
-      const data =
-        await friendsService.getUsersWithFriendship();
+      const [friends, pending] = await Promise.all([
+        friendsService.getMyFriends(),
+        friendsService.getPendingRequests(),
+      ]);
 
-      setUsers(data);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Error loading users";
-
-      setError(message);
+      setMyFriends(friends);
+      setPendingRequests(pending);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadUsers();
+    loadData();
   }, []);
 
-  const myFriends = useMemo(
-    () =>
-      users.filter(
-        (u) => u.friendship_status === "FRIENDS"
-      ),
-    [users]
-  );
+  const searchUsers = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
-  const pendingRequests = useMemo(
-    () =>
-      users.filter(
-        (u) =>
-          u.friendship_status ===
-          "PENDING_RECEIVED"
-      ),
-    [users]
-  );
+    const results =
+      await friendsService.searchUsers(query);
 
-  const searchUsers = (query: string) => {
-
-  if (!query.trim()) return [];
-
-  return users.filter((user) => {
-
-    const normalizedQuery =
-      query.toLowerCase();
-    
-
-    return (
-      user.full_name
-        ?.toLowerCase()
-        .startsWith(normalizedQuery) 
-    );
-  });
-};
-
-  const sendRequest = async (
-    receiverId: string
-  ) => {
-    await friendsService.sendFriendRequest(
-      receiverId
-    );
-
-    await loadUsers();
+    setSearchResults(results);
   };
 
-  const acceptRequest = async (
-    requestId: string
-  ) => {
-    await friendsService.acceptFriendRequest(
-      requestId
+  const sendRequest = async (userId: string) => {
+    await friendsService.sendFriendRequest(userId);
+
+    setSearchResults((prev) =>
+      prev.map((user) =>
+        user.id === userId
+          ? {
+              ...user,
+              friendship_status: "PENDING_SENT",
+            }
+          : user
+      )
     );
 
-    await loadUsers();
+    await loadData();
   };
 
-  const rejectRequest = async (
-    requestId: string
-  ) => {
-    await friendsService.rejectFriendRequest(
-      requestId
-    );
+  const acceptRequest = async (requestId: string) => {
+    await friendsService.acceptFriendRequest(requestId);
 
-    await loadUsers();
+    await loadData();
   };
 
-  const removeFriend = async (
-    requestId: string
-  ) => {
-    await friendsService.removeFriend(
-      requestId
-    );
+  const rejectRequest = async (requestId: string) => {
+    await friendsService.rejectFriendRequest(requestId);
 
-    await loadUsers();
+    await loadData();
+  };
+
+  const removeFriend = async (requestId: string) => {
+    await friendsService.removeFriend(requestId);
+
+    await loadData();
   };
 
   return {
-    users,
-
-    loading,
-    error,
-
     myFriends,
     pendingRequests,
+    searchResults,
 
     searchUsers,
 
@@ -129,6 +91,8 @@ export function useFriends() {
     rejectRequest,
     removeFriend,
 
-    reload: loadUsers,
+    reload: loadData,
+
+    loading,
   };
 }
