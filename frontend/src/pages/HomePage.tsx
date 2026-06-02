@@ -12,15 +12,7 @@ import {
   Ticket,
 } from "lucide-react";
 
-import stadiumImage from "../assets/Stadium3.avif";
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
-import card1 from "../assets/CartaAmarilla.png";
-import card2 from "../assets/CartaAzul.png";
-import card3 from "../assets/CartaRoja.png";
-import card4 from "../assets/CartaVerde.png";
-import avatar1 from "../assets/Avatar1.png";
-import avatar2 from "../assets/Avatar2.png";
-import avatar3 from "../assets/Avatar3.png";
 import { usePartidosVCF } from "@/hooks/usePartidosVCF";
 import { useSeasonStatus } from "@/hooks/useSeasonStatus";
 import { countdownSeason } from "@/utils/countDownSeason";
@@ -93,10 +85,7 @@ export default function HomePage() {
 
   const showMatch = inSeason && !!partidoDestacado;
   const showSeason = !inSeason;
-  const {
-    ranking,
-    rankingLoading,
-  } = useRanking();
+  const { ranking, rankingLoading } = useRanking();
 
   useEffect(() => {
     if (!showMatch || !partidoDestacado) return;
@@ -568,7 +557,9 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              {[card1, card2, card3, card4, card1, card2].map((cardImg, i) => (
+              {[
+                /* card1, card2, card3, card4, card1, card2 */
+              ].map((cardImg, i) => (
                 <Link
                   key={i}
                   to="/fanzone"
@@ -600,11 +591,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <RankingPreview
-            ranking={ranking}
-            loading={rankingLoading}
-            preview
-          />
+          <RankingPreview ranking={ranking} loading={rankingLoading} preview />
         </section>
       </div>
     </div>
