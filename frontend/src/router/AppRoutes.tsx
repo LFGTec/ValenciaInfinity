@@ -34,6 +34,7 @@ import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
 
 import { DailyRewards } from "@/pages/DailyRewards";
+import UserConfig from "@/components/features/UserConfig";
 
 export default function AppRoutes() {
   return (
@@ -67,6 +68,7 @@ export default function AppRoutes() {
           <Route path="/juego" element={<Juego />} />
           <Route path="/trivias" element={<TriviasQuizzes />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/settings" element={<UserConfig />} />
         </Route>
       </Route>
 
