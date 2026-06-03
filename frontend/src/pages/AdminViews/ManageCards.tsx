@@ -223,7 +223,7 @@ export function ManageCards(){
                     {/* Category Filters */}
                     <div className="flex flex-wrap gap-2 mt-4">
                         {allCategories.map((cat) => {
-                        const Icon = iconMap[ "Star"];
+                        const Icon = iconMap[cat.icon as keyof typeof iconMap] || Star;
                         return (
                             <button
                             key={cat.id}
@@ -245,7 +245,7 @@ export function ManageCards(){
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredCards.map((card) => {
-                    const CategoryIcon = iconMap[ "Star"];
+                    const CategoryIcon = iconMap[card.categories?.icon as keyof typeof iconMap] || Star;
 
                     return (
                         <div key={card.id} className="bg-card border-2 rounded-lg">
@@ -265,7 +265,7 @@ export function ManageCards(){
                             } text-white px-3 py-1 rounded-full text-xs font-black flex items-center gap-1`}
                             >
                             <CategoryIcon size={14} />
-                            {( card.rarity)?.toUpperCase()}
+                            {( card.categories?.name)?.toUpperCase()}
                             </div>
                         </div>
 

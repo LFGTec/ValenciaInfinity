@@ -3,7 +3,9 @@ import { supabase } from "./supabaseClient";
 export interface Category {
   id: string;
   name: string;
+  label: string;
   color: string;
+  icon: string;
 }
 
 export interface Card {
@@ -11,16 +13,16 @@ export interface Card {
   name: string;
   type: string | null;
   season: number | null;
-  image_url?: string;
+  image_url: string | null;
   rarity: string | null;
+  quantity?: number;
+  obtained?: boolean;
+
   category_id: string;
   is_deleted: boolean;
 
-  categories?: Category;
-  obtained?: boolean;
-  quantity?: number;
+  categories?: Category; 
 }
-
 
 
 export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
@@ -33,12 +35,13 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
         categories!fk_category (
           id,
           name,
-          color
+          color,
         )
       )
     `)
     .eq("user_id", userId)
     .gt("quantity", 0);
+    
 
   if (error) {
     console.error("Error al obtener cartas del usuario:", error);
@@ -131,7 +134,8 @@ export const getCards = async (): Promise<Card[]> => {
       categories!fk_category (
         id,
         name,
-        color
+        color,
+        icon,
       )
     `)
     .eq("is_deleted", false);
