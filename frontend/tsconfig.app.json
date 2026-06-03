@@ -5,9 +5,7 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "esnext",
     "types": ["vite/client"],
-    "skipLibCheck": true,
-    
-    "baseUrl": ".",
+    "skipLibCheck": true,    
     "paths": {
       "@/*": [
         "./src/*"

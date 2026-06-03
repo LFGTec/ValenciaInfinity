@@ -95,6 +95,12 @@ export function CardExchange() {
     };
   }, []);
 
+  useEffect(() => {
+    if (feedback) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [feedback]);
+
   // Load only current user cards when entering propose tab
   useEffect(() => {
     if (user?.id && (activeTab === "propose" || activeTab === "my_offers")) {
