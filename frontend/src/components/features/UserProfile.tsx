@@ -113,7 +113,7 @@ export function UserProfile() {
           MI <span className="text-vcf-orange">PERFIL</span>
         </h1>
         <p className="text-xl text-muted-foreground">
-          Gestiona tu información y configuración
+          Gestiona tu información
         </p>
       </div>
 
@@ -123,7 +123,6 @@ export function UserProfile() {
           { id: "profile", label: "PERFIL", icon: User },
           { id: "stats", label: "ESTADÍSTICAS", icon: TrendingUp },
           { id: "privacy", label: "PRIVACIDAD", icon: Shield },
-          { id: "settings", label: "CONFIGURACIÓN", icon: Lock },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -367,24 +366,6 @@ export function UserProfile() {
                 desc="Tu ciudad aparecerá en tu perfil"
                 value={settings.show_location}
                 onToggle={() => toggleSetting("show_location")}
-              />
-              <ToggleItem
-                label="Permitir Mensajes"
-                desc="Otros fans pueden enviarte mensajes"
-                value={settings.allow_messages}
-                onToggle={() => toggleSetting("allow_messages")}
-              />
-              <ToggleItem
-                label="Mostrar Estadísticas"
-                desc="Tus estadísticas serán visibles"
-                value={settings.show_stats}
-                onToggle={() => toggleSetting("show_stats")}
-              />
-              <ToggleItem
-                label="Mostrar Colección"
-                desc="Otros pueden ver tu álbum de cartas"
-                value={settings.show_collection}
-                onToggle={() => toggleSetting("show_collection")}
               />
             </div>
 

@@ -13,7 +13,7 @@ export default function MainLayout() {
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  
 
   const handleLogout = async () => {
     const { error } = await signOut();
@@ -23,10 +23,7 @@ export default function MainLayout() {
     }
   };
 
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-  };
+  
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -47,9 +44,8 @@ export default function MainLayout() {
                 { path: "/matches", label: "PARTIDOS" },
                 { path: "/news", label: "NOTICIAS" },
                 { path: "/fanzone", label: "ZONA FAN" },
-                { path: "/juego", label: "JUEGO" },
+                { path: "/juego", label: "MESTALLA RIVALS" },
                 { path: "/nou-mestalla", label: "NOU MESTALLA" },
-                { path: "/tienda", label: "TIENDA" },
               ].map((item) => (
                 <NavLink
                   key={item.path}
@@ -99,9 +95,7 @@ export default function MainLayout() {
                 </>
               )}
 
-              <button onClick={toggleTheme} className="text-white hover:text-vcf-orange flex-shrink-0">
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
+              
 
               {/* Perfil / Login */}
               <div className="flex justify-end relative flex-shrink-0">

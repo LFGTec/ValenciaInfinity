@@ -32,6 +32,7 @@ import { CardExchange } from "@/components/features/CardExchange";
 import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
 import { DailyRewards } from "@/pages/DailyRewards";
+import UserConfig from "@/components/features/UserConfig";
 import { TicketPurchase } from "@/pages/TicketsPage";
 
 export default function AppRoutes() {
@@ -67,6 +68,7 @@ export default function AppRoutes() {
           <Route path="/trivias" element={<TriviasQuizzes />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/ticket" element={<TicketPurchase />} />
+          <Route path="/settings" element={<UserConfig />} />
         </Route>
       </Route>
 
