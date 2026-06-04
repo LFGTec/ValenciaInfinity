@@ -25,53 +25,49 @@ export function PlayerCard({ player }: Props) {
       >
         {/* FRONT */}
         <div
-        className="absolute inset-0 rounded-xl overflow-hidden shadow-lg bg-card border border-border hover:border-vcf-orange transition-colors duration-300"
-        style={{ backfaceVisibility: "hidden" }}
+          className="absolute inset-0 rounded-xl overflow-hidden shadow-lg bg-card border border-border hover:border-vcf-orange transition-colors duration-300 flex flex-col"
+          style={{ backfaceVisibility: "hidden" }}
         >
 
-        {/* HEADER — fijo en la parte superior, opaco */}
-        <div className="relative z-10 p-4 pt-6 group"
-            style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, transparent 100%)" }}
-            >
-            <div className="flex justify-between items-start">
-
-            {/* INFO */}
-            <div className="leading-tight">
-                <div className="text-base font-black uppercase tracking-wide text-gray-100 transition-colors duration-300 group-hover:text-vcf-orange">
-                {player.name}
-                </div>
-                <div className="text-xs text-gray-300 transition-colors duration-300 group-hover:text-vcf-orange">
-                {player.position}
-                </div>
-            </div>
-
-            {/* NUMERO */}
-            <div className="text-2xl font-black text-gray-100 transition-colors duration-300 group-hover:text-vcf-orange">
-                {player.squad_number}
-            </div>
-
-            </div>
-        </div>
-
-        {/* IMAGEN — ocupa el espacio restante */}
-        <div className="relative flex-1 overflow-hidden" style={{ height: "calc(100% - 72px)" }}>
+          {/* IMAGEN — ocupa todo el espacio disponible */}
+          <div className="relative flex-1 overflow-hidden">
             <img
-            src={player.image_url}
-            alt={player.name}
-            className="w-full h-full object-cover object-top"
+              src={player.image_url}
+              alt={player.name}
+              className="w-full h-full object-cover object-top"
             />
 
-            {/* BOTTOM FADE */}
-            <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-black/90 to-transparent" />
-
-            {/* NATIONALITY */}
-            <div className="absolute bottom-0 w-full p-3 flex justify-center z-10">
-            <div className="text-[11px] tracking-widest uppercase text-gray-300">
-                {player.nationality}
+            {/* HEADER OVERLAY — gradiente encima de la imagen */}
+            <div
+              className="absolute top-0 left-0 right-0 z-10 p-4 pt-6 group"
+              style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)" }}
+            >
+              <div className="flex justify-between items-start">
+                <div className="leading-tight">
+                  <div className="text-base font-black uppercase tracking-wide text-gray-100 transition-colors duration-300 group-hover:text-vcf-orange">
+                    {player.name}
+                  </div>
+                  <div className="text-xs text-gray-300 transition-colors duration-300 group-hover:text-vcf-orange">
+                    {player.position}
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-gray-100 transition-colors duration-300 group-hover:text-vcf-orange">
+                  {player.squad_number}
+                </div>
+              </div>
             </div>
-            </div>
-        </div>
 
+            {/* BOTTOM FADE + NATIONALITY */}
+            <div className="absolute bottom-0 w-full z-10">
+              <div className="h-16 bg-gradient-to-t from-black/90 to-transparent" />
+              <div className="bg-black/90 p-3 flex justify-center">
+                <div className="text-[11px] tracking-widest uppercase text-gray-300">
+                  {player.nationality}
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* BACK */}
