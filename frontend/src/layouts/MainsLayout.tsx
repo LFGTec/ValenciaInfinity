@@ -2,7 +2,15 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import {
-  Sun, Moon, Menu, X, User, LogOut, Settings, ChevronDown, Flame
+  Sun,
+  Moon,
+  Menu,
+  X,
+  User,
+  LogOut,
+  Settings,
+  ChevronDown,
+  Flame,
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";
 import valenciaPointsIcon from "../assets/ValenciaPoints.png";
@@ -33,10 +41,13 @@ export default function MainLayout() {
       <header className="bg-black border-b-2 border-vcf-orange sticky top-0 z-50 shadow-md">
         <div className="w-full px-4">
           <div className="flex items-center justify-between py-4">
-
             {/* Logo */}
             <Link to="/home" className="flex items-center gap-3">
-              <img src={vcfShield} alt="VCF" className="w-14 h-14 object-contain" />
+              <img
+                src={vcfShield}
+                alt="VCF"
+                className="w-14 h-14 object-contain"
+              />
             </Link>
 
             {/* Navegación Desktop */}
@@ -49,7 +60,7 @@ export default function MainLayout() {
                 { path: "/fanzone", label: "ZONA FAN" },
                 { path: "/juego", label: "JUEGO" },
                 { path: "/nou-mestalla", label: "NOU MESTALLA" },
-                { path: "/tienda", label: "TIENDA" },
+                { path: "/ticket", label: "ENTRADAS" },
               ].map((item) => (
                 <NavLink
                   key={item.path}
@@ -76,7 +87,6 @@ export default function MainLayout() {
 
             {/* Acciones Derecha */}
             <div className="flex items-center gap-3 md:gap-4 flex-shrink-0 justify-end">
-
               {/* Puntos + Racha (Solo si está autenticado) */}
               {isAuthenticated && (
                 <>
@@ -85,21 +95,35 @@ export default function MainLayout() {
                       to="/daily-rewards"
                       className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
                     >
-                      <Flame size={16} className="text-orange-400 flex-shrink-0" />
-                      <span className="text-white font-black text-sm">{user?.current_streak}</span>
+                      <Flame
+                        size={16}
+                        className="text-orange-400 flex-shrink-0"
+                      />
+                      <span className="text-white font-black text-sm">
+                        {user?.current_streak}
+                      </span>
                     </Link>
                   )}
                   <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-vcf-orange/10 border border-vcf-orange/30 rounded-lg whitespace-nowrap">
-                    <img src={valenciaPointsIcon} alt="" className="w-5 h-5 flex-shrink-0" />
+                    <img
+                      src={valenciaPointsIcon}
+                      alt=""
+                      className="w-5 h-5 flex-shrink-0"
+                    />
                     <span className="text-vcf-orange font-black text-sm tabular-nums">
                       {(user?.puntos ?? 0).toLocaleString("es-ES")}
                     </span>
-                    <span className="text-white/40 text-[10px] font-bold uppercase">pts</span>
+                    <span className="text-white/40 text-[10px] font-bold uppercase">
+                      pts
+                    </span>
                   </div>
                 </>
               )}
 
-              <button onClick={toggleTheme} className="text-white hover:text-vcf-orange flex-shrink-0">
+              <button
+                onClick={toggleTheme}
+                className="text-white hover:text-vcf-orange flex-shrink-0"
+              >
                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
 
@@ -113,32 +137,54 @@ export default function MainLayout() {
                     >
                       {(user.avatar_url ?? user.user_metadata?.avatar_url) ? (
                         <img
-                          src={user.avatar_url ?? user.user_metadata?.avatar_url}
+                          src={
+                            user.avatar_url ?? user.user_metadata?.avatar_url
+                          }
                           alt="User"
                           referrerPolicy="no-referrer"
                           className="w-9 h-9 rounded-full object-cover"
                         />
                       ) : (
                         <div className="w-9 h-9 rounded-full bg-vcf-orange flex items-center justify-center text-white font-black text-sm">
-                          {(user.full_name ?? user.email ?? "?")[0].toUpperCase()}
+                          {(user.full_name ??
+                            user.email ??
+                            "?")[0].toUpperCase()}
                         </div>
                       )}
-                      <ChevronDown size={16} className={`text-white transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                      <ChevronDown
+                        size={16}
+                        className={`text-white transition-transform ${showDropdown ? "rotate-180" : ""}`}
+                      />
                     </button>
 
                     {showDropdown && (
                       <div className="absolute right-0 mt-3 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-2 z-[100]">
                         <div className="px-4 py-3 border-b border-white/5">
-                          <p className="text-sm font-bold text-white truncate">{user.full_name ?? user.user_metadata?.full_name}</p>
-                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                          <p className="text-sm font-bold text-white truncate">
+                            {user.full_name ?? user.user_metadata?.full_name}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {user.email}
+                          </p>
                         </div>
-                        <Link to="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors">
-                          <User size={16} /> Mi Perfil </Link>
-                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors">
+                        <Link
+                          to="/profile"
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"
+                        >
+                          <User size={16} /> Mi Perfil{" "}
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-vcf-orange hover:text-white transition-colors"
+                        >
                           <Settings size={16} /> Configuración
                         </Link>
                         <div className="border-t border-white/5 mt-1">
-                          <button onClick={handleLogout} disabled={isSigningOut} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" >
+                          <button
+                            onClick={handleLogout}
+                            disabled={isSigningOut}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors"
+                          >
                             <LogOut size={16} />
                             {isSigningOut ? "Saliendo..." : "Cerrar Sesión"}
                           </button>
@@ -147,7 +193,10 @@ export default function MainLayout() {
                     )}
                   </div>
                 ) : (
-                  <Link to="/login" className="bg-vcf-orange px-4 py-2 rounded-lg text-white font-bold text-sm">
+                  <Link
+                    to="/login"
+                    className="bg-vcf-orange px-4 py-2 rounded-lg text-white font-bold text-sm"
+                  >
                     INICIAR SESIÓN
                   </Link>
                 )}
@@ -205,8 +254,14 @@ export default function MainLayout() {
 
       {/* Footer (Simplificado) */}
       <footer className="bg-black border-t border-white/5 py-10 text-center">
-        <img src={vcfShield} alt="VCF" className="w-10 h-10 mx-auto mb-4 opacity-50" />
-        <p className="text-gray-600 text-xs tracking-widest uppercase">© 2026 VALENCIA CF FAN PLATFORM</p>
+        <img
+          src={vcfShield}
+          alt="VCF"
+          className="w-10 h-10 mx-auto mb-4 opacity-50"
+        />
+        <p className="text-gray-600 text-xs tracking-widest uppercase">
+          © 2026 VALENCIA CF FAN PLATFORM
+        </p>
       </footer>
     </div>
   );
