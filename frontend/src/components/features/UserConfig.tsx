@@ -1,6 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { ToggleItem } from "../ToggleItem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import  ChangePasswordForm  from "@/components/features/ChangePasswordForm";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -13,11 +13,27 @@ export default function UserConfig(){
     const { user } = useAuth();
     
     
-    const [darkMode, setDarkMode] = useState(false);
-    
+    const [darkMode, setDarkMode] = useState(() => {
+        const saved = localStorage.getItem("theme");
+        if (saved) return saved === "dark";
+
+        return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    });
+
+    useEffect(() => {
+        const root = document.documentElement;
+
+        if (darkMode) {
+        root.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+        } else {
+        root.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+        }
+    }, [darkMode]);
+
     const toggleTheme = () => {
-        setDarkMode(!darkMode);
-        document.documentElement.classList.toggle("dark");
+        setDarkMode((prev) => !prev);
     };
 
     const canChangePassword =
