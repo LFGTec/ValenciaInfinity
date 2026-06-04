@@ -11,6 +11,7 @@ import { Toast } from "@/components/ui.disabled/Toast";
 import { useCards } from "../../hooks/useCards";
 import { iconMap } from "@/utils/IconMap";
 import { colorMap } from "@/utils/colorMap";
+import { ChevronDown } from "lucide-react";
 import type { Card } from "../../services/cardsService";
 
 export function ManageCards(){
@@ -46,7 +47,7 @@ export function ManageCards(){
     const allCategories = [
     {
         id: "ALL",
-        label: "Todas",
+        name: "Todas",
         color: "bg-black",
         icon: "Filter",
     },
@@ -235,7 +236,7 @@ export function ManageCards(){
                             }`}
                             >
                             <Icon size={16} />
-                            {Icon}
+                            {cat.name}
                             </button>
                         );
                         })}
@@ -364,16 +365,47 @@ export function ManageCards(){
                         <label className="block text-sm font-bold text-foreground mb-2">
                         Tipo de carta *
                         </label>
-                        <input
-                        type="text"
-                        required
-                        value={formData.type}
-                        onChange={(e) =>
+                        <div className="relative">
+                        <select
+                            value={formData.type}
+                            onChange={(e) =>
                             setForm({ ...formData, type: e.target.value })
-                        }
-                        placeholder="Ej. Jugador"
-                        className="w-full px-4 py-3 bg-muted border-2 border-transparent rounded-lg focus:border-vcf-orange outline-none transition-all text-foreground"
+                            }
+                            className="
+                            w-full
+                            px-4
+                            py-3
+                            pr-10
+                            bg-muted
+                            border-2
+                            border-transparent
+                            rounded-lg
+                            focus:border-vcf-orange
+                            outline-none
+                            transition-all
+                            text-foreground
+                            appearance-none
+                            "
+                        >
+                            <option value="">Selecciona un tipo</option>
+                            <option value="jugador">Jugador</option>
+                            <option value="estadio">Estadio</option>
+                            <option value="aficion">Afición</option>
+                            <option value="camisetas">Camisetas</option>
+                        </select>
+
+                        <ChevronDown
+                            size={18}
+                            className="
+                            absolute
+                            right-3
+                            top-1/2
+                            -translate-y-1/2
+                            pointer-events-none
+                            text-muted-foreground
+                            "
                         />
+                        </div>
                     </div>
 
                      {/* Card TEMPORADA */}
@@ -417,7 +449,7 @@ export function ManageCards(){
                             }`}
                             >
                             <Icon size={20} />
-                            <span>{Icon}</span>
+                            <span>{cat.name}</span>
                             </button>
                         );
                         })}

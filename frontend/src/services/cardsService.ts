@@ -3,7 +3,6 @@ import { supabase } from "./supabaseClient";
 export interface Category {
   id: string;
   name: string;
-  label: string;
   color: string;
   icon: string;
 }
@@ -135,10 +134,13 @@ export const getCards = async (): Promise<Card[]> => {
         id,
         name,
         color,
-        icon,
+        icon
       )
     `)
     .eq("is_deleted", false);
+
+  console.log("ERROR:", error);
+  console.log("DATA:", data);
 
   if (error) {
     console.error("Error al obtener cartas:", error);
@@ -184,19 +186,18 @@ export async function addCard(
   type: string,
   season: number,
   category_id: string,
-  rarity: string | null,
   file?: File
 ) {
-  let image_url = null;
+  let image_url: string | null = null;
 
   if (file) {
     const fileName = `${Date.now()}-${file.name}`;
 
-    const { error } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("imagenesCartas")
       .upload(fileName, file);
 
-    if (error) throw error;
+    if (uploadError) throw uploadError;
 
     const { data } = supabase.storage
       .from("imagenesCartas")
@@ -205,6 +206,7 @@ export async function addCard(
     image_url = data.publicUrl;
   }
 
+  
   const { data, error } = await supabase
     .from("Cards")
     .insert([
@@ -213,7 +215,6 @@ export async function addCard(
         type,
         season,
         category_id,
-        rarity,
         image_url,
       },
     ])
@@ -243,7 +244,6 @@ export const updateCard = async (
   type: string,
   season: number,
   category_id: string,
-  rarity: string | null,
   existing_image_url: string | null,
   file?: File
 ) => {
@@ -272,7 +272,6 @@ export const updateCard = async (
       type,
       season,
       category_id,
-      rarity,
       image_url,
     })
     .eq("id", id)
