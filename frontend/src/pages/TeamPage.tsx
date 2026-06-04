@@ -1,26 +1,21 @@
+import { usePlayers } from "@/hooks/usePlayers";
 import { TimelinePublic } from "./TimelinePublic";
 
-export function TeamPage() {
-  const players = [
-    { id: 18, name: "Pepelu", position: "Mediocampista" },
-    { id: 9, name: "Hugo Duro", position: "Delantero" },
-    { id: 11, name: "Rafa Mir", position: "Delantero" },
-    { id: 7, name: "Barrenechea", position: "Mediocampista" },
-    { id: 22, name: "López", position: "Delantero" },
-    { id: 8, name: "Javi Guerra", position: "Mediocampista" },
-    { id: 15, name: "Centelles", position: "Defensa" },
-    { id: 17, name: "Mosquera", position: "Mediocampista" },
-    { id: 5, name: "Guillamón", position: "Defensa" },
-    { id: 20, name: "Foulquier", position: "Defensa" },
-  ];
+import { TeamCarousel } from "@/components/equipo/teamCarousel";
 
-  const allPlayers = [...players, ...players, ...players.slice(0, 5)];
+export function TeamPage() {
+ 
+  const { players: teamPlayers, loading } = usePlayers();
+
+  if (loading) return <div>Cargando...</div>;
 
   return (
     <div className="min-h-screen bg-content">
-      {/* Equipo */}
-      <section className="mx-auto max-w-[1400px] px-4 py-12">
-        <div className="mb-8">
+  
+      <div className="mx-auto max-w-[1400px] px-4 py-12">
+
+        {/* HEADER */}
+        <div className="mb-6">
           <h1 className="mb-3 text-5xl font-black text-foreground">
             EL <span className="text-vcf-orange">EQUIPO</span>
           </h1>
@@ -30,37 +25,12 @@ export function TeamPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {allPlayers.map((player, i) => (
-            <div
-              key={i}
-              className="group cursor-pointer rounded-xl border-2 border-border bg-card p-4 shadow-md transition-all hover:-translate-y-1 hover:border-vcf-orange hover:shadow-xl"
-            >
-              <div className="relative mb-3 aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-muted to-card">
-                <img
-                  /*                   src={}
-                   */ alt={player.name}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-
-                <div className="absolute left-3 top-3 rounded-lg bg-black/70 px-2 py-1 text-xs font-black text-white backdrop-blur-sm">
-                  #{player.id}
-                </div>
-              </div>
-
-              <div className="text-center">
-                <div className="mb-1 text-sm font-black text-foreground">
-                  {player.name}
-                </div>
-
-                <div className="text-xs font-medium text-muted-foreground">
-                  {player.position}
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* CARRUSEL */}
+        <div className="mt-6">
+          <TeamCarousel players={teamPlayers} />
         </div>
-      </section>
+
+      </div>
 
       {/* Separador visual */}
       <section className="mx-auto my-8 max-w-[1400px] px-4 md:my-14">
