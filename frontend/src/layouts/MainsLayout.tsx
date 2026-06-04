@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import {
-  Sun,
-  Moon,
   Menu,
   X,
   User,
@@ -21,7 +19,6 @@ export default function MainLayout() {
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
 
   const handleLogout = async () => {
     const { error } = await signOut();
@@ -30,8 +27,6 @@ export default function MainLayout() {
       navigate("/login", { replace: true });
     }
   };
-
-  
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -57,10 +52,7 @@ export default function MainLayout() {
                 { path: "/fanzone", label: "ZONA FAN" },
                 { path: "/juego", label: "MESTALLA RIVALS" },
                 { path: "/nou-mestalla", label: "NOU MESTALLA" },
-<<<<<<< HEAD
                 { path: "/ticket", label: "ENTRADAS" },
-=======
->>>>>>> 23d260d557521fe2e93dc186165a8af67f9682ec
               ].map((item) => (
                 <NavLink
                   key={item.path}
@@ -119,17 +111,6 @@ export default function MainLayout() {
                   </div>
                 </>
               )}
-
-<<<<<<< HEAD
-              <button
-                onClick={toggleTheme}
-                className="text-white hover:text-vcf-orange flex-shrink-0"
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-=======
-              
->>>>>>> 23d260d557521fe2e93dc186165a8af67f9682ec
 
               {/* Perfil / Login */}
               <div className="flex justify-end relative flex-shrink-0">

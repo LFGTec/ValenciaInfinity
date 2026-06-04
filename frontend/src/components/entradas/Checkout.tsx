@@ -1,5 +1,13 @@
-import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, Lock, CheckCircle, Loader2, AlertCircle, Shield, Wifi } from "lucide-react";
+import { useState, useRef } from "react";
+import {
+  ChevronLeft,
+  Lock,
+  CheckCircle,
+  Loader2,
+  AlertCircle,
+  Shield,
+  Wifi,
+} from "lucide-react";
 import type { Match, Sector, Seat } from "@/pages/TicketsPage";
 
 // ─── Card helpers ─────────────────────────────────────────────────────────────
@@ -28,7 +36,9 @@ function isValidExpiry(val: string): boolean {
   const year = 2000 + parseInt(m[2]);
   if (month < 1 || month > 12) return false;
   const now = new Date();
-  return new Date(year, month - 1) >= new Date(now.getFullYear(), now.getMonth());
+  return (
+    new Date(year, month - 1) >= new Date(now.getFullYear(), now.getMonth())
+  );
 }
 
 // ─── Animated credit card visual ─────────────────────────────────────────────
@@ -66,7 +76,10 @@ function CardVisual({
   ];
 
   return (
-    <div className="relative h-48 w-full max-w-sm mx-auto" style={{ perspective: "1000px" }}>
+    <div
+      className="relative h-48 w-full max-w-sm mx-auto"
+      style={{ perspective: "1000px" }}
+    >
       <div
         className="relative w-full h-full"
         style={{
@@ -88,13 +101,19 @@ function CardVisual({
           {/* Chip */}
           <div className="w-10 h-7 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-md mb-4 grid grid-cols-3 grid-rows-3 p-0.5 gap-px">
             {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className={`rounded-[1px] ${[1, 3, 4, 5, 7].includes(i) ? "bg-yellow-400" : "bg-yellow-600"}`} />
+              <div
+                key={i}
+                className={`rounded-[1px] ${[1, 3, 4, 5, 7].includes(i) ? "bg-yellow-400" : "bg-yellow-600"}`}
+              />
             ))}
           </div>
           {/* Number */}
           <div className="flex gap-3 mb-4">
             {groups.map((g, i) => (
-              <span key={i} className="font-mono font-bold text-white text-lg tracking-widest">
+              <span
+                key={i}
+                className="font-mono font-bold text-white text-lg tracking-widest"
+              >
                 {g}
               </span>
             ))}
@@ -102,14 +121,20 @@ function CardVisual({
           {/* Name & Expiry */}
           <div className="flex justify-between items-end">
             <div>
-              <div className="text-white/50 text-[10px] uppercase tracking-widest mb-0.5">Titular</div>
+              <div className="text-white/50 text-[10px] uppercase tracking-widest mb-0.5">
+                Titular
+              </div>
               <div className="text-white font-bold text-sm uppercase tracking-wide truncate max-w-32">
                 {name || "NOMBRE APELLIDO"}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-white/50 text-[10px] uppercase tracking-widest mb-0.5">Caduca</div>
-              <div className="text-white font-bold text-sm font-mono">{expiry || "MM/AA"}</div>
+              <div className="text-white/50 text-[10px] uppercase tracking-widest mb-0.5">
+                Caduca
+              </div>
+              <div className="text-white font-bold text-sm font-mono">
+                {expiry || "MM/AA"}
+              </div>
             </div>
           </div>
         </div>
@@ -126,7 +151,13 @@ function CardVisual({
             <div className="flex-1 h-9 bg-white/90 rounded flex items-center px-3">
               <div className="flex gap-0.5">
                 {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className="w-0.5 h-3 bg-gray-300 rounded-full" style={{ transform: `rotate(${Math.random() * 20 - 10}deg)` }} />
+                  <div
+                    key={i}
+                    className="w-0.5 h-3 bg-gray-300 rounded-full"
+                    style={{
+                      transform: `rotate(${Math.random() * 20 - 10}deg)`,
+                    }}
+                  />
                 ))}
               </div>
             </div>
@@ -152,7 +183,10 @@ function CardBrand({ type, small }: { type: CardType; small?: boolean }) {
   const size = small ? "text-sm" : "text-xl";
   if (type === "visa") {
     return (
-      <span className={`font-black italic text-white tracking-tight ${size}`} style={{ fontFamily: "serif" }}>
+      <span
+        className={`font-black italic text-white tracking-tight ${size}`}
+        style={{ fontFamily: "serif" }}
+      >
         VISA
       </span>
     );
@@ -160,19 +194,29 @@ function CardBrand({ type, small }: { type: CardType; small?: boolean }) {
   if (type === "mastercard") {
     return (
       <div className="flex items-center">
-        <div className={`${small ? "w-5 h-5" : "w-7 h-7"} bg-red-500 rounded-full opacity-90`} />
-        <div className={`${small ? "w-5 h-5" : "w-7 h-7"} bg-orange-400 rounded-full -ml-2 opacity-90`} />
+        <div
+          className={`${small ? "w-5 h-5" : "w-7 h-7"} bg-red-500 rounded-full opacity-90`}
+        />
+        <div
+          className={`${small ? "w-5 h-5" : "w-7 h-7"} bg-orange-400 rounded-full -ml-2 opacity-90`}
+        />
       </div>
     );
   }
   if (type === "amex") {
     return (
-      <span className={`font-black text-white tracking-widest ${small ? "text-xs" : "text-sm"}`}>
+      <span
+        className={`font-black text-white tracking-widest ${small ? "text-xs" : "text-sm"}`}
+      >
         AMEX
       </span>
     );
   }
-  return <div className={`${small ? "w-5 h-5" : "w-8 h-8"} rounded border-2 border-white/30`} />;
+  return (
+    <div
+      className={`${small ? "w-5 h-5" : "w-8 h-8"} rounded border-2 border-white/30`}
+    />
+  );
 }
 
 // ─── Processing overlay ───────────────────────────────────────────────────────
@@ -189,23 +233,36 @@ function ProcessingOverlay({ step }: { step: number }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-white rounded-3xl p-10 max-w-sm w-full mx-4 shadow-2xl text-center">
-        <div className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center transition-all duration-500 ${done ? "bg-green-100" : "bg-[#EE3224]/10"}`}>
+        <div
+          className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center transition-all duration-500 ${done ? "bg-green-100" : "bg-[#EE3224]/10"}`}
+        >
           {done ? (
             <CheckCircle size={48} className="text-green-500" />
           ) : (
             <Loader2 size={40} className="text-[#EE3224] animate-spin" />
           )}
         </div>
-        <div className="text-xl font-black text-gray-900 mb-3">{done ? "¡Pago realizado!" : "Procesando pago"}</div>
-        <div className="text-gray-600 text-sm min-h-[1.5rem] transition-all">{STEPS[step]}</div>
+        <div className="text-xl font-black text-gray-900 mb-3">
+          {done ? "¡Pago realizado!" : "Procesando pago"}
+        </div>
+        <div className="text-gray-600 text-sm min-h-[1.5rem] transition-all">
+          {STEPS[step]}
+        </div>
         {!done && (
           <div className="mt-6 space-y-1.5">
             {STEPS.slice(0, 3).map((s, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs text-left">
-                <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${i < step ? "bg-green-500" : i === step ? "bg-[#EE3224]" : "bg-gray-200"}`}>
+              <div
+                key={i}
+                className="flex items-center gap-2 text-xs text-left"
+              >
+                <div
+                  className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${i < step ? "bg-green-500" : i === step ? "bg-[#EE3224]" : "bg-gray-200"}`}
+                >
                   {i < step && <CheckCircle size={10} className="text-white" />}
                 </div>
-                <span className={i <= step ? "text-gray-900" : "text-gray-400"}>{s}</span>
+                <span className={i <= step ? "text-gray-900" : "text-gray-400"}>
+                  {s}
+                </span>
               </div>
             ))}
           </div>
@@ -235,7 +292,12 @@ export function Checkout({
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [cvvFocused, setCvvFocused] = useState(false);
-  const [touched, setTouched] = useState({ number: false, name: false, expiry: false, cvv: false });
+  const [touched, setTouched] = useState({
+    number: false,
+    name: false,
+    expiry: false,
+    cvv: false,
+  });
   const [processing, setProcessing] = useState(false);
   const [procStep, setProcStep] = useState(0);
 
@@ -248,9 +310,18 @@ export function Checkout({
 
   // ── Validation ──────────────────────────────────────────────────────────────
   const errors = {
-    number: touched.number && rawDigits.length !== 16 ? "Introduce los 16 dígitos de tu tarjeta" : "",
-    name: touched.name && name.trim().length < 3 ? "Introduce el nombre que aparece en la tarjeta" : "",
-    expiry: touched.expiry && !isValidExpiry(expiry) ? "Fecha inválida o tarjeta caducada" : "",
+    number:
+      touched.number && rawDigits.length !== 16
+        ? "Introduce los 16 dígitos de tu tarjeta"
+        : "",
+    name:
+      touched.name && name.trim().length < 3
+        ? "Introduce el nombre que aparece en la tarjeta"
+        : "",
+    expiry:
+      touched.expiry && !isValidExpiry(expiry)
+        ? "Fecha inválida o tarjeta caducada"
+        : "",
     cvv: touched.cvv && cvv.length < 3 ? "El CVV debe tener 3 dígitos" : "",
   };
 
@@ -274,7 +345,8 @@ export function Checkout({
 
   const handleExpiry = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
-    const formatted = digits.length > 2 ? digits.slice(0, 2) + "/" + digits.slice(2) : digits;
+    const formatted =
+      digits.length > 2 ? digits.slice(0, 2) + "/" + digits.slice(2) : digits;
     // Auto-advance: if user just typed 2nd month digit and wasn't deleting
     if (digits.length === 2 && prevExpiryLen.current === 1) {
       setExpiry(formatted + "/");
@@ -323,12 +395,17 @@ export function Checkout({
         {/* Header */}
         <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-40 shadow-sm">
           <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-            <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-bold">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-bold"
+            >
               <ChevronLeft size={20} />
               Volver
             </button>
             <div className="text-center">
-              <div className="text-sm font-black text-gray-900">Pago seguro</div>
+              <div className="text-sm font-black text-gray-900">
+                Pago seguro
+              </div>
               <div className="flex items-center justify-center gap-1 text-xs text-green-600">
                 <Lock size={10} />
                 Conexión SSL cifrada
@@ -342,8 +419,12 @@ export function Checkout({
         </div>
 
         <div className="max-w-5xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-black text-gray-900 mb-2">Finalizar compra</h1>
-          <p className="text-gray-500 text-sm mb-8">Introduce los datos de tu tarjeta para completar la simulación</p>
+          <h1 className="text-3xl font-black text-gray-900 mb-2">
+            Finalizar compra
+          </h1>
+          <p className="text-gray-500 text-sm mb-8">
+            Introduce los datos de tu tarjeta para completar la simulación
+          </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* ── Left: Card form ── */}
@@ -364,7 +445,9 @@ export function Checkout({
                   <div className="w-8 h-8 bg-[#EE3224]/10 rounded-lg flex items-center justify-center">
                     <span className="text-[#EE3224] font-black text-sm">1</span>
                   </div>
-                  <h3 className="text-lg font-black text-gray-900">Datos de la tarjeta</h3>
+                  <h3 className="text-lg font-black text-gray-900">
+                    Datos de la tarjeta
+                  </h3>
                 </div>
 
                 <div className="space-y-5">
@@ -379,15 +462,17 @@ export function Checkout({
                         inputMode="numeric"
                         value={number}
                         onChange={handleNumber}
-                        onBlur={() => setTouched((t) => ({ ...t, number: true }))}
+                        onBlur={() =>
+                          setTouched((t) => ({ ...t, number: true }))
+                        }
                         placeholder="1234 5678 9012 3456"
                         maxLength={19}
                         className={`w-full px-4 py-3 pr-14 bg-gray-50 border-2 rounded-xl text-gray-900 font-mono placeholder-gray-400 focus:outline-none transition-colors text-lg tracking-widest ${
                           errors.number
                             ? "border-red-400 focus:border-red-500"
                             : rawDigits.length === 16
-                            ? "border-green-400 focus:border-green-500"
-                            : "border-gray-200 focus:border-[#EE3224]"
+                              ? "border-green-400 focus:border-green-500"
+                              : "border-gray-200 focus:border-[#EE3224]"
                         }`}
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -413,15 +498,17 @@ export function Checkout({
                         value={expiry}
                         onChange={handleExpiry}
                         onKeyDown={handleExpiryKeyDown}
-                        onBlur={() => setTouched((t) => ({ ...t, expiry: true }))}
+                        onBlur={() =>
+                          setTouched((t) => ({ ...t, expiry: true }))
+                        }
                         placeholder="MM/AA"
                         maxLength={5}
                         className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl text-gray-900 font-mono placeholder-gray-400 focus:outline-none transition-colors text-lg tracking-widest ${
                           errors.expiry
                             ? "border-red-400 focus:border-red-500"
                             : isValidExpiry(expiry)
-                            ? "border-green-400 focus:border-green-500"
-                            : "border-gray-200 focus:border-[#EE3224]"
+                              ? "border-green-400 focus:border-green-500"
+                              : "border-gray-200 focus:border-[#EE3224]"
                         }`}
                       />
                       {errors.expiry && <FieldError msg={errors.expiry} />}
@@ -429,7 +516,9 @@ export function Checkout({
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
                         CVV{" "}
-                        <span className="font-normal text-gray-400 text-xs">(3 dígitos al dorso)</span>
+                        <span className="font-normal text-gray-400 text-xs">
+                          (3 dígitos al dorso)
+                        </span>
                       </label>
                       <input
                         type="text"
@@ -447,10 +536,10 @@ export function Checkout({
                           errors.cvv
                             ? "border-red-400 focus:border-red-500"
                             : cvv.length === 3
-                            ? "border-green-400 focus:border-green-500"
-                            : cvvFocused
-                            ? "border-[#EE3224]"
-                            : "border-gray-200 focus:border-[#EE3224]"
+                              ? "border-green-400 focus:border-green-500"
+                              : cvvFocused
+                                ? "border-[#EE3224]"
+                                : "border-gray-200 focus:border-[#EE3224]"
                         }`}
                       />
                       {errors.cvv && <FieldError msg={errors.cvv} />}
@@ -472,8 +561,8 @@ export function Checkout({
                         errors.name
                           ? "border-red-400 focus:border-red-500"
                           : name.trim().length >= 3
-                          ? "border-green-400 focus:border-green-500"
-                          : "border-gray-200 focus:border-[#EE3224]"
+                            ? "border-green-400 focus:border-green-500"
+                            : "border-gray-200 focus:border-[#EE3224]"
                       }`}
                     />
                     {errors.name && <FieldError msg={errors.name} />}
@@ -497,13 +586,22 @@ export function Checkout({
             {/* ── Right: Order summary ── */}
             <div className="lg:col-span-2">
               <div className="sticky top-24 bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-black text-gray-900 mb-4">Resumen del pedido</h3>
+                <h3 className="text-lg font-black text-gray-900 mb-4">
+                  Resumen del pedido
+                </h3>
 
                 {/* Match */}
                 <div className="mb-4">
-                  <div className="text-sm font-black text-gray-900">{match.homeTeam} vs {match.awayTeam}</div>
+                  <div className="text-sm font-black text-gray-900">
+                    {match.homeTeam} vs {match.awayTeam}
+                  </div>
                   <div className="text-xs text-gray-500 mt-0.5">
-                    {new Date(match.date).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })} · {match.time}h
+                    {new Date(match.date).toLocaleDateString("es-ES", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    })}{" "}
+                    · {match.time}h
                   </div>
                   <div className="text-xs text-gray-500">{match.stadium}</div>
                 </div>
@@ -511,21 +609,33 @@ export function Checkout({
                 {/* Details */}
                 <div className="border-t border-gray-100 py-4 space-y-2">
                   <SummaryRow label="Sector" value={sector.name} />
-                  <SummaryRow label="Categoría" value={`Cat. ${sector.category}`} />
+                  <SummaryRow
+                    label="Categoría"
+                    value={`Cat. ${sector.category}`}
+                  />
                   <SummaryRow label="Fila" value={seat.row} />
                   <SummaryRow label="Asiento" value={`#${seat.number}`} />
                 </div>
 
                 {/* Pricing */}
                 <div className="border-t border-gray-100 py-4 space-y-2">
-                  <SummaryRow label="Precio entrada" value={`€${sector.price.toFixed(2)}`} />
-                  <SummaryRow label="Cargo de servicio" value={`€${serviceFee.toFixed(2)}`} muted />
+                  <SummaryRow
+                    label="Precio entrada"
+                    value={`€${sector.price.toFixed(2)}`}
+                  />
+                  <SummaryRow
+                    label="Cargo de servicio"
+                    value={`€${serviceFee.toFixed(2)}`}
+                    muted
+                  />
                 </div>
 
                 <div className="border-t border-gray-200 pt-4 mb-6">
                   <div className="flex justify-between items-center">
                     <span className="font-black text-gray-900">Total</span>
-                    <span className="text-3xl font-black text-[#EE3224]">€{total.toFixed(2)}</span>
+                    <span className="text-3xl font-black text-[#EE3224]">
+                      €{total.toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
@@ -572,11 +682,23 @@ function FieldError({ msg }: { msg: string }) {
   );
 }
 
-function SummaryRow({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
+function SummaryRow({
+  label,
+  value,
+  muted,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+}) {
   return (
     <div className="flex justify-between text-sm">
       <span className="text-gray-500">{label}</span>
-      <span className={`font-bold ${muted ? "text-gray-400" : "text-gray-900"}`}>{value}</span>
+      <span
+        className={`font-bold ${muted ? "text-gray-400" : "text-gray-900"}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }
