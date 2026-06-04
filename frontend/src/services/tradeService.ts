@@ -359,6 +359,30 @@ export const acceptTradeWithInventoryUpdate = async (
   tradeId: string
 ): Promise<boolean> => {
   try {
+    // Fetch trade details first to validate
+    const trade = await getTradeRequestById(tradeId);
+    if (!trade) {
+      console.error("Trade not found");
+      return false;
+    }
+
+    // Validate that both sides have items
+    const offeredItems = trade.trade_items?.filter(i => i.side === "offered") || [];
+    const wantedItems = trade.trade_items?.filter(i => i.side === "wanted") || [];
+
+    if (offeredItems.length === 0 || wantedItems.length === 0) {
+      console.error("Trade has no offered or wanted items");
+      return false;
+    }
+
+    // Validate quantities
+    for (const item of [...offeredItems, ...wantedItems]) {
+      if (!item.card_id || item.quantity < 1) {
+        console.error("Invalid trade item:", item);
+        return false;
+      }
+    }
+
     const { data, error } = await supabase.rpc("accept_trade", {
       trade_id: tradeId,
     });
