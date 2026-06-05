@@ -15,7 +15,7 @@ import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import { Juego } from "../pages/Juego";
-import { NouMestellaPage } from "../pages/NouMestellaPage";
+
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
 import AdminLayout from "@/layouts/AdminLayout";
 import { TriviasQuizzes } from "../components/features/TriviasQuizzes";
@@ -52,7 +52,6 @@ export default function AppRoutes() {
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/estadisticas" element={<EstadisticasPage />} />
         <Route path="/news" element={<News />} />
-        <Route path="/nou-mestalla" element={<NouMestellaPage />} />
         <Route path="/daily-rewards" element={<DailyRewards />} />
 
         {/* Rutas Protegidas */}
@@ -72,21 +71,17 @@ export default function AppRoutes() {
         </Route>
       </Route>
 
-      {/*Rutas de Admin*/}
-      <Route element={<AdminLayout />}>
-        <Route path="/admin/statistics" element={<AdminStatistics />} />
-        <Route path="/admin/trivias" element={<CrearTrivias />} />
-        <Route path="/admin/timeline" element={<TimelineAdmin />} />
-        <Route path="/admin/cards" element={<ManageCards />} />
-        <Route path="/admin/rewards" element={<ManageRewards />} />
-
-        <Route element={<ProtectedRoute adminOnly={true} />}>
-          <Route
-            path="/admin"
-            element={<Navigate to="/admin/dashboard" replace />}
-          />
+      {/*Rutas de Admin*/}  
+      <Route element={<ProtectedRoute adminOnly={true} />}>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/statistics" element={<AdminStatistics />} />
+          <Route path="/admin/trivias" element={<CrearTrivias />} />
+          <Route path="/admin/timeline" element={<TimelineAdmin />} />
+          <Route path="/admin/cards" element={<ManageCards />} />
+          <Route path="/admin/rewards" element={<ManageRewards />} />
         </Route>
       </Route>
+      
     </Routes>
   );
 }

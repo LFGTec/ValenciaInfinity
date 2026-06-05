@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { formatNumber } from "@/utils/formatNumbers";
 
 type RankingUser = {
   id: string;
@@ -96,7 +97,7 @@ export function RankingPreview({
                   </div>
 
                   <div className="text-sm text-vcf-orange font-bold">
-                    {user.puntos} pts
+                    {formatNumber(user.puntos)} pts
                   </div>
                 </div>
               );
@@ -132,7 +133,7 @@ export function RankingPreview({
                 </div>
 
                 <div className="font-black text-foreground">
-                  {user.puntos} pts
+                  {formatNumber(user.puntos)} pts
                 </div>
               </div>
             ))}

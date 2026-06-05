@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";
 import valenciaPointsIcon from "../assets/ValenciaPoints.png";
+import { formatNumber } from "@/utils/formatNumbers";
+
 
 export default function MainLayout() {
   const { user, isAuthenticated, signOut, isSigningOut } = useAuth();
@@ -51,7 +53,6 @@ export default function MainLayout() {
                 { path: "/news", label: "NOTICIAS" },
                 { path: "/fanzone", label: "ZONA FAN" },
                 { path: "/juego", label: "MESTALLA RIVALS" },
-                { path: "/nou-mestalla", label: "NOU MESTALLA" },
                 { path: "/ticket", label: "ENTRADAS" },
               ].map((item) => (
                 <NavLink
@@ -78,7 +79,7 @@ export default function MainLayout() {
             </nav>
 
             {/* Acciones Derecha */}
-            <div className="flex items-center gap-3 md:gap-4 flex-shrink-0 justify-end">
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               {/* Puntos + Racha (Solo si está autenticado) */}
               {isAuthenticated && (
                 <>
@@ -103,13 +104,60 @@ export default function MainLayout() {
                       className="w-5 h-5 flex-shrink-0"
                     />
                     <span className="text-vcf-orange font-black text-sm tabular-nums">
-                      {(user?.puntos ?? 0).toLocaleString("es-ES")}
+                      {formatNumber(user?.puntos)}
                     </span>
                     <span className="text-white/40 text-[10px] font-bold uppercase">
                       pts
                     </span>
                   </div>
                 </>
+              )}
+
+              {isAuthenticated && (
+                <div className="flex md:hidden items-center gap-2">
+                  {(user?.current_streak ?? 0) > 0 && (
+                    <Link
+                      to="/daily-rewards"
+                      className="
+                        flex items-center gap-1
+                        px-2 py-1
+                        bg-orange-500/10
+                        border border-orange-500/30
+                        rounded-lg
+                        hover:bg-orange-500/20
+                        transition-colors
+                      "
+                    >
+                      <Flame
+                        size={14}
+                        className="text-orange-400 flex-shrink-0"
+                      />
+                      <span className="text-white font-black text-xs">
+                        {user?.current_streak}
+                      </span>
+                    </Link>
+                  )}
+
+                  <div
+                    className="
+                      flex items-center gap-1
+                      px-2 py-1
+                      bg-vcf-orange/10
+                      border border-vcf-orange/30
+                      rounded-lg
+                      whitespace-nowrap
+                    "
+                  >
+                    <img
+                      src={valenciaPointsIcon}
+                      alt=""
+                      className="w-4 h-4 flex-shrink-0"
+                    />
+                    <span className="text-vcf-orange font-black text-xs">
+                      {formatNumber(user?.puntos)}
+                    </span>
+                  </div>
+                </div>
               )}
 
               {/* Perfil / Login */}
@@ -127,10 +175,15 @@ export default function MainLayout() {
                           }
                           alt="User"
                           referrerPolicy="no-referrer"
-                          className="w-9 h-9 rounded-full object-cover"
+                          className="w-8 h-8 md:w-9 md:h-9
+                                      rounded-full
+                                      object-cover"
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-vcf-orange flex items-center justify-center text-white font-black text-sm">
+                        <div className=" w-8 h-8 md:w-9 md:h-9
+                                          rounded-full
+                                          bg-vcf-orange
+                                          flex items-center justify-center">
                           {(user.full_name ??
                             user.email ??
                             "?")[0].toUpperCase()}
@@ -200,7 +253,15 @@ export default function MainLayout() {
       </header>
 
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-black border-t border-vcf-orange">
+        <div className="xl:hidden
+                        fixed
+                        top-[86px]
+                        left-0
+                        right-0
+                        bottom-0
+                        bg-black
+                        z-[90]
+                        overflow-y-auto">
           <nav className="flex flex-col py-2">
             {[
               { path: "/home", label: "INICIO" },
@@ -209,7 +270,6 @@ export default function MainLayout() {
               { path: "/news", label: "NOTICIAS" },
               { path: "/fanzone", label: "ZONA FAN" },
               { path: "/juego", label: "JUEGO" },
-              { path: "/nou-mestalla", label: "NOU MESTALLA" },
               { path: "/ticket", label: "ENTRADA" },
             ].map((item) => (
               <NavLink
