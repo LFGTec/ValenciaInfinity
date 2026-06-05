@@ -54,6 +54,7 @@ export default function MainLayout() {
                 { path: "/fanzone", label: "ZONA FAN" },
                 { path: "/juego", label: "MESTALLA RIVALS" },
                 { path: "/ticket", label: "ENTRADAS" },
+                { path: "/store", label: "TIENDA" },
               ].map((item) => (
                 <NavLink
                   key={item.path}
@@ -270,6 +271,7 @@ export default function MainLayout() {
               { path: "/news", label: "NOTICIAS" },
               { path: "/fanzone", label: "ZONA FAN" },
               { path: "/juego", label: "JUEGO" },
+              { path: "/store", label: "TIENDA" },
               { path: "/ticket", label: "ENTRADA" },
             ].map((item) => (
               <NavLink

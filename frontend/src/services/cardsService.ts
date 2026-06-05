@@ -454,3 +454,28 @@ export const openPack = async (packId: string): Promise<Card[] | null> => {
     return null;
   }
 }
+
+export const buySpecificCard = async (userId: string, cardId: string): Promise<void> => {
+  const { data: existingCard, error: fetchError } = await supabase
+    .from("user_cards")
+    .select("quantity")
+    .eq("user_id", userId)
+    .eq("card_id", cardId)
+    .maybeSingle();
+
+  if (fetchError) throw new Error(fetchError.message);
+
+  if (existingCard) {
+    const { error } = await supabase
+      .from("user_cards")
+      .update({ quantity: existingCard.quantity + 1 })
+      .eq("user_id", userId)
+      .eq("card_id", cardId);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from("user_cards")
+      .insert([{ user_id: userId, card_id: cardId, quantity: 1 }]);
+    if (error) throw new Error(error.message);
+  }
+};

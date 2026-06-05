@@ -4,7 +4,14 @@ import { useSetAtom } from "jotai";
 import { pageAtom } from "../UI";
 import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
-import { getFullAlbumCardsByUser, getUserPacks, openPack, createUserPack, type Card, type UserPack } from "../../services/cardsService";
+import {
+  getFullAlbumCardsByUser,
+  getUserPacks,
+  openPack,
+  createUserPack,
+  type Card,
+  type UserPack,
+} from "../../services/cardsService";
 import { PackOpenAnimation } from "./PackOpenAnimation";
 import { useVisitingAlbum } from "@/hooks/useVisitingAlbum";
 import { Star, Trophy } from "lucide-react";
@@ -17,17 +24,14 @@ type Props = {
 export function CardAlbum({ userId }: Props) {
   // Authentication and user context
   const { user } = useAuth();
-  
+
   const setPage = useSetAtom(pageAtom);
 
-  const targetUserId =
-    userId ?? user?.id;
+  const targetUserId = userId ?? user?.id;
 
-  const isVisiting =
-    !!userId &&
-    userId !== user?.id;
+  const isVisiting = !!userId && userId !== user?.id;
 
-   const {
+  const {
     profile: friend,
     sendFriendRequest,
     loadingVisiting,
@@ -72,7 +76,8 @@ export function CardAlbum({ userId }: Props) {
         const data = await getFullAlbumCardsByUser(targetUserId);
         setCards(data);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "No se pudo cargar el album";
+        const message =
+          err instanceof Error ? err.message : "No se pudo cargar el album";
         setError(message);
       } finally {
         setLoading(false);
@@ -109,11 +114,37 @@ export function CardAlbum({ userId }: Props) {
   const totalCards = cards.length;
   const obtainedCards = useMemo(
     () => cards.filter((card) => card.obtained).length,
-    [cards]
+    [cards],
   );
   const missingCards = Math.max(totalCards - obtainedCards, 0);
-  const progress = totalCards > 0 ? Math.round((obtainedCards / totalCards) * 100) : 0;
 
+  const progress =
+    totalCards > 0 ? Math.round((obtainedCards / totalCards) * 100) : 0;
+
+  const filteredCards = useMemo(() => {
+    return cards.filter((card) => {
+      
+      const matchesCategory =
+        selectedCategory === "todas" ||
+        (selectedCategory === "jugadores" && card.type === "jugador") ||
+        (selectedCategory === "leyendas" && card.rarity === "Legendario") ||
+        (selectedCategory === "Epica" && card.rarity === "Epica") ||
+        (selectedCategory === "Comun" && card.rarity === "Comun") ||
+        (selectedCategory === "Raro" && card.rarity === "Raro");
+
+      return  matchesCategory;
+    });
+  }, [cards, searchQuery, selectedCategory]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setPage(0);
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setPage(0);
+  };
   // Handle pack opening and card reveal
   const handleOpenPack = async (packId: string) => {
     setOpeningPackId(packId);
@@ -122,7 +153,7 @@ export function CardAlbum({ userId }: Props) {
       const revealedCards = await openPack(packId);
       if (revealedCards) {
         // Remove the opened pack from local state
-        setPacks(prev => prev.filter(p => p.id !== packId));
+        setPacks((prev) => prev.filter((p) => p.id !== packId));
 
         // Refresh cards to display newly obtained ones
         if (user?.id) {
@@ -134,11 +165,14 @@ export function CardAlbum({ userId }: Props) {
         setRevealedCards(revealedCards);
         setShowPackAnimation(true);
       } else {
-        setPackError("No se pudo guardar el sobre abierto en la base de datos. Intenta de nuevo.");
+        setPackError(
+          "No se pudo guardar el sobre abierto en la base de datos. Intenta de nuevo.",
+        );
       }
     } catch (err) {
       console.error("Error opening pack:", err);
-      const message = err instanceof Error ? err.message : "No se pudo abrir el sobre.";
+      const message =
+        err instanceof Error ? err.message : "No se pudo abrir el sobre.";
       setPackError(message);
     } finally {
       setOpeningPackId(null);
@@ -171,19 +205,13 @@ export function CardAlbum({ userId }: Props) {
   // Show loading state
   if (loading) {
     return (
-      <div className="team-album-loading">
-        Cargando album de cartas...
-      </div>
+      <div className="team-album-loading">Cargando album de cartas...</div>
     );
   }
 
   // Show error state
   if (error) {
-    return (
-      <div className="team-album-loading">
-        {error}
-      </div>
-    );
+    return <div className="team-album-loading">{error}</div>;
   }
 
   return (
@@ -198,34 +226,11 @@ export function CardAlbum({ userId }: Props) {
                 ÁLBUM DE <span className="text-vcf-orange">CARTAS</span>
               </h1>
               <p className="text-sm md:text-base text-gray-600">
-                {obtainedCards} de {totalCards} cartas coleccionadas ({progress}%)
+                {obtainedCards} de {totalCards} cartas coleccionadas ({progress}
+                %)
               </p>
             </div>
-            
-            {!isVisiting && (
-              <div className="flex gap-3">
-              
-                <button
-                  onClick={() => packs.length > 0 && handleOpenPack(packs[0].id)}
-                  disabled={packs.length === 0 || openingPackId !== null}
-                  className="flex items-center justify-center gap-2 bg-vcf-orange hover:bg-vcf-orange/90 disabled:bg-gray-400 text-white font-bold px-6 py-3 rounded-lg transition-all disabled:cursor-not-allowed"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
-                  </svg>
-                  {openingPackId ? "Abriendo..." : `ABRIR SOBRE (${packs.length})`}
-                </button>
-                <button className="flex items-center justify-center gap-2 border-2 border-vcf-orange text-vcf-orange hover:bg-vcf-orange/5 font-bold px-6 py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleBuyPacks}
-                  disabled={buyingPacks}
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 2l-1.41 1.41L9.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-5.17l1.58-1.59L15 2H9zm0 2h6v3H9V4zm7 12H8v-2h8v2z" />
-                  </svg>
-                  {buyingPacks ? "Comprando..." : "COMPRAR SOBRES"}
-                </button>
-              </div>
-            )}
+
             {packError && (
               <p className="mt-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 {packError}
@@ -233,12 +238,10 @@ export function CardAlbum({ userId }: Props) {
             )}
           </div>
           {isVisiting && friend && (
-
             <VisitorAlbumHeader
               friend={friend}
               onSendFriendRequest={sendFriendRequest}
             />
-
           )}
 
           {/* Progress card */}
@@ -260,31 +263,23 @@ export function CardAlbum({ userId }: Props) {
             </div>
 
             <div className="grid grid-cols-4 gap-3">
-              <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">
+              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
                 <p className="text-2xl md:text-3xl font-black text-vcf-orange">
                   {obtainedCards}
                 </p>
-                <p className="text-xs text-muted-foreground font-medium">
-                  Obtenidas
-                </p>
+                <p className="text-xs text-gray-600 font-medium">Obtenidas</p>
               </div>
-
-              <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">
-                <p className="text-2xl md:text-3xl font-black text-foreground">
+              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
+                <p className="text-2xl md:text-3xl font-black text-black">
                   {missingCards}
                 </p>
-                <p className="text-xs text-muted-foreground font-medium">
-                  Faltantes
-                </p>
+                <p className="text-xs text-gray-600 font-medium">Faltantes</p>
               </div>
-
-              <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">
+              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
                 <p className="text-2xl md:text-3xl font-black text-vcf-orange">
                   0
                 </p>
-                <p className="text-xs text-muted-foreground font-medium">
-                  Duplicadas
-                </p>
+                <p className="text-xs text-gray-600 font-medium">Duplicadas</p>
               </div>
 
               <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">
@@ -337,45 +332,46 @@ export function CardAlbum({ userId }: Props) {
                 ))}
             </div>
 
-            {/* Search */}
+            {/* Search and filter section */}
             <div className="mb-6">
               <div className="flex flex-col md:flex-row gap-4 mb-4">
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Buscar carta por nombre o número..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-6 py-3 pl-12 bg-gray-50 dark:bg-muted border-2 border-gray-200 dark:border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-vcf-orange transition-colors"
-                  />
+                {/* Search input */}
+            
 
-                  <svg
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-
-                {/* Filters */}
+                {/* Category filter tabs */}
                 <div className="flex overflow-x-auto gap-3 pb-2">
                   {[
                     { id: "todas", label: "TODAS", count: cards.length },
-                    { id: "jugadores", label: "JUGADORES", count: cards.filter(c => c.type === "jugador").length },
-                    { id: "leyendas", label: "LEYENDAS", count: cards.filter(c => c.rarity === "legendaria").length },
-                    { id: "estadio", label: "ESTADIO", count: cards.filter(c => c.type === "estadio").length },
-                    { id: "aficion", label: "AFICIÓN", count: cards.filter(c => c.type === "aficion").length }
+                    {
+                      id: "jugadores",
+                      label: "JUGADORES",
+                      count: cards.filter((c) => c.type === "jugador").length,
+                    },
+                    {
+                      id: "leyendas",
+                      label: "LEYENDAS",
+                      count: cards.filter((c) => c.rarity === "Legendario")
+                        .length,
+                    },
+                    {
+                      id: "Epica",
+                      label: "ÉPICA",
+                      count: cards.filter((c) => c.rarity === "Epica").length,
+                    },
+                    {
+                      id: "Comun",
+                      label: "COMUN",
+                      count: cards.filter((c) => c.rarity === "Comun").length,
+                    },
+                    {
+                      id: "Raro",
+                      label: "RARO",
+                      count: cards.filter((c) => c.rarity === "Raro").length,
+                    },
                   ].map((category) => (
                     <button
                       key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
+                      onClick={() => handleCategoryChange(category.id)}
                       className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all ${
                         selectedCategory === category.id
                           ? "bg-vcf-orange text-white shadow-lg"
@@ -389,8 +385,8 @@ export function CardAlbum({ userId }: Props) {
               </div>
             </div>
           </div>
+        </div>
       </div>
-    </div>
 
       {/* 3D Book canvas container */}
       <div id="album-book" className="album-canvas-wrapper">
@@ -410,7 +406,7 @@ export function CardAlbum({ userId }: Props) {
           />
 
           <group position={[-0.1, -0.05, 0]}>
-            <Book cards={cards} />
+            <Book cards={filteredCards} />
           </group>
         </Canvas>
       </div>
