@@ -49,11 +49,11 @@ export function TimelinePublic() {
           Historia del club
         </p>
 
-        <h2 className="text-3xl font-black uppercase tracking-tight md:text-5xl">
+        <h2 className="text-3xl text-black text-foreground uppercase tracking-tight md:text-5xl">
           Línea del Tiempo
         </h2>
 
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-600 md:text-base">
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base ">
           Los momentos que han marcado nuestra historia y construido la
           identidad del equipo.
         </p>
@@ -81,9 +81,9 @@ function TimelineBody({
 }: TimelineBodyProps) {
   return (
     <section className="relative mx-auto max-w-[1250px]">
-      <div className="absolute left-1/2 top-0 hidden h-full w-[2px] -translate-x-1/2 bg-gray-300 md:block" />
+      <div className="absolute left-1/2 top-0 hidden h-full w-[2px] -translate-x-1/2 bg-border md:block" />
 
-      <div className="absolute left-5 top-0 h-full w-[2px] bg-gray-300 md:hidden" />
+      <div className="absolute left-5 top-0 h-full w-[2px] bg-border md:hidden" />
 
       <div className="space-y-8 md:space-y-14">
         {events.map((event, index) => {
