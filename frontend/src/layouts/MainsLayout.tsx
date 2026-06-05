@@ -210,7 +210,7 @@ export default function MainLayout() {
               { path: "/fanzone", label: "ZONA FAN" },
               { path: "/juego", label: "JUEGO" },
               { path: "/nou-mestalla", label: "NOU MESTALLA" },
-              { path: "/tienda", label: "TIENDA" },
+              { path: "/ticket", label: "ENTRADA" },
             ].map((item) => (
               <NavLink
                 key={item.path}
