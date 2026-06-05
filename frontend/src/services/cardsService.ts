@@ -34,7 +34,7 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
         categories!fk_category (
           id,
           name,
-          color,
+          color
         )
       )
     `)
