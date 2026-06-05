@@ -1,17 +1,31 @@
 import React, { useState } from 'react';
 import { Play, Info, Maximize2, Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { useAuth } from "../hooks/useAuth";
 
 export function Juego() {
   const [isGameLoaded, setIsGameLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
+  
+  const { user, isAuthenticated } = useAuth();
 
-  const unityGameUrl = "https://gorgeous-caramel-10da77.netlify.app/";
+  const unityGameBaseUrl = "https://gorgeous-caramel-10da77.netlify.app/";
+
+  const unityGameUrl = user?.id
+    ? `${unityGameBaseUrl}?userId=${encodeURIComponent(user.id)}`
+    : unityGameBaseUrl;
 
   const handleLoadGame = () => {
-    setIsGameLoaded(true);
-    setShowInstructions(false);
-  };
+  if (!isAuthenticated || !user?.id) {
+    alert("Debes iniciar sesión para jugar.");
+    return;
+  }
+
+  console.log("Cargando Unity con userId:", user.id);
+
+  setIsGameLoaded(true);
+  setShowInstructions(false);
+};
 
   const handleRestartGame = () => {
     setIsGameLoaded(false);
