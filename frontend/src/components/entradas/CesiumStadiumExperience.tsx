@@ -15,8 +15,7 @@ import {
 } from "./cesiumController";
 import ZonePanel from "./ZonePanel";
 
-const CESIUM_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMThkNjRmZS1jOTY1LTQwZGYtOWRjNC0zODIyZTY4YTljZmMiLCJpZCI6NDQwMDIzLCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3ODA1MTQyNDd9.E4mto4FEe5voDQ4XDydVDD76ScLtIk1pIs-Ned8gpaA";
+const CESIUM_TOKEN = import.meta.env.VITE_CESIUM_TOKEN as string;
 
 const ZONES: Zone[] = ["VIP", "Preferente", "General", "Gol"];
 
