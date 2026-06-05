@@ -34,6 +34,7 @@ import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 import { DailyRewards } from "@/pages/DailyRewards";
 import UserConfig from "@/components/features/UserConfig";
 import { TicketPurchase } from "@/pages/TicketsPage";
+import {StorePage}  from "@/pages/StorePage" 
 
 export default function AppRoutes() {
   return (
@@ -69,6 +70,7 @@ export default function AppRoutes() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/ticket" element={<TicketPurchase />} />
           <Route path="/settings" element={<UserConfig />} />
+          <Route path="/store" element={<StorePage />} />
         </Route>
       </Route>
 

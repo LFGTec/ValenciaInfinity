@@ -1,6 +1,3 @@
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-
 type RankingUser = {
   id: string;
   full_name: string;
