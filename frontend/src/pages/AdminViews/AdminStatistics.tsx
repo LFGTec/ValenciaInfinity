@@ -156,8 +156,8 @@ export function AdminStatistics() {
   }, [timeRange]);
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] text-black px-8 py-8 rounded-sm">
-      <div className="max-w-[1600px] mx-auto">
+    <div className="min-h-screen bg-[#f7f7f7] text-black px-4 md:px-8 py-8 rounded-sm overflow-x-hidden">
+      <div className="max-w-[1600px] mx-auto w-full">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-black mb-4 text-black">
             ESTADÍSTICAS <span className="text-vcf-orange">Y MÉTRICAS</span>
@@ -194,7 +194,7 @@ export function AdminStatistics() {
           ))}
         </div>
 
-        <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md mb-12">
+        <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md mb-12 overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
             <PieChart size={24} className="text-vcf-orange" />
             <h2 className="text-2xl font-black text-black">
@@ -258,7 +258,7 @@ export function AdminStatistics() {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
-          <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md">
+          <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
               <Trophy size={24} className="text-vcf-orange" />
               <h2 className="text-2xl font-black text-black">
@@ -271,15 +271,15 @@ export function AdminStatistics() {
                 topUsers.map((user, index) => (
                   <div
                     key={user.userId}
-                    className="flex items-center justify-between p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-black bg-gray-500 text-white">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-black bg-gray-500 text-white flex-shrink-0">
                         {index + 1}
                       </div>
 
-                      <div>
-                        <div className="font-black text-black">
+                      <div className="min-w-0">
+                        <div className="font-black text-black truncate">
                           {user.username}
                         </div>
 
@@ -289,7 +289,7 @@ export function AdminStatistics() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6 justify-end">
                       <div className="text-center">
                         <div className="text-xl font-black text-vcf-orange">
                           {user.triviasCompleted}
@@ -315,7 +315,7 @@ export function AdminStatistics() {
             </div>
           </section>
 
-          <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md">
+          <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
               <BarChart3 size={24} className="text-vcf-orange" />
               <h2 className="text-2xl font-black text-black">
@@ -330,12 +330,12 @@ export function AdminStatistics() {
                     key={trivia.triviaId}
                     className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-black text-black">
+                    <div className="flex items-center justify-between mb-2 gap-4">
+                      <div className="font-black text-black truncate">
                         {trivia.title}
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <Users size={16} className="text-vcf-orange" />
                         <span className="font-bold text-black">
                           {trivia.participants}
@@ -344,7 +344,7 @@ export function AdminStatistics() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="text-xs text-gray-600 mb-1">
                           Promedio de Puntuación
                         </div>
@@ -359,7 +359,7 @@ export function AdminStatistics() {
                         </div>
                       </div>
 
-                      <div className="text-xl font-black text-vcf-orange">
+                      <div className="text-xl font-black text-vcf-orange flex-shrink-0">
                         {trivia.avgScore}%
                       </div>
                     </div>
@@ -376,8 +376,8 @@ export function AdminStatistics() {
         </div>
 
         <div className="mb-12">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-            <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md">
+          <div className="grid grid-cols-1 2xl:grid-cols-2 gap-8 mb-8">
+            <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md overflow-hidden">
               <div className="flex items-center gap-3 mb-6">
                 <BarChart3 size={24} className="text-vcf-orange" />
                 <h2 className="text-2xl font-black text-black">
@@ -389,7 +389,7 @@ export function AdminStatistics() {
               <VerticalFeatureChart data={featureUsage} />
             </section>
 
-            <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md">
+            <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md overflow-hidden">
               <div className="flex items-center gap-3 mb-6">
                 <PieChart size={24} className="text-vcf-orange" />
                 <h2 className="text-2xl font-black text-black">
@@ -524,7 +524,7 @@ function MetricCard({
     <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md min-h-[220px] flex flex-col justify-center">
       <div className="flex items-center gap-3 mb-4">
         <div
-          className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center`}
+          className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center flex-shrink-0`}
         >
           <Icon size={24} className="text-white" />
         </div>
@@ -567,33 +567,35 @@ function VerticalFeatureChart({ data }: { data: FeatureUsageView[] }) {
   }
 
   return (
-    <div className="h-[380px] flex items-end justify-between gap-6 pt-6 px-4">
-      {data.map((item) => {
-        const height = Math.max((item.value / maxValue) * 260, 24);
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-[520px] h-[380px] flex items-end justify-between gap-4 pt-6 px-2">
+        {data.map((item) => {
+          const height = Math.max((item.value / maxValue) * 250, 24);
 
-        return (
-          <div key={item.key} className="flex-1 flex flex-col items-center">
-            <div className="text-xl font-black text-vcf-orange mb-2">
-              {item.value}
-            </div>
+          return (
+            <div key={item.key} className="flex-1 flex flex-col items-center">
+              <div className="text-lg font-black text-vcf-orange mb-2">
+                {item.value}
+              </div>
 
-            <div className="w-full flex justify-center items-end h-[270px]">
-              <div
-                className="w-full max-w-[86px] bg-vcf-orange rounded-t-xl transition-all shadow-md"
-                style={{ height: `${height}px` }}
-              />
-            </div>
+              <div className="w-full flex justify-center items-end h-[260px]">
+                <div
+                  className="w-full max-w-[64px] bg-vcf-orange rounded-t-xl transition-all shadow-md"
+                  style={{ height: `${height}px` }}
+                />
+              </div>
 
-            <div className="text-sm font-black text-center text-black mt-3 leading-tight">
-              {item.name}
-            </div>
+              <div className="text-xs font-black text-center text-black mt-3 leading-tight">
+                {item.name}
+              </div>
 
-            <div className="text-xs text-gray-500 text-center leading-tight mt-1">
-              {item.description}
+              <div className="text-[11px] text-gray-500 text-center leading-tight mt-1 max-w-[85px]">
+                {item.description}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -660,52 +662,54 @@ function EngagementValuePieChart({ data }: { data: FeatureUsageView[] }) {
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-center min-h-[380px]">
-      <div className="flex justify-center">
-        <div
-          className="w-[250px] h-[250px] rounded-full shadow-lg border-8 border-white"
-          style={{
-            background: `conic-gradient(${gradientParts.join(", ")})`,
-          }}
-        />
-      </div>
+    <div className="w-full overflow-hidden">
+      <div className="grid grid-cols-1 2xl:grid-cols-[240px_1fr] gap-6 items-center min-h-[380px]">
+        <div className="flex justify-center">
+          <div
+            className="w-[220px] h-[220px] rounded-full shadow-lg border-8 border-white flex-shrink-0"
+            style={{
+              background: `conic-gradient(${gradientParts.join(", ")})`,
+            }}
+          />
+        </div>
 
-      <div className="space-y-3">
-        {chartData.map((item) => {
-          const percentage = Math.round((item.value / total) * 100);
+        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-1 gap-3 w-full min-w-0">
+          {chartData.map((item) => {
+            const percentage = Math.round((item.value / total) * 100);
 
-          return (
-            <div
-              key={item.name}
-              className="flex items-center justify-between bg-gray-100 rounded-lg p-3"
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: item.color }}
-                />
+            return (
+              <div
+                key={item.name}
+                className="flex items-center justify-between gap-3 bg-gray-100 rounded-lg p-3 min-w-0"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-4 h-4 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
 
-                <div>
-                  <div className="font-black text-black text-sm">
-                    {item.name}
+                  <div className="min-w-0">
+                    <div className="font-black text-black text-sm truncate">
+                      {item.name}
+                    </div>
+                    <div className="text-xs text-gray-500 leading-tight line-clamp-2">
+                      {item.description}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {item.description}
+                </div>
+
+                <div className="text-right flex-shrink-0">
+                  <div className="text-lg font-black text-vcf-orange">
+                    {percentage}%
+                  </div>
+                  <div className="text-[11px] text-gray-500">
+                    {item.value}
                   </div>
                 </div>
               </div>
-
-              <div className="text-right">
-                <div className="text-lg font-black text-vcf-orange">
-                  {percentage}%
-                </div>
-                <div className="text-[11px] text-gray-500">
-                  {item.value} registros
-                </div>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
