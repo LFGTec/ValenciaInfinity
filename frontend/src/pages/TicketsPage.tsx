@@ -133,6 +133,16 @@ export function TicketPurchase() {
   const [selectedSector, setSelectedSector] = useState<Sector | null>(initial.sector);
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(initial.seat);
 
+  // Precarga CesiumJS mientras el usuario elige partido
+  useEffect(() => {
+    if ((window as any).Cesium) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "script";
+    link.href = "https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js";
+    document.head.appendChild(link);
+  }, []);
+
   // Persiste cada cambio de estado en sessionStorage
   useEffect(() => {
     sessionStorage.setItem(
