@@ -1,17 +1,31 @@
 import React, { useState } from 'react';
 import { Play, Info, Maximize2, Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { useAuth } from "../hooks/useAuth";
 
 export function Juego() {
   const [isGameLoaded, setIsGameLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
+  
+  const { user, isAuthenticated } = useAuth();
 
-  const unityGameUrl = "https://gorgeous-caramel-10da77.netlify.app/";
+  const unityGameBaseUrl = "https://jocular-squirrel-d3c2d8.netlify.app/";
+
+  const unityGameUrl = user?.id
+    ? `${unityGameBaseUrl}?userId=${encodeURIComponent(user.id)}`
+    : unityGameBaseUrl;
 
   const handleLoadGame = () => {
-    setIsGameLoaded(true);
-    setShowInstructions(false);
-  };
+  if (!isAuthenticated || !user?.id) {
+    alert("Debes iniciar sesión para jugar.");
+    return;
+  }
+
+  console.log("Cargando Unity con userId:", user.id);
+
+  setIsGameLoaded(true);
+  setShowInstructions(false);
+};
 
   const handleRestartGame = () => {
     setIsGameLoaded(false);
@@ -28,13 +42,14 @@ export function Juego() {
   return (
     <div className="min-h-screen bg-content">
       {/* Hero Section */}
-      <div className="bg-white py-8 mb-6 border-b-4 border-vcf-orange">
+      <div className="bg-card py-8 mb-6 border-b-4 border-vcf-orange">
         <div className="max-w-[1600px] mx-auto px-4">
           <div>
-            <h1 className="text-4xl md:text-5xl font-black text-black tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">
               MESTALLA <span className="text-vcf-orange">RIVALS</span>
             </h1>
-            <p className="text-black/70 text-base md:text-lg mt-1 font-semibold">
+
+            <p className="text-muted-foreground text-base md:text-lg mt-1 font-semibold">
               Juega partidos multijugador inspirados en Valencia CF
             </p>
           </div>

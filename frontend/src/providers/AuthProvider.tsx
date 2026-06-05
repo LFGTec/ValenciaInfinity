@@ -13,7 +13,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const mapUser = async (user: SupabaseUser | null): Promise<User | null> => {
     if (!user) return null;
+    const isGoogleUser =
+      user.identities?.some(
+        identity => identity.provider === "google"
+      ) ?? false;
     try {
+
       let profile = await getUserProfile(user.id);
 
       // Usuario nuevo sin fila en profiles → crearla con valores por defecto
@@ -50,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ...streak,
           avatar_url: profile.avatar_url ?? user.user_metadata?.avatar_url,
           user_metadata: user.user_metadata,
+          isGoogleUser,
         };
       }
     } catch (error) {
@@ -64,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       full_name: user.user_metadata?.full_name,
       avatar_url: user.user_metadata?.avatar_url,
       user_metadata: user.user_metadata,
+      isGoogleUser,
     };
   };
 

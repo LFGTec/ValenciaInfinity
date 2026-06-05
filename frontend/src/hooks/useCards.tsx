@@ -6,7 +6,7 @@ import {
   getCategories,
   type Card,
   type Category,
-  updateCard, 
+  updateCard,
 } from "../services/cardsService";
 
 export const useCards = () => {
@@ -29,7 +29,6 @@ export const useCards = () => {
     fetchData();
   }, []);
 
- 
   const createCard = async (
     name: string,
     type: string,
@@ -37,16 +36,12 @@ export const useCards = () => {
     category_id: string,
     file?: File
   ) => {
-    const category = categories.find((c) => c.id === category_id);
-
-    const rarity = category?.name ?? null;
 
     await addCard(
       name,
       type,
       season,
       category_id,
-      rarity,
       file
     );
 
@@ -63,21 +58,15 @@ export const useCards = () => {
     existing_image_url: string | null,
     file?: File
   ) => {
-    const category = categories.find((c) => c.id === category_id);
-
-    const rarity = category?.name || null;
-
     await updateCard(
       id,
       name,
       type,
       season,
       category_id,
-      rarity,
       existing_image_url,
       file
     );
-
 
     const updatedCards = await getCards();
     setCards(updatedCards);

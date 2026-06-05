@@ -19,27 +19,16 @@ export default function AdminLayout() {
   };
 
   const adminNavItems = [
-    { id: "home", label: "Dashboard", icon: Home, path: "/admin/dashboard" },
     { id: "statistics", label: "Estadísticas", icon: BarChart3, path: "/admin/statistics" },
-    { id: "activity", label: "Actividad", icon: TrendingUp, path: "/admin/activity" },
-    { id: "users", label: "Usuarios", icon: Users, path: "/admin/users" },
     { id: "manage-cards",   label: "Cartas",      icon: BookOpen, path: "/admin/cards"    },
     { id: "manage-rewards", label: "Recompensas", icon: Trophy,   path: "/admin/rewards"  },
     { id: "manage-trivias", label: "Trivias", icon: Gamepad2, path: "/admin/trivias" },
     { id: "manage-timeline", label: "Línea de Tiempo", icon: Calendar, path: "/admin/timeline" },
-    { id: "manage-calendar", label: "Calendario", icon: Calendar, path: "/admin/calendar" },
-    { id: "winners", label: "Ganadores", icon: Trophy, path: "/admin/winners" },
-    { id: "settings", label: "Ajustes", icon: Settings, path: "/admin/settings" },
   ];
 
   return (
     <div className="flex min-h-screen bg-[#0a0a0a]">
       {/* Sidebar */}
-      {/* <aside
-        className={`${
-          sidebarOpen ? "w-64" : "w-20"
-        } bg-black border-r border-vcf-orange/30 transition-all duration-300 flex flex-col fixed h-screen z-50`}
-      > */}
         <aside className={`${sidebarOpen ? "w-64" : "w-20"} transition-all duration-300 flex flex-col fixed h-screen z-50`}>
         {/* Logo Header */}
         <div className="p-4 border-b border-white/10 flex items-center gap-3">

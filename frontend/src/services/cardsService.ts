@@ -4,6 +4,7 @@ export interface Category {
   id: string;
   name: string;
   color: string;
+  icon: string;
 }
 
 export interface Card {
@@ -11,16 +12,16 @@ export interface Card {
   name: string;
   type: string | null;
   season: number | null;
-  image_url?: string;
+  image_url: string | null;
   rarity: string | null;
+  quantity?: number;
+  obtained?: boolean;
+
   category_id: string;
   is_deleted: boolean;
 
-  categories?: Category;
-  obtained?: boolean;
-  quantity?: number;
+  categories?: Category; 
 }
-
 
 
 export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
@@ -33,12 +34,13 @@ export const getAlbumCardsByUser = async (userId: string): Promise<Card[]> => {
         categories!fk_category (
           id,
           name,
-          color
+          color,
         )
       )
     `)
     .eq("user_id", userId)
     .gt("quantity", 0);
+    
 
   if (error) {
     console.error("Error al obtener cartas del usuario:", error);
@@ -131,10 +133,14 @@ export const getCards = async (): Promise<Card[]> => {
       categories!fk_category (
         id,
         name,
-        color
+        color,
+        icon
       )
     `)
     .eq("is_deleted", false);
+
+  console.log("ERROR:", error);
+  console.log("DATA:", data);
 
   if (error) {
     console.error("Error al obtener cartas:", error);
@@ -180,19 +186,18 @@ export async function addCard(
   type: string,
   season: number,
   category_id: string,
-  rarity: string | null,
   file?: File
 ) {
-  let image_url = null;
+  let image_url: string | null = null;
 
   if (file) {
     const fileName = `${Date.now()}-${file.name}`;
 
-    const { error } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("imagenesCartas")
       .upload(fileName, file);
 
-    if (error) throw error;
+    if (uploadError) throw uploadError;
 
     const { data } = supabase.storage
       .from("imagenesCartas")
@@ -201,6 +206,7 @@ export async function addCard(
     image_url = data.publicUrl;
   }
 
+  
   const { data, error } = await supabase
     .from("Cards")
     .insert([
@@ -209,7 +215,6 @@ export async function addCard(
         type,
         season,
         category_id,
-        rarity,
         image_url,
       },
     ])
@@ -239,7 +244,6 @@ export const updateCard = async (
   type: string,
   season: number,
   category_id: string,
-  rarity: string | null,
   existing_image_url: string | null,
   file?: File
 ) => {
@@ -268,7 +272,6 @@ export const updateCard = async (
       type,
       season,
       category_id,
-      rarity,
       image_url,
     })
     .eq("id", id)
@@ -451,3 +454,28 @@ export const openPack = async (packId: string): Promise<Card[] | null> => {
     return null;
   }
 }
+
+export const buySpecificCard = async (userId: string, cardId: string): Promise<void> => {
+  const { data: existingCard, error: fetchError } = await supabase
+    .from("user_cards")
+    .select("quantity")
+    .eq("user_id", userId)
+    .eq("card_id", cardId)
+    .maybeSingle();
+
+  if (fetchError) throw new Error(fetchError.message);
+
+  if (existingCard) {
+    const { error } = await supabase
+      .from("user_cards")
+      .update({ quantity: existingCard.quantity + 1 })
+      .eq("user_id", userId)
+      .eq("card_id", cardId);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from("user_cards")
+      .insert([{ user_id: userId, card_id: cardId, quantity: 1 }]);
+    if (error) throw new Error(error.message);
+  }
+};

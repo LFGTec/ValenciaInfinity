@@ -25,25 +25,40 @@ export function FansZonePage() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
         {[
-          { icon: Video, title: 'MATCH ROOMS', desc: 'Ve los partidos en directo con tus amigos', path: '/match-rooms' },
-          { icon: BookOpen, title: 'ÁLBUM DE CARTAS', desc: 'Colecciona y completa tu álbum', path: '/album' },
-          { icon: Gamepad2, title: 'TRIVIAS & QUIZZES', desc: 'Demuestra tus conocimientos', path: '/trivias' },
-          { icon: Share2, title: 'INTERCAMBIO', desc: 'Comercia cartas con otros fans', path: '/exchange' },
-          { icon: Globe, title: 'MUNDO VIRTUAL', desc: 'Explora y conecta globalmente', path: '/virtual-world' },
-          { icon: Users, title: 'MIS AMIGOS', desc: 'Conecta con otros fanáticos del Valencia CF', path: '/friends' },
+          { icon: Video, title: "MATCH ROOMS", desc: "Ve los partidos en directo con tus amigos", path: "/match-rooms" },
+          { icon: BookOpen, title: "ÁLBUM DE CARTAS", desc: "Colecciona y completa tu álbum", path: "/album" },
+          { icon: Gamepad2, title: "TRIVIAS & QUIZZES", desc: "Demuestra tus conocimientos", path: "/trivias" },
+          { icon: Share2, title: "INTERCAMBIO", desc: "Comercia cartas con otros fans", path: "/exchange" },
+          { icon: Globe, title: "MUNDO VIRTUAL", desc: "Explora y conecta globalmente", path: "/virtual-world" },
+          { icon: Users, title: "MIS AMIGOS", desc: "Conecta con otros fanáticos del Valencia CF", path: "/friends" },
         ].map((feature, i) => (
           <NavLink
             key={i}
             to={feature.path}
-            className="group relative overflow-hidden rounded-xl p-8 transition-all hover:scale-105 shadow-lg hover:shadow-2xl border-4 border-vcf-orange bg-white block"
+            className="group relative overflow-hidden rounded-xl p-8 transition-all hover:scale-105 shadow-lg hover:shadow-2xl border-2 border-vcf-orange/70 bg-card block"
           >
             <div className="relative z-10 text-left">
-              <feature.icon size={44} className="mb-4 text-vcf-orange" strokeWidth={2.5} />
-              <h3 className="text-xl font-black mb-2 text-black">{feature.title}</h3>
-              <p className="text-sm mb-4 font-semibold text-black">{feature.desc}</p>
+              <feature.icon
+                size={44}
+                className="mb-4 text-vcf-orange"
+                strokeWidth={2.5}
+              />
 
-              <div className="flex items-center gap-2 font-black text-sm group-hover:gap-3 transition-all text-black">
-                EXPLORAR <ArrowRight size={16} strokeWidth={3} className="text-vcf-orange" />
+              <h3 className="text-xl font-black mb-2 text-foreground">
+                {feature.title}
+              </h3>
+
+              <p className="text-sm mb-4 font-medium text-muted-foreground">
+                {feature.desc}
+              </p>
+
+              <div className="flex items-center gap-2 font-black text-sm text-foreground group-hover:text-vcf-orange transition-colors">
+                EXPLORAR
+                <ArrowRight
+                  size={16}
+                  strokeWidth={3}
+                  className="text-vcf-orange"
+                />
               </div>
             </div>
           </NavLink>
@@ -51,11 +66,12 @@ export function FansZonePage() {
       </div>
 
      
-      <div className="rounded-xl bg-gray-100 p-6 mb-6">
-        <h2 className="text-4xl md:text-5xl font-black text-black">
+      <div className="rounded-xl bg-card p-6 mb-6 border border-border">
+        <h2 className="text-4xl md:text-5xl font-black text-foreground">
           PERSONALIZA TU <span className="text-vcf-orange">AVATAR</span>
         </h2>
-        <p className="mt-2 text-gray-600 text-base">
+
+        <p className="mt-2 text-muted-foreground text-base">
           Crea tu identidad única como valencianista
         </p>
       </div>

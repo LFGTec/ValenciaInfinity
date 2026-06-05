@@ -11,15 +11,14 @@ import { FansZonePage } from "../pages/FansZonePage";
 import LogIn from "../pages/LogIn";
 import { UserProfile } from "../components/features/UserProfile";
 
-
 import SignUp from "../pages/SignUp";
 import AuthCallback from "../pages/AuthCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import { Juego } from "../pages/Juego";
-import { NouMestellaPage } from "../pages/NouMestellaPage";
+
 import { ManageCards } from "@/pages/AdminViews/ManageCards";
-import AdminLayout from "@/layouts/AdminLayout"
-import { TriviasQuizzes } from "../components/features/TriviasQuizzes"
+import AdminLayout from "@/layouts/AdminLayout";
+import { TriviasQuizzes } from "../components/features/TriviasQuizzes";
 import { CrearTrivias } from "@/pages/AdminViews/CrearTrivias";
 import { TimelineAdmin } from "@/pages/AdminViews/TimelineaAdmin";
 import { ManageRewards } from "@/pages/AdminViews/ManageRewards";
@@ -32,8 +31,10 @@ import { EstadisticasPage } from "@/pages/EstadisticasPage";
 import { CardExchange } from "@/components/features/CardExchange";
 import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
-
 import { DailyRewards } from "@/pages/DailyRewards";
+import UserConfig from "@/components/features/UserConfig";
+import { TicketPurchase } from "@/pages/TicketsPage";
+import {StorePage}  from "@/pages/StorePage" 
 
 export default function AppRoutes() {
   return (
@@ -52,7 +53,6 @@ export default function AppRoutes() {
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/estadisticas" element={<EstadisticasPage />} />
         <Route path="/news" element={<News />} />
-        <Route path="/nou-mestalla" element={<NouMestellaPage />} />
         <Route path="/daily-rewards" element={<DailyRewards />} />
 
         {/* Rutas Protegidas */}
@@ -67,24 +67,23 @@ export default function AppRoutes() {
           <Route path="/juego" element={<Juego />} />
           <Route path="/trivias" element={<TriviasQuizzes />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/ticket" element={<TicketPurchase />} />
+          <Route path="/settings" element={<UserConfig />} />
+          <Route path="/store" element={<StorePage />} />
         </Route>
       </Route>
 
-      {/*Rutas de Admin*/}
-      <Route element={<AdminLayout />}>
-        <Route path="/admin/statistics" element={<AdminStatistics />} />
-        <Route path="/admin/trivias" element={<CrearTrivias />} />
-        <Route path="/admin/timeline" element={<TimelineAdmin />} />
-        <Route path="/admin/cards" element={<ManageCards />} />
-        <Route path="/admin/rewards" element={<ManageRewards />} />
-
-        <Route element={<ProtectedRoute adminOnly={true} />}>
-          <Route
-            path="/admin"
-            element={<Navigate to="/admin/dashboard" replace />}
-          />
+      {/*Rutas de Admin*/}  
+      <Route element={<ProtectedRoute adminOnly={true} />}>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/statistics" element={<AdminStatistics />} />
+          <Route path="/admin/trivias" element={<CrearTrivias />} />
+          <Route path="/admin/timeline" element={<TimelineAdmin />} />
+          <Route path="/admin/cards" element={<ManageCards />} />
+          <Route path="/admin/rewards" element={<ManageRewards />} />
         </Route>
       </Route>
+      
     </Routes>
   );
 }

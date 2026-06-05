@@ -52,7 +52,7 @@ export default function Album() {
 
               <div className="mt-6 flex flex-wrap gap-4">
                 <Link
-                  to="/album"
+                  to="/store"
                   onClick={() => window.scrollTo(0, 0)}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-vcf-orange bg-vcf-orange px-6 py-3 font-black text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#e85c17] hover:shadow-lg"
                 >

@@ -9,6 +9,9 @@ export interface User {
   full_name?: string;
   avatar_url?: string;
   puntos?: number;
+
+  isGoogleUser?: boolean;
+
   current_streak?: number;
   longest_streak?: number;
   total_days?: number;
@@ -194,11 +197,10 @@ export async function getCurrentUser(): Promise<User | null> {
     if (!data.session?.user) {
       return null;
     }
-
     // Obtener el rol de la BD
     const profile = await getUserProfile(data.session.user.id);
     if (profile) {
-      return profile;
+      return profile
     }
 
     // Fallback
@@ -256,8 +258,8 @@ export async function exchangeCodeForSession(
 
     if (error) return { user: null, error: error.message };
     if (!data.user) return { user: null, error: "No user returned" };
+    
 
-    // 🔴 LA PIEZA QUE FALTA: Buscar el perfil real en la tabla 'profiles'
     const profile = await getUserProfile(data.user.id);
     
     if (profile) {
@@ -428,19 +430,16 @@ export async function uploadAvatar(
 }
 
 export async function updatePassword(
-  newPassword: string,
-  currentPassword?: string
+  currentPassword: string,
+  newPassword: string
 ): Promise<{ error: string | null }> {
   try {
-    const updateData: { password: string; currentPassword?: string } = {
+    const { error } = await supabase.auth.updateUser({
       password: newPassword,
-    };
+      current_password: currentPassword,
+    });
 
-    if (currentPassword) {
-      updateData.currentPassword = currentPassword;
-    }
-
-    const { error } = await supabase.auth.updateUser(updateData);
+    console.log("updatePassword result:", { error });
 
     if (error) {
       return { error: error.message };
@@ -449,8 +448,24 @@ export async function updatePassword(
     return { error: null };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Password update failed";
+      error instanceof Error
+        ? error.message
+        : "Password update failed";
+
     return { error: message };
   }
 }
 
+export async function verifyCurrentPassword(
+  email: string,
+  currentPassword: string
+): Promise<{ error: string | null }> {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password: currentPassword,
+  });
+
+  return {
+    error: error?.message ?? null,
+  };
+}
