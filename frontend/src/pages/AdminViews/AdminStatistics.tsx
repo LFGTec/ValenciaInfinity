@@ -18,18 +18,79 @@ import {
   getAdminStatsSummary,
   getMostActiveUsers,
   getPopularTrivias,
+  getFeatureUsageStats,
+  getComparisonStats,
   type AdminStatsSummary,
   type ActiveUserStat,
   type PopularTriviaStat,
+  type FeatureUsageStat,
+  type ComparisonStat,
+  type TimeRange,
 } from "@/services/adminStatisticsService";
 
-type TimeRange = "day" | "week" | "month";
+type IconProps = {
+  size?: number;
+  className?: string;
+};
 
-type FeatureUsage = {
-  name: string;
-  value: number;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+type FeatureUsageView = FeatureUsageStat & {
+  icon: React.ComponentType<IconProps>;
   color: string;
+};
+
+type ComparisonStatView = ComparisonStat & {
+  icon: React.ComponentType<IconProps>;
+  color: string;
+};
+
+const featureConfig: Record<
+  FeatureUsageStat["key"],
+  {
+    icon: React.ComponentType<IconProps>;
+    color: string;
+  }
+> = {
+  matchRooms: {
+    icon: MessageSquare,
+    color: "bg-blue-500",
+  },
+  trivias: {
+    icon: Gamepad2,
+    color: "bg-purple-500",
+  },
+  album: {
+    icon: BookOpen,
+    color: "bg-green-500",
+  },
+  rankings: {
+    icon: Trophy,
+    color: "bg-yellow-500",
+  },
+  trades: {
+    icon: Star,
+    color: "bg-pink-500",
+  },
+  virtualWorld: {
+    icon: Award,
+    color: "bg-red-500",
+  },
+};
+
+const comparisonConfig: Record<
+  ComparisonStat["key"],
+  {
+    icon: React.ComponentType<IconProps>;
+    color: string;
+  }
+> = {
+  trades: {
+    icon: BookOpen,
+    color: "bg-blue-600",
+  },
+  matchRooms: {
+    icon: MessageSquare,
+    color: "bg-green-600",
+  },
 };
 
 export function AdminStatistics() {
@@ -45,87 +106,54 @@ export function AdminStatistics() {
 
   const [topUsers, setTopUsers] = useState<ActiveUserStat[]>([]);
   const [triviaStats, setTriviaStats] = useState<PopularTriviaStat[]>([]);
+  const [featureUsage, setFeatureUsage] = useState<FeatureUsageView[]>([]);
+  const [comparisonStats, setComparisonStats] = useState<ComparisonStatView[]>(
+    []
+  );
 
   useEffect(() => {
     const loadStatistics = async () => {
       setLoading(true);
 
-      const [summaryData, usersData, triviasData] = await Promise.all([
-        getAdminStatsSummary(),
-        getMostActiveUsers(),
-        getPopularTrivias(),
+      const [
+        summaryData,
+        usersData,
+        triviasData,
+        featuresData,
+        comparisonData,
+      ] = await Promise.all([
+        getAdminStatsSummary(timeRange),
+        getMostActiveUsers(timeRange),
+        getPopularTrivias(timeRange),
+        getFeatureUsageStats(timeRange),
+        getComparisonStats(timeRange),
       ]);
 
       setSummary(summaryData);
       setTopUsers(usersData);
       setTriviaStats(triviasData);
+
+      setFeatureUsage(
+        featuresData.map((feature) => ({
+          ...feature,
+          icon: featureConfig[feature.key].icon,
+          color: featureConfig[feature.key].color,
+        }))
+      );
+
+      setComparisonStats(
+        comparisonData.map((item) => ({
+          ...item,
+          icon: comparisonConfig[item.key].icon,
+          color: comparisonConfig[item.key].color,
+        }))
+      );
+
       setLoading(false);
     };
 
     loadStatistics();
-  }, []);
-
-  const engagementStats = {
-    day: {
-      activeUsers: summary.activeUsers,
-      triviasPlayed: summary.triviasPlayed,
-      cardsTraded: 0,
-      matchRoomVisits: 0,
-    },
-    week: {
-      activeUsers: summary.activeUsers,
-      triviasPlayed: summary.triviasPlayed,
-      cardsTraded: 0,
-      matchRoomVisits: 0,
-    },
-    month: {
-      activeUsers: summary.activeUsers,
-      triviasPlayed: summary.triviasPlayed,
-      cardsTraded: 0,
-      matchRoomVisits: 0,
-    },
-  };
-
-  const currentStats = engagementStats[timeRange];
-
-  const featureUsage: FeatureUsage[] = [
-    {
-      name: "Match Rooms",
-      value: 0,
-      icon: MessageSquare,
-      color: "bg-blue-500",
-    },
-    {
-      name: "Trivias",
-      value: summary.triviasPlayed,
-      icon: Gamepad2,
-      color: "bg-purple-500",
-    },
-    {
-      name: "Álbum",
-      value: 0,
-      icon: BookOpen,
-      color: "bg-green-500",
-    },
-    {
-      name: "Rankings",
-      value: summary.activeUsers,
-      icon: Trophy,
-      color: "bg-yellow-500",
-    },
-    {
-      name: "Intercambios",
-      value: 0,
-      icon: Star,
-      color: "bg-pink-500",
-    },
-    {
-      name: "Mundo Virtual",
-      value: 0,
-      icon: Award,
-      color: "bg-red-500",
-    },
-  ];
+  }, [timeRange]);
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] text-black px-8 py-8 rounded-sm">
@@ -166,34 +194,67 @@ export function AdminStatistics() {
           ))}
         </div>
 
+        <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <PieChart size={24} className="text-vcf-orange" />
+            <h2 className="text-2xl font-black text-black">
+              USO DE <span className="text-vcf-orange">FUNCIONALIDADES</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4">
+            {featureUsage.map((feature) => (
+              <div
+                key={feature.key}
+                className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all text-center"
+              >
+                <div
+                  className={`w-12 h-12 ${feature.color} rounded-lg flex items-center justify-center mx-auto mb-3`}
+                >
+                  <feature.icon size={24} className="text-white" />
+                </div>
+
+                <div className="text-2xl font-black text-black mb-1">
+                  {feature.value.toLocaleString()}
+                </div>
+
+                <div className="text-xs font-bold text-gray-600">
+                  {feature.name}
+                </div>
+
+                <div className="text-[11px] text-gray-500 mt-1">
+                  {feature.description}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
           <StatCard
             icon={Users}
             title="Usuarios Activos"
-            value={currentStats.activeUsers}
+            value={summary.activeUsers}
             color="bg-vcf-orange"
           />
 
           <StatCard
             icon={Gamepad2}
             title="Trivias Jugadas"
-            value={currentStats.triviasPlayed}
+            value={summary.triviasPlayed}
             color="bg-purple-600"
           />
 
-          <StatCard
-            icon={BookOpen}
-            title="Cartas Intercambiadas"
-            value={currentStats.cardsTraded}
-            color="bg-blue-600"
-          />
-
-          <StatCard
-            icon={MessageSquare}
-            title="Visitas a Match Rooms"
-            value={currentStats.matchRoomVisits}
-            color="bg-green-600"
-          />
+          {comparisonStats.map((item) => (
+            <ComparisonStatCard
+              key={item.key}
+              icon={item.icon}
+              title={item.title}
+              value={item.value}
+              changeLabel={item.changeLabel}
+              color={item.color}
+            />
+          ))}
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
@@ -221,6 +282,7 @@ export function AdminStatistics() {
                         <div className="font-black text-black">
                           {user.username}
                         </div>
+
                         <div className="text-xs text-gray-600">
                           Última actividad: {user.lastActive}
                         </div>
@@ -245,12 +307,10 @@ export function AdminStatistics() {
                   </div>
                 ))
               ) : (
-                <div className="p-4 bg-gray-100 rounded-lg">
-                  <div className="font-black text-black">
-                    Sin datos registrados
-                  </div>
-                  <div className="text-sm text-gray-600">No disponible</div>
-                </div>
+                <EmptyBox
+                  title="Sin usuarios activos"
+                  description="No hay actividad registrada en este periodo."
+                />
               )}
             </div>
           </section>
@@ -271,7 +331,9 @@ export function AdminStatistics() {
                     className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="font-black text-black">{trivia.title}</div>
+                      <div className="font-black text-black">
+                        {trivia.title}
+                      </div>
 
                       <div className="flex items-center gap-2">
                         <Users size={16} className="text-vcf-orange" />
@@ -290,7 +352,9 @@ export function AdminStatistics() {
                         <div className="w-full bg-gray-300 rounded-full h-2 overflow-hidden">
                           <div
                             className="h-full bg-vcf-orange"
-                            style={{ width: `${trivia.avgScore}%` }}
+                            style={{
+                              width: `${Math.min(trivia.avgScore, 100)}%`,
+                            }}
                           />
                         </div>
                       </div>
@@ -302,94 +366,120 @@ export function AdminStatistics() {
                   </div>
                 ))
               ) : (
-                <div className="p-4 bg-gray-100 rounded-lg">
-                  <div className="font-black text-black">
-                    Sin trivias con participación registrada
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Promedio de Puntuación
-                  </div>
-                </div>
+                <EmptyBox
+                  title="Sin trivias con participación"
+                  description="No hay intentos registrados en este periodo."
+                />
               )}
             </div>
           </section>
         </div>
 
-        <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <PieChart size={24} className="text-vcf-orange" />
-            <h2 className="text-2xl font-black text-black">
-              USO DE <span className="text-vcf-orange">FUNCIONALIDADES</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4">
-            {featureUsage.map((feature, index) => (
-              <div
-                key={index}
-                className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all text-center"
-              >
-                <div
-                  className={`w-12 h-12 ${feature.color} rounded-lg flex items-center justify-center mx-auto mb-3`}
-                >
-                  <feature.icon size={24} className="text-white" />
-                </div>
-
-                <div className="text-2xl font-black text-black mb-1">
-                  {feature.value}
-                </div>
-
-                <div className="text-xs font-bold text-gray-600">
-                  {feature.name}
-                </div>
+        <div className="mb-12">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+            <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md">
+              <div className="flex items-center gap-3 mb-6">
+                <BarChart3 size={24} className="text-vcf-orange" />
+                <h2 className="text-2xl font-black text-black">
+                  USO GENERAL DE{" "}
+                  <span className="text-vcf-orange">FUNCIONALIDADES</span>
+                </h2>
               </div>
-            ))}
+
+              <VerticalFeatureChart data={featureUsage} />
+            </section>
+
+            <section className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md">
+              <div className="flex items-center gap-3 mb-6">
+                <PieChart size={24} className="text-vcf-orange" />
+                <h2 className="text-2xl font-black text-black">
+                  VALOR DE <span className="text-vcf-orange">ENGAGEMENT</span>
+                </h2>
+              </div>
+
+              <EngagementValuePieChart data={featureUsage} />
+            </section>
           </div>
-        </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <MetricCard
-            icon={Activity}
-            title="Tasa de Finalización"
-            value={`${summary.completionRate}%`}
-            description="Trivias terminadas por usuarios"
-            color="bg-vcf-orange"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <MetricCard
+              icon={Activity}
+              title="Tasa de Finalización"
+              value={`${summary.completionRate}%`}
+              description="Trivias terminadas por usuarios"
+              color="bg-vcf-orange"
+            />
 
-          <MetricCard
-            icon={Calendar}
-            title="Promedio de Puntuación"
-            value={`${summary.averageScore}%`}
-            description="Promedio general de respuestas correctas"
-            color="bg-purple-600"
-          />
+            <MetricCard
+              icon={Calendar}
+              title="Promedio de Puntuación"
+              value={`${summary.averageScore}%`}
+              description="Promedio general de respuestas correctas"
+              color="bg-purple-600"
+            />
 
-          <MetricCard
-            icon={Eye}
-            title="Participaciones"
-            value={`${summary.triviasPlayed}`}
-            description="Intentos registrados en trivias"
-            color="bg-green-600"
-          />
+            <MetricCard
+              icon={Eye}
+              title="Participaciones"
+              value={`${summary.triviasPlayed}`}
+              description="Intentos registrados en trivias"
+              color="bg-green-600"
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-type IconProps = {
-  size?: number;
-  className?: string;
-};
-
 type StatCardProps = {
   icon: React.ComponentType<IconProps>;
   title: string;
-  value: number;
+  value: number | string;
   color: string;
 };
 
 function StatCard({ icon: Icon, title, value, color }: StatCardProps) {
+  return (
+    <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md hover:border-vcf-orange transition-all">
+      <div className="flex items-center justify-between mb-4">
+        <div
+          className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center`}
+        >
+          <Icon size={24} className="text-white" />
+        </div>
+
+        <TrendingUp size={20} className="text-green-500" />
+      </div>
+
+      <div className="text-4xl font-black text-black mb-2">
+        {typeof value === "number" ? value.toLocaleString() : value}
+      </div>
+
+      <div className="text-sm font-bold text-gray-600">{title}</div>
+
+      <div className="mt-2 text-xs text-green-600 font-bold">
+        Datos actualizados automáticamente
+      </div>
+    </div>
+  );
+}
+
+type ComparisonStatCardProps = {
+  icon: React.ComponentType<IconProps>;
+  title: string;
+  value: number;
+  changeLabel: string;
+  color: string;
+};
+
+function ComparisonStatCard({
+  icon: Icon,
+  title,
+  value,
+  changeLabel,
+  color,
+}: ComparisonStatCardProps) {
   return (
     <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md hover:border-vcf-orange transition-all">
       <div className="flex items-center justify-between mb-4">
@@ -409,7 +499,7 @@ function StatCard({ icon: Icon, title, value, color }: StatCardProps) {
       <div className="text-sm font-bold text-gray-600">{title}</div>
 
       <div className="mt-2 text-xs text-green-600 font-bold">
-        Datos actualizados automáticamente
+        {changeLabel}
       </div>
     </div>
   );
@@ -431,20 +521,192 @@ function MetricCard({
   color,
 }: MetricCardProps) {
   return (
-    <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md">
+    <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-md min-h-[220px] flex flex-col justify-center">
       <div className="flex items-center gap-3 mb-4">
         <div
-          className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center`}
+          className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center`}
         >
-          <Icon size={20} className="text-white" />
+          <Icon size={24} className="text-white" />
         </div>
 
-        <h3 className="font-black text-black">{title}</h3>
+        <h3 className="font-black text-black text-xl">{title}</h3>
       </div>
 
-      <div className="text-5xl font-black text-vcf-orange mb-2">{value}</div>
+      <div className="text-5xl font-black text-vcf-orange mb-3">{value}</div>
 
+      <div className="text-base text-gray-600">{description}</div>
+    </div>
+  );
+}
+
+function EmptyBox({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="p-4 bg-gray-100 rounded-lg">
+      <div className="font-black text-black">{title}</div>
       <div className="text-sm text-gray-600">{description}</div>
+    </div>
+  );
+}
+
+function VerticalFeatureChart({ data }: { data: FeatureUsageView[] }) {
+  const maxValue = Math.max(...data.map((item) => item.value), 1);
+
+  if (!data.length || data.every((item) => item.value === 0)) {
+    return (
+      <EmptyBox
+        title="Sin datos de funcionalidades"
+        description="No hay actividad registrada para graficar en este periodo."
+      />
+    );
+  }
+
+  return (
+    <div className="h-[380px] flex items-end justify-between gap-6 pt-6 px-4">
+      {data.map((item) => {
+        const height = Math.max((item.value / maxValue) * 260, 24);
+
+        return (
+          <div key={item.key} className="flex-1 flex flex-col items-center">
+            <div className="text-xl font-black text-vcf-orange mb-2">
+              {item.value}
+            </div>
+
+            <div className="w-full flex justify-center items-end h-[270px]">
+              <div
+                className="w-full max-w-[86px] bg-vcf-orange rounded-t-xl transition-all shadow-md"
+                style={{ height: `${height}px` }}
+              />
+            </div>
+
+            <div className="text-sm font-black text-center text-black mt-3 leading-tight">
+              {item.name}
+            </div>
+
+            <div className="text-xs text-gray-500 text-center leading-tight mt-1">
+              {item.description}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function EngagementValuePieChart({ data }: { data: FeatureUsageView[] }) {
+  const getFeatureValue = (key: FeatureUsageStat["key"]) => {
+    return data.find((item) => item.key === key)?.value ?? 0;
+  };
+
+  const chartData = [
+    {
+      name: "Entretenimiento",
+      value: getFeatureValue("trivias"),
+      description: "Participación en trivias",
+      color: "#ff5a1f",
+    },
+    {
+      name: "Coleccionismo",
+      value: getFeatureValue("album"),
+      description: "Cartas guardadas",
+      color: "#00b050",
+    },
+    {
+      name: "Comunidad",
+      value: getFeatureValue("matchRooms") + getFeatureValue("trades"),
+      description: "Match Rooms e intercambios",
+      color: "#2563eb",
+    },
+    {
+      name: "Competitividad",
+      value: getFeatureValue("rankings"),
+      description: "Usuarios en ranking",
+      color: "#f4b400",
+    },
+    {
+      name: "Presencia Virtual",
+      value: getFeatureValue("virtualWorld"),
+      description: "Actividad en mundo virtual",
+      color: "#ec4899",
+    },
+  ];
+
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  if (total === 0) {
+    return (
+      <EmptyBox
+        title="Sin datos de engagement"
+        description="No hay actividad suficiente para calcular el valor estratégico."
+      />
+    );
+  }
+
+  let currentAngle = 0;
+
+  const gradientParts = chartData.map((item) => {
+    const percentage = (item.value / total) * 100;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + percentage;
+
+    currentAngle = endAngle;
+
+    return `${item.color} ${startAngle}% ${endAngle}%`;
+  });
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-center min-h-[380px]">
+      <div className="flex justify-center">
+        <div
+          className="w-[250px] h-[250px] rounded-full shadow-lg border-8 border-white"
+          style={{
+            background: `conic-gradient(${gradientParts.join(", ")})`,
+          }}
+        />
+      </div>
+
+      <div className="space-y-3">
+        {chartData.map((item) => {
+          const percentage = Math.round((item.value / total) * 100);
+
+          return (
+            <div
+              key={item.name}
+              className="flex items-center justify-between bg-gray-100 rounded-lg p-3"
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: item.color }}
+                />
+
+                <div>
+                  <div className="font-black text-black text-sm">
+                    {item.name}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {item.description}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="text-lg font-black text-vcf-orange">
+                  {percentage}%
+                </div>
+                <div className="text-[11px] text-gray-500">
+                  {item.value} registros
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
