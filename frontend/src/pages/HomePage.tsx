@@ -513,36 +513,42 @@ export default function HomePage() {
 
         {/* Album CTA */}
         <section className="mb-8">
-  <div className="bg-card rounded-xl p-8 shadow-lg border-2 border-vcf-orange">
-    
-    {/* Header — ancho completo */}
-    <h2 className="text-4xl font-black mb-2 text-foreground">
-      COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE CARTAS
-    </h2>
-    <p className="text-lg text-muted-foreground mb-6">
-      Colecciona cartas de jugadores, leyendas y momentos históricos.
-    </p>
+          <div className="bg-card rounded-xl p-8 shadow-lg border-2 border-vcf-orange">
+            {/* Header — ancho completo */}
+            <h2 className="text-4xl font-black mb-2 text-foreground">
+              COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE
+              CARTAS
+            </h2>
+            <p className="text-lg text-muted-foreground mb-6">
+              Colecciona cartas de jugadores, leyendas y momentos históricos.
+            </p>
 
-    {/* Progress bar — ancho completo */}
-    <AlbumProgressBar
-      obtained={obtained}
-      total={total}
-      missing={missing}
-      progress={progress}
-    />
+            {/* Progress bar — ancho completo */}
+            <AlbumProgressBar
+              obtained={obtained}
+              total={total}
+              missing={missing}
+              progress={progress}
+            />
 
-    {/* Botones */}
-    <div className="flex gap-4 mt-6">
-      <Link to="/album" className="px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-all shadow-md hover:scale-105" onClick={() => window.scrollTo(0, 0)}>
-        ABRIR SOBRES
-      </Link>
-      <Link to="/album?scroll=album-book" className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 transition-all shadow-md hover:scale-105">
-        VER ÁLBUM
-      </Link>
-    </div>
-  </div>
-</section>
-        
+            {/* Botones */}
+            <div className="flex gap-4 mt-6">
+              <Link
+                to="/album"
+                className="px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-all shadow-md hover:scale-105"
+                onClick={() => window.scrollTo(0, 0)}
+              >
+                ABRIR SOBRES
+              </Link>
+              <Link
+                to="/album?scroll=album-book"
+                className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 transition-all shadow-md hover:scale-105"
+              >
+                VER ÁLBUM
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* Rankings Preview */}
         <section className="mb-8">
