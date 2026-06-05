@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MatchSelection } from "@/components/entradas/MatchSelection";
-import { Stadium3DExperience } from "@/components/entradas/Stadium3DExperience";
+import { CesiumStadiumExperience } from "@/components/entradas/CesiumStadiumExperience";
 import { Checkout } from "@/components/entradas/Checkout";
 import { TicketSuccess } from "@/components/entradas/TicketSuccess";
+import { useTicketStore } from "@/components/entradas/store/useTicketStore";
 
 export interface Match {
   id: string;
   homeTeam: string;
   awayTeam: string;
+  awayCrest: string;
   competition: string;
   date: string;
   time: string;
@@ -36,6 +38,7 @@ const MATCHES: Match[] = [
     id: "1",
     homeTeam: "Valencia CF",
     awayTeam: "Real Madrid",
+    awayCrest: "https://crests.football-data.org/86.svg",
     competition: "La Liga",
     date: "2026-06-15",
     time: "21:00",
@@ -47,6 +50,7 @@ const MATCHES: Match[] = [
     id: "2",
     homeTeam: "Valencia CF",
     awayTeam: "FC Barcelona",
+    awayCrest: "https://crests.football-data.org/81.svg",
     competition: "La Liga",
     date: "2026-06-22",
     time: "18:30",
@@ -58,6 +62,7 @@ const MATCHES: Match[] = [
     id: "3",
     homeTeam: "Valencia CF",
     awayTeam: "Atlético Madrid",
+    awayCrest: "https://crests.football-data.org/78.svg",
     competition: "Copa del Rey",
     date: "2026-06-29",
     time: "21:30",
@@ -67,27 +72,92 @@ const MATCHES: Match[] = [
   },
 ];
 
-const SECTORS: Sector[] = [
-  { id: "tribuna",       name: "Tribuna Central", category: "A", color: "#3B82F6", price: 85,  available: 45  },
-  { id: "preferencia",   name: "Preferencia",     category: "B", color: "#60A5FA", price: 65,  available: 120 },
-  { id: "fondo-norte",   name: "Fondo Norte",     category: "C", color: "#10B981", price: 45,  available: 230 },
-  { id: "fondo-sur",     name: "Fondo Sur",       category: "C", color: "#10B981", price: 45,  available: 180 },
-  { id: "fondos-altos",  name: "Fondos Altos",    category: "D", color: "#F59E0B", price: 35,  available: 340 },
-];
-
 type Step = "matches" | "stadium3d" | "checkout" | "success";
 
+const STEP_NUMBER: Record<Step, number> = {
+  matches:   1,
+  stadium3d: 2,
+  checkout:  3,
+  success:   4,
+};
+
+// ── Session persistence ────────────────────────────────────────────────────────
+
+const SESSION_KEY = "vcf-ticket-flow";
+
+interface SessionData {
+  step: Step;
+  match: Match | null;
+  sector: Sector | null;
+  seat: Seat | null;
+}
+
+function readSession(): SessionData {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return { step: "matches", match: null, sector: null, seat: null };
+
+    const data = JSON.parse(raw) as SessionData;
+
+    // Si el paso requiere un partido pero no hay ninguno → inicio
+    if (
+      (data.step === "stadium3d" ||
+        data.step === "checkout" ||
+        data.step === "success") &&
+      !data.match
+    ) {
+      return { step: "matches", match: null, sector: null, seat: null };
+    }
+
+    // Si el paso requiere sector/asiento pero no hay → estadio
+    if (
+      (data.step === "checkout" || data.step === "success") &&
+      (!data.sector || !data.seat)
+    ) {
+      return { step: "stadium3d", match: data.match, sector: null, seat: null };
+    }
+
+    return data;
+  } catch {
+    return { step: "matches", match: null, sector: null, seat: null };
+  }
+}
+
+// ── Component ──────────────────────────────────────────────────────────────────
+
 export function TicketPurchase() {
-  const [step, setStep] = useState<Step>("matches");
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
+  const initial = useMemo(() => readSession(), []);
+
+  const [step, setStep] = useState<Step>(initial.step);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(initial.match);
+  const [selectedSector, setSelectedSector] = useState<Sector | null>(initial.sector);
+  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(initial.seat);
+
+  // Persiste cada cambio de estado en sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({ step, match: selectedMatch, sector: selectedSector, seat: selectedSeat }),
+    );
+  }, [step, selectedMatch, selectedSector, selectedSeat]);
+
+  const currentStep = STEP_NUMBER[step];
+
+  function handleDone() {
+    useTicketStore.getState().goHome();
+    sessionStorage.removeItem(SESSION_KEY);
+    setStep("matches");
+    setSelectedMatch(null);
+    setSelectedSector(null);
+    setSelectedSeat(null);
+  }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100">
+    <div>
       {step === "matches" && (
         <MatchSelection
           matches={MATCHES}
+          stepNumber={currentStep}
           onSelectMatch={(match) => {
             setSelectedMatch(match);
             setStep("stadium3d");
@@ -96,9 +166,9 @@ export function TicketPurchase() {
       )}
 
       {step === "stadium3d" && selectedMatch && (
-        <Stadium3DExperience
+        <CesiumStadiumExperience
           match={selectedMatch}
-          sectors={SECTORS}
+          stepNumber={currentStep}
           onBack={() => setStep("matches")}
           onSelectSeat={(sector, seat) => {
             setSelectedSector(sector);
@@ -113,6 +183,7 @@ export function TicketPurchase() {
           match={selectedMatch}
           sector={selectedSector}
           seat={selectedSeat}
+          stepNumber={currentStep}
           onBack={() => setStep("stadium3d")}
           onConfirm={() => setStep("success")}
         />
@@ -123,7 +194,8 @@ export function TicketPurchase() {
           match={selectedMatch}
           sector={selectedSector}
           seat={selectedSeat}
-          onDone={() => setStep("matches")}
+          stepNumber={currentStep}
+          onDone={handleDone}
         />
       )}
     </div>

@@ -212,6 +212,7 @@ export default function MainLayout() {
               { path: "/juego", label: "JUEGO" },
               { path: "/nou-mestalla", label: "NOU MESTALLA" },
               { path: "/store", label: "TIENDA" },
+              { path: "/ticket", label: "ENTRADA" },
             ].map((item) => (
               <NavLink
                 key={item.path}

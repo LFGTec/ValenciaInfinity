@@ -244,18 +244,24 @@ export function CardAlbum({ userId }: Props) {
             />
           )}
 
-          {/* Album progress section */}
-          <div className="mb-4 bg-white border-2 border-vcf-orange backdrop-blur-sm rounded-lg px-6 py-4">
+          {/* Progress card */}
+          <div className="mb-4 bg-card border-2 border-vcf-orange dark:border-border backdrop-blur-sm rounded-lg px-6 py-4 transition-colors">
             <div className="flex items-center justify-between mb-4">
-              <p className="font-bold text-lg text-black">Progreso del Álbum</p>
-              <p className="text-2xl font-black text-vcf-orange">{progress}%</p>
+              <p className="font-bold text-lg text-foreground">
+                Progreso del Álbum
+              </p>
+              <p className="text-2xl font-black text-vcf-orange">
+                {progress}%
+              </p>
             </div>
-            <div className="w-full h-8 bg-gray-300 rounded-full overflow-hidden mb-4 shadow-md border border-gray-400">
+
+            <div className="w-full h-8 bg-gray-300 dark:bg-muted rounded-full overflow-hidden mb-4 shadow-md border border-gray-400 dark:border-border">
               <div
                 className="h-full rounded-full bg-vcf-orange shadow-inner transition-all duration-700 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
+
             <div className="grid grid-cols-4 gap-3">
               <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
                 <p className="text-2xl md:text-3xl font-black text-vcf-orange">
@@ -275,44 +281,49 @@ export function CardAlbum({ userId }: Props) {
                 </p>
                 <p className="text-xs text-gray-600 font-medium">Duplicadas</p>
               </div>
-              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                <p className="text-2xl md:text-3xl font-black text-black">0</p>
-                <p className="text-xs text-gray-600 font-medium">Legendarias</p>
+
+              <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">
+                <p className="text-2xl md:text-3xl font-black text-foreground">
+                  0
+                </p>
+                <p className="text-xs text-muted-foreground font-medium">
+                  Legendarias
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Unopened packs section */}
-          <div className="bg-white border-2 border-vcf-orange backdrop-blur-sm rounded-lg px-6 py-4 mb-12">
+          {/* Packs */}
+          <div className="bg-card border-2 border-vcf-orange dark:border-border backdrop-blur-sm rounded-lg px-6 py-4 mb-12 transition-colors">
             <div className="mb-4">
-              <p className="text-xl font-black text-black">
+              <p className="text-xl font-black text-foreground">
                 SOBRES <span className="text-vcf-orange">SIN ABRIR</span>
               </p>
-              <p className="text-sm text-gray-600">
+
+              <p className="text-sm text-muted-foreground">
                 {packsLoading
                   ? "Cargando..."
                   : `Tienes ${packs.length} ${packs.length === 1 ? "sobre" : "sobres"} esperando ser ${packs.length === 1 ? "abierto" : "abiertos"}`}
               </p>
             </div>
+
             <div className="grid grid-cols-3 gap-4 px-6 py-4">
               {packs.length > 0 &&
                 packs.map((pack) => (
                   <div
                     key={pack.id}
                     onClick={() => handleOpenPack(pack.id)}
-                    className="border-2 border-vcf-orange rounded-lg aspect-square bg-gray-50 hover:bg-vcf-orange/10 transition-colors cursor-pointer flex items-center justify-center"
+                    className="border-2 border-vcf-orange dark:border-border rounded-lg aspect-square bg-gray-50 dark:bg-muted hover:bg-vcf-orange/10 dark:hover:bg-neutral-800 transition-colors cursor-pointer flex items-center justify-center"
                   >
                     {openingPackId === pack.id ? (
                       <div className="text-center">
                         <div className="animate-spin mb-2">📦</div>
-                        <p className="text-xs font-bold text-vcf-orange">
-                          Abriendo...
-                        </p>
+                        <p className="text-xs font-bold text-vcf-orange">Abriendo...</p>
                       </div>
                     ) : (
                       <div className="text-center">
                         <p className="text-4xl">📦</p>
-                        <p className="text-xs font-bold text-gray-600 mt-2">
+                        <p className="text-xs font-bold text-muted-foreground mt-2">
                           Sobre
                         </p>
                       </div>
@@ -364,7 +375,7 @@ export function CardAlbum({ userId }: Props) {
                       className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all ${
                         selectedCategory === category.id
                           ? "bg-vcf-orange text-white shadow-lg"
-                          : "bg-white border-2 border-gray-200 text-black hover:border-vcf-orange"
+                          : "bg-white dark:bg-card border-2 border-gray-200 dark:border-border text-foreground hover:border-vcf-orange"
                       }`}
                     >
                       {category.label} ({category.count})

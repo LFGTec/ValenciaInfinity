@@ -201,22 +201,19 @@ export function Friends() {
                                     setSelectedPin(friend.friend_pin || "N/A")
                                 }
                                 className="
-                                w-full
-                                px-3
-                                py-2
-                                border-2
-                                border-vcf-orange
-                                text-vcf-orange
-                                bg-white
-                                rounded-lg
-                                font-bold
-                                hover:bg-vcf-orange
-                                hover:text-white
-                                hover:shadow-md
-                                transition-all
-                                duration-200
-                                text-sm
-                            "
+                                    w-full
+                                    px-3 py-2
+                                    border-2 border-vcf-orange
+                                    text-vcf-orange
+                                    bg-card
+                                    rounded-lg
+                                    font-bold
+                                    hover:bg-vcf-orange
+                                    hover:text-white
+                                    hover:shadow-md
+                                    transition-all duration-200
+                                    text-sm
+                                "
                             >
                             Mostrar PIN
                             </button>
@@ -232,25 +229,19 @@ export function Friends() {
                             <div className="flex gap-2">
                             <Link to={`/album/${friend.id}`} 
                             className="
-                                flex-1
-                                px-3
-                                py-2
-                                border-2
-                                border-vcf-orange
-                                text-vcf-orange
-                                bg-white
-                                rounded-lg
-                                font-bold
-                                hover:bg-vcf-orange
-                                hover:text-white
-                                hover:shadow-md
-                                transition-all
-                                duration-200
-                                flex
-                                items-center
-                                justify-center
-                                gap-2
-                                text-sm
+                            flex-1
+                            px-3 py-2
+                            border-2 border-vcf-orange
+                            text-vcf-orange
+                            bg-card
+                            rounded-lg
+                            font-bold
+                            hover:bg-vcf-orange
+                            hover:text-white
+                            hover:shadow-md
+                            transition-all duration-200
+                            flex items-center justify-center gap-2
+                            text-sm
                             ">
                                 <BookOpen size={16} />
                                 Ver Álbum 
@@ -263,7 +254,7 @@ export function Friends() {
                                 border-2
                                 border-vcf-orange
                                 text-vcf-orange
-                                bg-white
+                                bg-card
                                 rounded-lg
                                 font-bold
                                 hover:bg-vcf-orange

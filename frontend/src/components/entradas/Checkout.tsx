@@ -9,6 +9,9 @@ import {
   Wifi,
 } from "lucide-react";
 import type { Match, Sector, Seat } from "@/pages/TicketsPage";
+import { StepIndicator } from "./StepIndicator";
+import { useTicketStore } from "./store/useTicketStore";
+import { ZONE_PRICES, ZONE_COLORS } from "./data/seat";
 
 // ─── Card helpers ─────────────────────────────────────────────────────────────
 
@@ -77,7 +80,7 @@ function CardVisual({
 
   return (
     <div
-      className="relative h-48 w-full max-w-sm mx-auto"
+      className="relative h-56 w-full max-w-sm mx-auto"
       style={{ perspective: "1000px" }}
     >
       <div
@@ -278,12 +281,14 @@ export function Checkout({
   match,
   sector,
   seat,
+  stepNumber,
   onBack,
   onConfirm,
 }: {
   match: Match;
   sector: Sector;
   seat: Seat;
+  stepNumber: number;
   onBack: () => void;
   onConfirm: () => void;
 }) {
@@ -303,10 +308,24 @@ export function Checkout({
 
   const prevExpiryLen = useRef(0);
 
+  const { selectedSeats } = useTicketStore();
+
   const cardType = detectCard(number);
   const rawDigits = number.replace(/\s/g, "");
-  const serviceFee = 2.5;
-  const total = sector.price + serviceFee;
+
+  // Usa todos los asientos del store; si está vacío cae al sector individual
+  const ticketItems = selectedSeats.length > 0
+    ? selectedSeats.map((s) => ({
+        id: s.id,
+        label: `${s.zone} · Fila ${s.row} · Asiento ${s.col}`,
+        price: ZONE_PRICES[s.zone],
+        color: ZONE_COLORS[s.zone],
+      }))
+    : [{ id: "single", label: `${sector.name} · Fila ${seat.row} · Asiento #${seat.number}`, price: sector.price, color: "#EE3224" }];
+
+  const subtotal = ticketItems.reduce((sum, t) => sum + t.price, 0);
+  const serviceFee = Math.round(subtotal * 0.1 * 100) / 100;
+  const total = subtotal + serviceFee;
 
   // ── Validation ──────────────────────────────────────────────────────────────
   const errors = {
@@ -397,7 +416,7 @@ export function Checkout({
           <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-bold"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-vcf-orange/5 transition-colors font-bold flex-shrink-0 cursor-pointer hover:-translate-y-1"
             >
               <ChevronLeft size={20} />
               Volver
@@ -411,10 +430,7 @@ export function Checkout({
                 Conexión SSL cifrada
               </div>
             </div>
-            <div className="flex items-center gap-1.5 text-gray-400 text-xs">
-              <Shield size={14} className="text-green-500" />
-              <span>Seguro</span>
-            </div>
+            <StepIndicator current={stepNumber} />
           </div>
         </div>
 
@@ -606,25 +622,48 @@ export function Checkout({
                   <div className="text-xs text-gray-500">{match.stadium}</div>
                 </div>
 
-                {/* Details */}
-                <div className="border-t border-gray-100 py-4 space-y-2">
-                  <SummaryRow label="Sector" value={sector.name} />
-                  <SummaryRow
-                    label="Categoría"
-                    value={`Cat. ${sector.category}`}
-                  />
-                  <SummaryRow label="Fila" value={seat.row} />
-                  <SummaryRow label="Asiento" value={`#${seat.number}`} />
+                {/* Desglose de entradas */}
+                <div className="border-t border-gray-100 pt-4 pb-2 space-y-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-black text-gray-500 uppercase tracking-wide">
+                      Entradas
+                    </span>
+                    <span className="text-xs bg-[#EE3224]/10 text-[#EE3224] font-bold px-2 py-0.5 rounded-full border border-[#EE3224]/20">
+                      {ticketItems.length} {ticketItems.length === 1 ? "entrada" : "entradas"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                    {ticketItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ background: item.color }}
+                          />
+                          <span className="text-xs font-medium text-gray-700 truncate">
+                            {item.label}
+                          </span>
+                        </div>
+                        <span className="text-sm font-black text-gray-900 ml-2 shrink-0">
+                          €{item.price.toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Pricing */}
-                <div className="border-t border-gray-100 py-4 space-y-2">
+                <div className="border-t border-gray-100 py-3 space-y-2">
                   <SummaryRow
-                    label="Precio entrada"
-                    value={`€${sector.price.toFixed(2)}`}
+                    label="Subtotal"
+                    value={`€${subtotal.toFixed(2)}`}
                   />
                   <SummaryRow
-                    label="Cargo de servicio"
+                    label="Cargo de gestión (10%)"
                     value={`€${serviceFee.toFixed(2)}`}
                     muted
                   />
@@ -642,9 +681,9 @@ export function Checkout({
                 <button
                   onClick={handleSubmit}
                   disabled={processing}
-                  className={`w-full py-4 rounded-xl font-black text-white flex items-center justify-center gap-2 transition-all shadow-lg text-base ${
+                  className={`w-full py-4 rounded-xl  cursor-pointer font-black text-white flex items-center justify-center gap-2 transition-all shadow-lg text-base ${
                     isValid
-                      ? "bg-[#EE3224] hover:bg-[#d92b1e] hover:shadow-xl active:scale-95"
+                      ? "bg-gray-600 hover:-translate-y-1 hover:shadow-xl active:scale-95"
                       : "bg-gray-300 cursor-not-allowed"
                   }`}
                 >
