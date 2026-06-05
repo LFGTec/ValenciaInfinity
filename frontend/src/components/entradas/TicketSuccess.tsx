@@ -583,14 +583,19 @@ export function TicketSuccess({
         </div>
 
         {/* VR Banner */}
-        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-5 mb-3 flex items-center justify-between shadow-xl cursor-pointer hover:opacity-90 transition-opacity active:scale-95">
-          <div className="flex items-center gap-4">
+        <a
+          href="https://horizon.meta.com/casting"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-5 mb-3 flex items-center justify-between shadow-xl hover:opacity-90 transition-opacity active:scale-95 hover:-translate-y-1"
+        >
+          <div className="flex items-center gap-4 hover:-translate-y-1">
             <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center">
               <Smartphone size={22} className="text-white" />
             </div>
             <div>
               <div className="font-black text-white text-sm">
-                Ver mi asiento en VR
+                Ver Estadio en VR
               </div>
               <div className="text-xs text-white/70">
                 Disponible en Meta Quest
@@ -598,11 +603,11 @@ export function TicketSuccess({
             </div>
           </div>
           <ChevronRight size={20} className="text-white/70" />
-        </div>
+        </a>
 
         <button
           onClick={onDone}
-          className="w-full py-4 bg-gray-600 text-white rounded-2xl font-black text-base hover:-translate-y-1 transition-all shadow-lg active:scale-95 cursor-pointer"
+          className="w-full py-4 bg-gray-600 text-white rounded-2xl font-black text-base hover:-translate-y-1 transition-all shadow-lg active:scale-95 cursor-pointer "
         >
           Volver al inicio
         </button>
