@@ -504,7 +504,7 @@ export function TicketSuccess({
           </div>
 
           {/* Body */}
-          <div className="px-6 pb-6 pt-4">
+          <div className="px-6 pb-10 pt-4">
             {/* Seat info */}
             <div className="grid grid-cols-3 gap-2 mb-6">
               {[

@@ -80,7 +80,7 @@ function CardVisual({
 
   return (
     <div
-      className="relative h-48 w-full max-w-sm mx-auto"
+      className="relative h-56 w-full max-w-sm mx-auto"
       style={{ perspective: "1000px" }}
     >
       <div
