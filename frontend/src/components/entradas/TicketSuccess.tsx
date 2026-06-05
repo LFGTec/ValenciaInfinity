@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Check,
-  Download,
-  Smartphone,
-  ChevronRight,
-} from "lucide-react";
+import { Check, Download, Smartphone, ChevronRight } from "lucide-react";
 import type { Match, Sector, Seat } from "@/pages/TicketsPage";
 import vcfShield from "../../assets/EscudoValenciaCF.png";
 import { StepIndicator } from "./StepIndicator";
@@ -439,25 +434,8 @@ export function TicketSuccess({
       <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={vcfShield} alt="Valencia CF" className="w-9 h-9" />
-              <div>
-                <div className="text-base font-black text-gray-900 leading-none">
-                  VALENCIA
-                </div>
-                <div className="text-xs font-bold text-[#EE3224] leading-none mt-0.5">
-                  INFINITY
-                </div>
-              </div>
-            </div>
-            <div className="text-center hidden sm:block">
-              <div className="text-sm font-black text-gray-900">
-                Compra de entradas
-              </div>
-              <div className="text-xs text-gray-500">
-                {match.homeTeam} vs {match.awayTeam}
-              </div>
-            </div>
+            <div className="flex items-center gap-3"></div>
+            <div className="text-center hidden sm:block "></div>
             <StepIndicator current={stepNumber} />
           </div>
         </div>
