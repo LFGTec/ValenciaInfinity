@@ -13,4 +13,7 @@ export default defineConfig({
   server: {
     host: "localhost",
   },
+  define:{
+          CESIUM_BASE_URL: JSON.stringify('https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium'),
+  }
 });
