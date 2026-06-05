@@ -72,14 +72,14 @@ export function MatchesPage() {
         </div>
         <button
           onClick={() => navegar("/estadisticas")}
-          className="flex items-center gap-2 px-5 py-3 bg-card border-2 border-black hover:border-vcf-orange text-foreground hover:text-vcf-orange rounded-xl font-black transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base "
+          className="flex items-center gap-2 px-5 py-3 bg-card border-2 border-black hover:border-vcf-orange text-foreground hover:text-vcf-orange rounded-xl font-black transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base cursor-pointer"
         >
           <BarChart2 size={20} />
           ESTADÍSTICAS
         </button>
         <button
           onClick={() => setMostrarCalendario(true)}
-          className="flex items-center gap-2 px-5 py-3 bg-white text-black border-2 border-black rounded-xl font-black hover:bg-black hover:text-white transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base"
+          className="flex items-center gap-2 px-5 py-3 bg-white text-black border-2 border-black rounded-xl font-black hover:bg-black hover:text-white transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base cursor-pointer"
         >
           <Calendar size={20} />
           VER CALENDARIO

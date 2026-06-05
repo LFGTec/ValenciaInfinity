@@ -1,11 +1,22 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, Download, Share2, Copy, CheckCircle, Smartphone, ChevronRight } from "lucide-react";
+import {
+  Check,
+  Download,
+  Smartphone,
+  ChevronRight,
+} from "lucide-react";
 import type { Match, Sector, Seat } from "@/pages/TicketsPage";
 import vcfShield from "../../assets/EscudoValenciaCF.png";
+import { StepIndicator } from "./StepIndicator";
 
 // ─── QR Code generator (canvas-based, no external deps) ──────────────────────
 
-function drawFinder(ctx: CanvasRenderingContext2D, x: number, y: number, cell: number) {
+function drawFinder(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  cell: number,
+) {
   ctx.fillStyle = "#000";
   ctx.fillRect(x, y, 7 * cell, 7 * cell);
   ctx.fillStyle = "#fff";
@@ -14,7 +25,12 @@ function drawFinder(ctx: CanvasRenderingContext2D, x: number, y: number, cell: n
   ctx.fillRect(x + 2 * cell, y + 2 * cell, 3 * cell, 3 * cell);
 }
 
-function drawAlignment(ctx: CanvasRenderingContext2D, x: number, y: number, cell: number) {
+function drawAlignment(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  cell: number,
+) {
   ctx.fillStyle = "#000";
   ctx.fillRect(x, y, 5 * cell, 5 * cell);
   ctx.fillStyle = "#fff";
@@ -50,7 +66,10 @@ function generateQR(canvas: HTMLCanvasElement, data: string) {
     (r >= MODULES - 8 && c < 9) ||
     (r === 6 && c >= 8 && c <= MODULES - 9) ||
     (c === 6 && r >= 8 && r <= MODULES - 9) ||
-    (r >= MODULES - 9 && r <= MODULES - 5 && c >= MODULES - 9 && c <= MODULES - 5) ||
+    (r >= MODULES - 9 &&
+      r <= MODULES - 5 &&
+      c >= MODULES - 9 &&
+      c <= MODULES - 5) ||
     (r === 8 && (c <= 8 || c >= MODULES - 8)) ||
     (c === 8 && (r <= 8 || r >= MODULES - 8));
 
@@ -64,7 +83,13 @@ function generateQR(canvas: HTMLCanvasElement, data: string) {
     for (let c = 0; c < MODULES; c++) {
       if (!reserved(r, c)) {
         const idx = r * MODULES + c;
-        const bit = (Math.imul(h ^ (idx * 0x9e3779b9 + (idx << 6) + (idx >> 2)), 0x45d9f3b) >>> 0) % 2;
+        const bit =
+          (Math.imul(
+            h ^ (idx * 0x9e3779b9 + (idx << 6) + (idx >> 2)),
+            0x45d9f3b,
+          ) >>>
+            0) %
+          2;
         if (bit === 0) fill(c, r);
       }
     }
@@ -96,7 +121,12 @@ function generateQR(canvas: HTMLCanvasElement, data: string) {
   }
 
   // Alignment pattern
-  drawAlignment(ctx, (QUIET + MODULES - 9) * CELL, (QUIET + MODULES - 9) * CELL, CELL);
+  drawAlignment(
+    ctx,
+    (QUIET + MODULES - 9) * CELL,
+    (QUIET + MODULES - 9) * CELL,
+    CELL,
+  );
 
   // Dark module
   fill(8, MODULES - 8);
@@ -105,16 +135,31 @@ function generateQR(canvas: HTMLCanvasElement, data: string) {
   const fmt = [1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0];
   fmt.forEach((bit, i) => {
     if (!bit) return;
-    if (i < 6) { fill(i, 8); fill(8, i); }
-    else if (i === 6) { fill(7, 8); fill(8, 7); }
-    else if (i === 7) { fill(8, 8); fill(8, 8); }
-    else { fill(8, MODULES - 15 + i); fill(MODULES - 15 + i, 8); }
+    if (i < 6) {
+      fill(i, 8);
+      fill(8, i);
+    } else if (i === 6) {
+      fill(7, 8);
+      fill(8, 7);
+    } else if (i === 7) {
+      fill(8, 8);
+      fill(8, 8);
+    } else {
+      fill(8, MODULES - 15 + i);
+      fill(MODULES - 15 + i, 8);
+    }
   });
 }
 
 // ─── QR Canvas component ──────────────────────────────────────────────────────
 
-function QRCode({ data, canvasRef }: { data: string; canvasRef: React.RefObject<HTMLCanvasElement | null> }) {
+function QRCode({
+  data,
+  canvasRef,
+}: {
+  data: string;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+}) {
   useEffect(() => {
     if (canvasRef.current) generateQR(canvasRef.current, data);
   }, [data, canvasRef]);
@@ -136,9 +181,10 @@ async function downloadTicket(
   sector: Sector,
   seat: Seat,
   qrCanvas: HTMLCanvasElement | null,
-  shieldUrl: string
+  shieldUrl: string,
 ) {
-  const W = 660, H = 960;
+  const W = 660,
+    H = 960;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -171,7 +217,9 @@ async function downloadTicket(
   try {
     const img = await loadImage(shieldUrl);
     ctx.drawImage(img, 48, 44, 60, 60);
-  } catch { /* skip if fails */ }
+  } catch {
+    /* skip if fails */
+  }
 
   // MESTALLA text
   ctx.fillStyle = "rgba(255,255,255,0.9)";
@@ -192,7 +240,10 @@ async function downloadTicket(
   ctx.font = "16px Arial";
   ctx.fillStyle = "rgba(255,255,255,0.85)";
   const dateStr = new Date(match.date).toLocaleDateString("es-ES", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
   ctx.fillText(dateStr, W / 2, 195);
   ctx.font = "bold 20px Arial";
@@ -227,7 +278,11 @@ async function downloadTicket(
   // Seat info grid
   const cols = [W / 4, W / 2, (W * 3) / 4];
   const labels = ["SECTOR", "FILA", "ASIENTO"];
-  const values = [sector.name.split(" ")[0].toUpperCase(), seat.row, String(seat.number)];
+  const values = [
+    sector.name.split(" ")[0].toUpperCase(),
+    seat.row,
+    String(seat.number),
+  ];
   cols.forEach((cx, i) => {
     ctx.fillStyle = "#9ca3af";
     ctx.font = "10px Arial";
@@ -280,7 +335,11 @@ async function downloadTicket(
   // Footer
   ctx.fillStyle = "#9ca3af";
   ctx.font = "11px Arial";
-  ctx.fillText("Valencia Infinity · Simulación de entrada digital · No válida para acceso real", W / 2, 790);
+  ctx.fillText(
+    "Valencia Infinity · Simulación de entrada digital · No válida para acceso real",
+    W / 2,
+    790,
+  );
 
   // Decorative corner VCF badge
   ctx.fillStyle = "#EE3224";
@@ -294,7 +353,15 @@ async function downloadTicket(
   link.click();
 }
 
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number, partial = false) {
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+  partial = false,
+) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -329,16 +396,16 @@ export function TicketSuccess({
   match,
   sector,
   seat,
+  stepNumber,
   onDone,
 }: {
   match: Match;
   sector: Sector;
   seat: Seat;
+  stepNumber: number;
   onDone: () => void;
 }) {
   const qrRef = useRef<HTMLCanvasElement>(null);
-  const [copied, setCopied] = useState(false);
-  const [shared, setShared] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   const ticketCode = `VCF-${match.id.toUpperCase()}-${sector.id.toUpperCase()}-${seat.row}${seat.number}`;
@@ -350,47 +417,61 @@ export function TicketSuccess({
     year: "numeric",
   });
 
-  const shareText =
-    `🎫 ¡Tengo entrada para el partido!\n\n` +
-    `⚽ ${match.homeTeam} vs ${match.awayTeam}\n` +
-    `📅 ${dateStr} · ${match.time}h\n` +
-    `📍 ${match.stadium}\n\n` +
-    `🏟️ ${sector.name} · Fila ${seat.row} · Asiento #${seat.number}\n` +
-    `🎟️ Código: ${ticketCode}\n\n` +
-    `#ValenciaCF #Mestalla #ValenciaInfinity`;
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "Entrada Valencia CF", text: shareText });
-        setShared(true);
-        setTimeout(() => setShared(false), 3000);
-      } catch { /* cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(shareText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    }
-  };
-
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      await downloadTicket(ticketCode, match, sector, seat, qrRef.current, vcfShield);
+      await downloadTicket(
+        ticketCode,
+        match,
+        sector,
+        seat,
+        qrRef.current,
+        vcfShield,
+      );
     } finally {
       setDownloading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-lg mx-auto">
-        {/* Success header */}
+    <div className="min-h-screen bg-gray-50">
+      {/* ── Header sticky ── */}
+      <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={vcfShield} alt="Valencia CF" className="w-9 h-9" />
+              <div>
+                <div className="text-base font-black text-gray-900 leading-none">
+                  VALENCIA
+                </div>
+                <div className="text-xs font-bold text-[#EE3224] leading-none mt-0.5">
+                  INFINITY
+                </div>
+              </div>
+            </div>
+            <div className="text-center hidden sm:block">
+              <div className="text-sm font-black text-gray-900">
+                Compra de entradas
+              </div>
+              <div className="text-xs text-gray-500">
+                {match.homeTeam} vs {match.awayTeam}
+              </div>
+            </div>
+            <StepIndicator current={stepNumber} />
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-lg mx-auto px-4 py-8">
+        {/* ── Título ── */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-green-500 rounded-full mx-auto mb-5 flex items-center justify-center shadow-xl animate-bounce">
             <Check size={44} className="text-white" />
           </div>
-          <h1 className="text-4xl font-black text-gray-900 mb-2">¡Entrada confirmada!</h1>
+          <h1 className="text-4xl font-black text-gray-900 mb-2">
+            ¡Entrada confirmada!
+          </h1>
           <p className="text-gray-500">Tu entrada digital está lista</p>
         </div>
 
@@ -399,15 +480,27 @@ export function TicketSuccess({
           {/* Red header */}
           <div className="bg-gradient-to-r from-[#EE3224] to-[#b71c1c] p-6 text-white">
             <div className="flex items-center justify-between mb-5">
-              <img src={vcfShield} alt="VCF" className="w-12 h-12 drop-shadow-lg" />
+              <img
+                src={vcfShield}
+                alt="VCF"
+                className="w-12 h-12 drop-shadow-lg"
+              />
               <div className="text-right">
-                <div className="text-[10px] uppercase tracking-widest opacity-70">Valencia CF</div>
-                <div className="font-black text-base tracking-wide">MESTALLA</div>
-                <div className="text-[10px] opacity-60">{match.competition}</div>
+                <div className="text-[10px] uppercase tracking-widest opacity-70">
+                  Valencia CF
+                </div>
+                <div className="font-black text-base tracking-wide">
+                  MESTALLA
+                </div>
+                <div className="text-[10px] opacity-60">
+                  {match.competition}
+                </div>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-black mb-1">{match.homeTeam} vs {match.awayTeam}</div>
+              <div className="text-2xl font-black mb-1">
+                {match.homeTeam} vs {match.awayTeam}
+              </div>
               <div className="text-sm opacity-85">{dateStr}</div>
               <div className="text-xl font-bold mt-1">{match.time}h</div>
             </div>
@@ -415,7 +508,13 @@ export function TicketSuccess({
 
           {/* Perforated edge */}
           <div className="relative h-5 bg-[#EE3224]">
-            <div className="absolute inset-x-0 bottom-0 h-5 bg-white" style={{ borderTopLeftRadius: "100%", borderTopRightRadius: "100%" }} />
+            <div
+              className="absolute inset-x-0 bottom-0 h-5 bg-white"
+              style={{
+                borderTopLeftRadius: "100%",
+                borderTopRightRadius: "100%",
+              }}
+            />
             {/* Notch circles */}
             {[-1, 1].map((side) => (
               <div
@@ -430,17 +529,30 @@ export function TicketSuccess({
           <div className="px-6 pb-6 pt-4">
             {/* Seat info */}
             <div className="grid grid-cols-3 gap-2 mb-6">
-              {[["SECTOR", sector.name], ["FILA", seat.row], ["ASIENTO", String(seat.number)]].map(([label, val]) => (
-                <div key={label} className="text-center bg-gray-50 rounded-xl py-3">
-                  <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">{label}</div>
-                  <div className="font-black text-gray-900 text-lg leading-tight">{val}</div>
+              {[
+                ["SECTOR", sector.name],
+                ["FILA", seat.row],
+                ["ASIENTO", String(seat.number)],
+              ].map(([label, val]) => (
+                <div
+                  key={label}
+                  className="text-center bg-gray-50 rounded-xl py-3"
+                >
+                  <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">
+                    {label}
+                  </div>
+                  <div className="font-black text-gray-900 text-lg leading-tight">
+                    {val}
+                  </div>
                 </div>
               ))}
             </div>
 
             {/* Category */}
             <div className="flex items-center justify-center gap-3 mb-5 text-sm">
-              <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full font-bold text-xs">Cat. {sector.category}</span>
+              <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full font-bold text-xs">
+                Cat. {sector.category}
+              </span>
               <span className="text-gray-400">·</span>
               <span className="font-black text-[#EE3224]">€{sector.price}</span>
             </div>
@@ -454,8 +566,12 @@ export function TicketSuccess({
 
             {/* Ticket code */}
             <div className="text-center">
-              <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Código de entrada</div>
-              <div className="font-mono font-black text-gray-900 text-lg tracking-widest">{ticketCode}</div>
+              <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">
+                Código de entrada
+              </div>
+              <div className="font-mono font-black text-gray-900 text-lg tracking-widest">
+                {ticketCode}
+              </div>
             </div>
           </div>
 
@@ -468,43 +584,25 @@ export function TicketSuccess({
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="mb-3">
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center justify-center gap-2 py-4 bg-white border-2 border-gray-200 rounded-2xl font-bold text-gray-800 hover:border-[#EE3224] hover:text-[#EE3224] transition-all shadow-md active:scale-95 disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-4 bg-white border-2 border-gray-200 rounded-2xl font-bold text-gray-800 hover:border-gray-400 hover:text-black cursor-pointer transition-all shadow-md active:scale-95 disabled:opacity-60"
           >
             {downloading ? (
-              <span className="flex items-center gap-2 text-sm"><span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />Descargando...</span>
+              <span className="flex items-center gap-2 text-sm">
+                <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                Descargando...
+              </span>
             ) : (
-              <><Download size={18} />Descargar</>
-            )}
-          </button>
-
-          <button
-            onClick={handleShare}
-            className={`flex items-center justify-center gap-2 py-4 rounded-2xl font-bold transition-all shadow-md active:scale-95 border-2 ${
-              shared || copied
-                ? "bg-green-50 border-green-400 text-green-700"
-                : "bg-white border-gray-200 text-gray-800 hover:border-[#EE3224] hover:text-[#EE3224]"
-            }`}
-          >
-            {shared ? (
-              <><CheckCircle size={18} />¡Compartido!</>
-            ) : copied ? (
-              <><Copy size={18} />¡Copiado!</>
-            ) : (
-              <><Share2 size={18} />Compartir</>
+              <>
+                <Download size={18} />
+                Descargar entrada
+              </>
             )}
           </button>
         </div>
-
-        {/* Copy code fallback hint */}
-        {!navigator.share && (
-          <p className="text-xs text-gray-400 text-center mb-3">
-            Compartir copia el texto al portapapeles
-          </p>
-        )}
 
         {/* VR Banner */}
         <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-5 mb-3 flex items-center justify-between shadow-xl cursor-pointer hover:opacity-90 transition-opacity active:scale-95">
@@ -513,8 +611,12 @@ export function TicketSuccess({
               <Smartphone size={22} className="text-white" />
             </div>
             <div>
-              <div className="font-black text-white text-sm">Ver mi asiento en VR</div>
-              <div className="text-xs text-white/70">Disponible en Meta Quest</div>
+              <div className="font-black text-white text-sm">
+                Ver mi asiento en VR
+              </div>
+              <div className="text-xs text-white/70">
+                Disponible en Meta Quest
+              </div>
             </div>
           </div>
           <ChevronRight size={20} className="text-white/70" />
@@ -522,7 +624,7 @@ export function TicketSuccess({
 
         <button
           onClick={onDone}
-          className="w-full py-4 bg-[#EE3224] text-white rounded-2xl font-black text-base hover:bg-[#d92b1e] transition-all shadow-lg active:scale-95"
+          className="w-full py-4 bg-gray-600 text-white rounded-2xl font-black text-base hover:-translate-y-1 transition-all shadow-lg active:scale-95 cursor-pointer"
         >
           Volver al inicio
         </button>

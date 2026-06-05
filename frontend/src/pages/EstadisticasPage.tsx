@@ -113,7 +113,7 @@ export function EstadisticasPage() {
       <div className="mb-8">
         <button
           onClick={() => navegar("/matches")}
-          className="flex items-center gap-2 text-black hover:text-vcf-orange font-bold mb-4 transition-colors border-2 border-black rounded-xl px-4 py-2 hover:border-vcf-orange"
+          className="flex items-center gap-2 px-5 py-3 bg-card border-2 border-black hover:border-vcf-orange text-foreground hover:text-vcf-orange rounded-xl font-black transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base cursor-pointer mb-4"
         >
           <ArrowLeft size={18} />
           Volver a Partidos
