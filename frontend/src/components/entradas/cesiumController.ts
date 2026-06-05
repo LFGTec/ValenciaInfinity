@@ -70,12 +70,13 @@ export function setSeatViewMode(active: boolean, minPitchDeg = -30): void {
     ctrl.zoomEventTypes      = [];
     ctrl.translateEventTypes = [];
 
-    ctrl.enableLook      = true;
-    ctrl.enableRotate    = false;
-    ctrl.enableTilt      = false;
-    ctrl.enableZoom      = false;
-    ctrl.enableTranslate = false;
-    ctrl.lookFactor      = -0.1;
+    ctrl.enableLook             = true;
+    ctrl.enableRotate           = false;
+    ctrl.enableTilt             = false;
+    ctrl.enableZoom             = false;
+    ctrl.enableTranslate        = false;
+    ctrl.enableCollisionDetection = false;
+    ctrl.lookFactor             = -0.1;
 
     const MIN = Cesium.Math.toRadians(minPitchDeg);
     const MAX = Cesium.Math.toRadians(25);
@@ -89,6 +90,7 @@ export function setSeatViewMode(active: boolean, minPitchDeg = -30): void {
       }
     });
   } else {
+    ctrl.enableCollisionDetection = true;
     initHomeControls();
   }
 }

@@ -97,6 +97,7 @@ export function CesiumStadiumExperience({
         infoBox: false,
         selectionIndicator: false,
         shadows: false,
+        targetFramesPerSecond: 30,
       });
 
       setCesiumViewer(viewer);
@@ -106,6 +107,8 @@ export function CesiumStadiumExperience({
       viewer.shadows = false;
       viewer.scene.shadowMap.enabled = false;
       viewer.scene.shadowMap.softShadows = false;
+      viewer.scene.fog.enabled = false;
+      viewer.scene.skyAtmosphere.show = false;
       viewer.clock.currentTime = Cesium.JulianDate.fromDate(
         new Date("2026-06-15T10:00:00Z"),
       );
@@ -121,6 +124,7 @@ export function CesiumStadiumExperience({
         const tileset = await Cesium.createGooglePhotorealistic3DTileset();
         tileset.maximumScreenSpaceError = 4;
         tileset.shadows = Cesium.ShadowMode.DISABLED;
+        tileset.dynamicScreenSpaceError = true;
         viewer.scene.primitives.add(tileset);
       } catch (e) {
         console.log("Error cargando tiles:", e);
