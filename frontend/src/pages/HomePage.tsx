@@ -51,7 +51,7 @@ export default function HomePage() {
   });
   const seasonTarget = season?.in_season ? null : season?.next_season_start;
   const { user } = useAuth(); // ya lo tienes
-  const { obtained, total, missing, progress } = useAlbumProgress(user?.id);
+  const { obtained, total, missing, duplicated, progress } = useAlbumProgress(user?.id);
 
   useEffect(() => {
     if (!seasonTarget) return;
@@ -528,6 +528,7 @@ export default function HomePage() {
               obtained={obtained}
               total={total}
               missing={missing}
+              duplicated={duplicated}
               progress={progress}
             />
 

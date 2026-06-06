@@ -6,6 +6,7 @@ interface AlbumProgress {
   obtained: number;
   total: number;
   missing: number;
+  duplicated: number;
   progress: number;
   loading: boolean;
   error: string | null;
@@ -42,7 +43,11 @@ export function useAlbumProgress(userId?: string): AlbumProgress {
   const obtained = useMemo(() => cards.filter((c) => c.obtained).length, [cards]);
   const total = cards.length;
   const missing = Math.max(total - obtained, 0);
+  const duplicated = useMemo(
+    () => cards.reduce((acc, c) => acc + Math.max((c.quantity ?? 1) - 1, 0), 0),
+    [cards],
+  );
   const progress = total > 0 ? Math.round((obtained / total) * 100) : 0;
 
-  return { obtained, total, missing, progress, loading, error };
+  return { obtained, total, missing, duplicated, progress, loading, error };
 }

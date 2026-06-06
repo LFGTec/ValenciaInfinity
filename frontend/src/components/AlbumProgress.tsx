@@ -6,6 +6,7 @@ interface AlbumProgressBarProps {
   total: number;
   missing: number;
   progress: number;
+  duplicated?: number;
 }
 
 export function AlbumProgressBar({
@@ -13,6 +14,7 @@ export function AlbumProgressBar({
   total,
   missing,
   progress,
+  duplicated = 0,
 }: AlbumProgressBarProps) {
   return (
     <div className="mb-4 bg-card border-2 border-vcf-orange dark:border-border backdrop-blur-sm rounded-lg px-6 py-4 transition-colors">
@@ -42,7 +44,7 @@ export function AlbumProgressBar({
           <p className="text-xs text-gray-600 font-medium">Faltantes</p>
         </div>
         <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-          <p className="text-2xl md:text-3xl font-black text-vcf-orange">0</p>
+          <p className="text-2xl md:text-3xl font-black text-vcf-orange">{duplicated}</p>
           <p className="text-xs text-gray-600 font-medium">Duplicadas</p>
         </div>
         <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">

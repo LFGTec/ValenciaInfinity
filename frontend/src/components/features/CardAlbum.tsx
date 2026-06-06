@@ -118,6 +118,10 @@ export function CardAlbum({ userId }: Props) {
     [cards],
   );
   const missingCards = Math.max(totalCards - obtainedCards, 0);
+  const duplicatedCards = useMemo(
+    () => cards.reduce((acc, c) => acc + Math.max((c.quantity ?? 1) - 1, 0), 0),
+    [cards],
+  );
 
   const progress =
     totalCards > 0 ? Math.round((obtainedCards / totalCards) * 100) : 0;
@@ -251,6 +255,7 @@ export function CardAlbum({ userId }: Props) {
   total={totalCards}
   missing={missingCards}
   progress={progress}
+  duplicated={duplicatedCards}
 />
           
 
