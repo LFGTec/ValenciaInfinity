@@ -11,11 +11,13 @@ import {
   Gamepad2,
   Ticket,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 import matchRoomBgImage from "../assets/Vivelospartidos.png";
 import { usePartidosVCF } from "@/hooks/usePartidosVCF";
 import { useSeasonStatus } from "@/hooks/useSeasonStatus";
-import { countdownSeason } from "@/utils/countDownSeason";
+import { useAlbumProgress } from "@/hooks/useAlbumProgress";
+import { AlbumProgressBar } from "@/components/AlbumProgress";
 
 import { RankingPreview } from "@/components/RankingPreview";
 import { useRanking } from "@/hooks/useRanking";
@@ -48,6 +50,8 @@ export default function HomePage() {
     segundos: 0,
   });
   const seasonTarget = season?.in_season ? null : season?.next_season_start;
+  const { user } = useAuth(); // ya lo tienes
+  const { obtained, total, missing, duplicated, progress } = useAlbumProgress(user?.id);
 
   useEffect(() => {
     if (!seasonTarget) return;
@@ -509,69 +513,40 @@ export default function HomePage() {
 
         {/* Album CTA */}
         <section className="mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-card rounded-xl p-8 shadow-lg border-2 border-vcf-orange">
-            <div>
-              <h2 className="text-4xl font-black mb-4 text-foreground">
-                COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE
-                CARTAS
-              </h2>
+          <div className="bg-card rounded-xl p-8 shadow-lg border-2 border-vcf-orange">
+            {/* Header — ancho completo */}
+            <h2 className="text-4xl font-black mb-2 text-foreground">
+              COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE
+              CARTAS
+            </h2>
+            <p className="text-lg text-muted-foreground mb-6">
+              Colecciona cartas de jugadores, leyendas y momentos históricos.
+            </p>
 
-              <p className="text-lg text-muted-foreground mb-6">
-                Colecciona cartas de jugadores, leyendas y momentos históricos.
-              </p>
+            {/* Progress bar — ancho completo */}
+            <AlbumProgressBar
+              obtained={obtained}
+              total={total}
+              missing={missing}
+              duplicated={duplicated}
+              progress={progress}
+            />
 
-              <div className="mb-6">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="font-black text-foreground">
-                    Tu Progreso
-                  </span>
-                  <span className="font-black text-vcf-orange">
-                    145/200 (72%)
-                  </span>
-                </div>
-
-                <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-vcf-orange to-vcf-yellow"
-                    style={{ width: "72%" }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <Link
-                  to="/album"
-                  className="px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-md hover:shadow-lg hover:scale-105"
-                  onClick={() => window.scrollTo(0, 0)}
-                >
-                  ABRIR SOBRES
-                </Link>
-
-                <Link
-                  to="/album?scroll=album-book"
-                  className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 hover:border-gray-100 transition-all shadow-md hover:shadow-lg hover:scale-105"
-                >
-                  VER ÁLBUM
-                </Link>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                /* card1, card2, card3, card4, card1, card2 */
-              ].map((cardImg, i) => (
-                <Link
-                  key={i}
-                  to="/fanzone"
-                  className="aspect-[2/3] rounded-lg shadow-lg transform hover:scale-105 transition-transform cursor-pointer overflow-hidden"
-                >
-                  <img
-                    src={cardImg}
-                    alt={`Carta ${i + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </Link>
-              ))}
+            {/* Botones */}
+            <div className="flex gap-4 mt-6">
+              <Link
+                to="/album"
+                className="px-8 py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-all shadow-md hover:scale-105"
+                onClick={() => window.scrollTo(0, 0)}
+              >
+                ABRIR SOBRES
+              </Link>
+              <Link
+                to="/album?scroll=album-book"
+                className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 transition-all shadow-md hover:scale-105"
+              >
+                VER ÁLBUM
+              </Link>
             </div>
           </div>
         </section>

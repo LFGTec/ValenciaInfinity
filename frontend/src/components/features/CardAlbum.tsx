@@ -16,6 +16,7 @@ import { PackOpenAnimation } from "./PackOpenAnimation";
 import { useVisitingAlbum } from "@/hooks/useVisitingAlbum";
 import { Star, Trophy } from "lucide-react";
 import { VisitorAlbumHeader } from "../album/visitorAlbum";
+import { AlbumProgressBar } from "../AlbumProgress";
 
 type Props = {
   userId?: string;
@@ -117,6 +118,10 @@ export function CardAlbum({ userId }: Props) {
     [cards],
   );
   const missingCards = Math.max(totalCards - obtainedCards, 0);
+  const duplicatedCards = useMemo(
+    () => cards.reduce((acc, c) => acc + Math.max((c.quantity ?? 1) - 1, 0), 0),
+    [cards],
+  );
 
   const progress =
     totalCards > 0 ? Math.round((obtainedCards / totalCards) * 100) : 0;
@@ -245,53 +250,14 @@ export function CardAlbum({ userId }: Props) {
           )}
 
           {/* Progress card */}
-          <div className="mb-4 bg-card border-2 border-vcf-orange dark:border-border backdrop-blur-sm rounded-lg px-6 py-4 transition-colors">
-            <div className="flex items-center justify-between mb-4">
-              <p className="font-bold text-lg text-foreground">
-                Progreso del Álbum
-              </p>
-              <p className="text-2xl font-black text-vcf-orange">
-                {progress}%
-              </p>
-            </div>
-
-            <div className="w-full h-8 bg-gray-300 dark:bg-muted rounded-full overflow-hidden mb-4 shadow-md border border-gray-400 dark:border-border">
-              <div
-                className="h-full rounded-full bg-vcf-orange shadow-inner transition-all duration-700 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            <div className="grid grid-cols-4 gap-3">
-              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                <p className="text-2xl md:text-3xl font-black text-vcf-orange">
-                  {obtainedCards}
-                </p>
-                <p className="text-xs text-gray-600 font-medium">Obtenidas</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                <p className="text-2xl md:text-3xl font-black text-black">
-                  {missingCards}
-                </p>
-                <p className="text-xs text-gray-600 font-medium">Faltantes</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                <p className="text-2xl md:text-3xl font-black text-vcf-orange">
-                  0
-                </p>
-                <p className="text-xs text-gray-600 font-medium">Duplicadas</p>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">
-                <p className="text-2xl md:text-3xl font-black text-foreground">
-                  0
-                </p>
-                <p className="text-xs text-muted-foreground font-medium">
-                  Legendarias
-                </p>
-              </div>
-            </div>
-          </div>
+          <AlbumProgressBar
+  obtained={obtainedCards}
+  total={totalCards}
+  missing={missingCards}
+  progress={progress}
+  duplicated={duplicatedCards}
+/>
+          
 
           {/* Packs */}
           <div className="bg-card border-2 border-vcf-orange dark:border-border backdrop-blur-sm rounded-lg px-6 py-4 mb-12 transition-colors">

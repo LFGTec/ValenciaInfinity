@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowRight, Gift, Shuffle } from "lucide-react";
 import { CardAlbum } from "../components/features/CardAlbum";
+import { AlbumProgressBar } from "@/components/AlbumProgress";
 
 export default function Album() {
   const { userId } = useParams();
