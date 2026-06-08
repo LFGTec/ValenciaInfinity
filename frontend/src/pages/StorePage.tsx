@@ -92,6 +92,7 @@ export function StorePage() {
 
   const filteredCards = useMemo(() => {
     return allCards.filter((card) => {
+      if (card.rarity === "Legendario") return false;
       const matchesSearch =
         cardSearch.trim() === "" ||
         card.name.toLowerCase().includes(cardSearch.toLowerCase());
@@ -102,7 +103,11 @@ export function StorePage() {
   }, [allCards, cardSearch, selectedRarity]);
 
   const rarities = useMemo(() => {
-    const set = new Set(allCards.map((c) => c.rarity).filter(Boolean));
+    const set = new Set(
+      allCards
+        .map((c) => c.rarity)
+        .filter((r): r is string => Boolean(r) && r !== "Legendario")
+    );
     return ["todas", ...Array.from(set)] as string[];
   }, [allCards]);
 
