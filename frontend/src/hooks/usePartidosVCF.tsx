@@ -5,7 +5,7 @@ import { partidosAtom } from "../stores/partidosStore";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const CACHE_KEY = "vcf_partidos_v1";
+const CACHE_KEY = "vcf_partidos_v2";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutos
 
 interface CacheEntry {
@@ -140,19 +140,24 @@ export function usePartidosVCF() {
 
     async function fetchTodo() {
       try {
-        const base = `/v4/teams/${VCF_ID}/matches`;
+        // El tier gratuito no permite /v4/teams/{id}/matches.
+        // Usamos /v4/competitions/{id}/matches y filtramos VCF del lado del cliente.
+        const base = `/v4/competitions/2014/matches`;
 
-        const [dataProximos, dataJugados, dataStats] = await Promise.all([
-          footballFetch(base, { status: "SCHEDULED", competitions: "2014", limit: "5" }),
-          footballFetch(base, { status: "FINISHED", competitions: "2014", limit: "10" }),
-          footballFetch(base, { status: "FINISHED", competitions: "2014" }),
+        const [dataFinished, dataScheduled] = await Promise.all([
+          footballFetch(base, { status: "FINISHED" }),
+          footballFetch(base, { status: "SCHEDULED" }),
         ]);
 
-        const matches = dataStats.matches as any[];
+        const esVCF = (m: any) => m.homeTeam.id === VCF_ID || m.awayTeam.id === VCF_ID;
+
+        const allFinished: any[] = (dataFinished.matches as any[]).filter(esVCF);
+        const allScheduled: any[] = (dataScheduled.matches as any[]).filter(esVCF);
+
         let ganados = 0, empatados = 0, perdidos = 0;
         let golesAFavor = 0, golesEnContra = 0;
 
-        matches.forEach((m: any) => {
+        allFinished.forEach((m: any) => {
           const esLocal = m.homeTeam.id === VCF_ID;
           golesAFavor += esLocal ? m.score.fullTime.home : m.score.fullTime.away;
           golesEnContra += esLocal ? m.score.fullTime.away : m.score.fullTime.home;
@@ -169,12 +174,12 @@ export function usePartidosVCF() {
           }
         });
 
-        const ultimaJornada = matches[matches.length - 1]?.matchday ?? 0;
+        const ultimaJornada = allFinished[allFinished.length - 1]?.matchday ?? 0;
 
-        const proximos = dataProximos.matches.map((m: any) => mapearPartido(m, "PROXIMO"));
-        const jugados = dataJugados.matches.reverse().map((m: any) => mapearPartido(m, "JUGADO"));
+        const proximos = allScheduled.slice(0, 5).map((m: any) => mapearPartido(m, "PROXIMO"));
+        const jugados = allFinished.slice(-10).reverse().map((m: any) => mapearPartido(m, "JUGADO"));
         const estadisticas: EstadisticasTemporada = {
-          jugados: matches.length,
+          jugados: allFinished.length,
           ganados,
           empatados,
           perdidos,
