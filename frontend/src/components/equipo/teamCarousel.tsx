@@ -53,7 +53,7 @@ export function TeamCarousel({ players }: Props) {
 
         {/* EMBLA VIEWPORT */}
         <div className="overflow-hidden">
-          <div ref={emblaRef} className="overflow-hidden">
+          <div ref={emblaRef} className="overflow-hidden pt-3">
             <div className="flex gap-4 px-6">
               {players.map((p) => (
                 <div className="flex-[0_0_auto]">

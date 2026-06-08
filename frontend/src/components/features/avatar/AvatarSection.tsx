@@ -28,7 +28,6 @@ function normalize(value?: string) {
 
 function getPaletteColors(colors: any): string[] {
   if (Array.isArray(colors)) return colors;
-
   if (typeof colors === "string") {
     try {
       const parsed = JSON.parse(colors);
@@ -37,16 +36,13 @@ function getPaletteColors(colors: any): string[] {
       return [];
     }
   }
-
   return [];
 }
 
 function sameCategory(a?: string, b?: string) {
   const x = normalize(a);
   const y = normalize(b);
-
   if (x === y) return true;
-
   const aliases: Record<string, string[]> = {
     cabeza: ["cabeza", "head", "cara", "face"],
     cabello: ["cabello", "hair", "pelo", "cejas", "barba"],
@@ -56,99 +52,54 @@ function sameCategory(a?: string, b?: string) {
     sombrero: ["sombrero", "hat"],
     zapatos: ["zapatos", "shoes"],
   };
-
   return Object.values(aliases).some(
     (group) => group.includes(x) && group.includes(y)
   );
 }
 
 function getColorCategory(categoryId: string) {
-  const category = normalize(categoryId);
-
-  if (
-    category === "cabello" ||
-    category === "cejas" ||
-    category === "barba" ||
-    category === "hair" ||
-    category === "eyebrow" ||
-    category === "eyebrows" ||
-    category === "facialhair"
-  ) {
-    return "Cabello";
-  }
-
-  if (category === "nariz" || category === "nose") {
-    return "Cabeza";
-  }
-
-  if (category === "pantalon" || category === "bottom") {
-    return "Pantalón";
-  }
-
-  if (category === "playera" || category === "top") {
-    return "Playera";
-  }
-
-  if (category === "lentes" || category === "glasses") {
-    return "Lentes";
-  }
-
-  if (category === "sombrero" || category === "hat") {
-    return "Sombrero";
-  }
-
-  if (category === "zapatos" || category === "shoes") {
-    return "Zapatos";
-  }
-
+  const c = normalize(categoryId);
+  if (["cabello","cejas","barba","hair","eyebrow","eyebrows","facialhair"].includes(c)) return "Cabello";
+  if (["nariz","nose"].includes(c)) return "Cabeza";
+  if (["pantalon","bottom"].includes(c)) return "Pantalón";
+  if (["playera","top"].includes(c)) return "Playera";
+  if (["lentes","glasses"].includes(c)) return "Lentes";
+  if (["sombrero","hat"].includes(c)) return "Sombrero";
+  if (["zapatos","shoes"].includes(c)) return "Zapatos";
   return categoryId;
 }
 
 function buildInitialAssets(categories: AvatarCategory[]) {
   const initialAssets: Record<string, AvatarAsset> = {};
-
   categories.forEach((cat) => {
     if (cat.assets.length > 0 && !cat.removable && !cat.removible) {
       initialAssets[cat.id] = cat.assets[0];
     }
   });
-
   return initialAssets;
 }
 
 function buildInitialColors(palettes: any[]) {
   const initialColors: Record<string, string> = {};
-
   palettes.forEach((palette: any) => {
     const colors = getPaletteColors(palette?.colores);
-
     if (palette?.categoria && colors.length > 0) {
       initialColors[palette.categoria] = colors[0];
     }
   });
-
   return initialColors;
 }
 
 function getRandomColorForCategory(categoryId: string, palettes: any[]) {
   const colorCategory = getColorCategory(categoryId);
-
-  const palette = palettes.find((p) => {
-    return (
-      sameCategory(p?.categoria, colorCategory) ||
-      sameCategory(p?.nombre, colorCategory)
-    );
-  });
-
+  const palette = palettes.find((p) =>
+    sameCategory(p?.categoria, colorCategory) || sameCategory(p?.nombre, colorCategory)
+  );
   const colors = getPaletteColors(palette?.colores);
-
   if (colors.length === 0) return null;
-
-  const randomColorIndex = Math.floor(Math.random() * colors.length);
-
   return {
     key: palette?.categoria || colorCategory,
-    color: colors[randomColorIndex],
+    color: colors[Math.floor(Math.random() * colors.length)],
   };
 }
 
@@ -160,204 +111,143 @@ export function AvatarSection() {
   const [palettes, setPalettes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [toast, setToast] = useState<ToastType | null>(null);
 
-  const showToast = (newToast: ToastType) => {
-    setToast(newToast);
-
-    setTimeout(() => {
-      setToast(null);
-    }, 3000);
+  const showToast = (t: ToastType) => {
+    setToast(t);
+    setTimeout(() => setToast(null), 3000);
   };
 
   useEffect(() => {
-    async function loadAvatar() {
+    async function load() {
       try {
         const data = await getAvatarCategories();
         const paletteData = await getAvatarPalettes();
         const savedAvatar = await getUserAvatar();
-
         setCategories(data);
         setPalettes(paletteData);
-
-        if (data.length > 0) {
-          setSelectedCategory(data[0].id);
-        }
-
-        const defaultAssets = buildInitialAssets(data);
-        const defaultColors = buildInitialColors(paletteData);
+        if (data.length > 0) setSelectedCategory(data[0].id);
         const savedState = buildSavedAvatarState(savedAvatar);
-
-        setSelectedAssets({
-          ...defaultAssets,
-          ...savedState.selectedAssets,
-        });
-
-        setSelectedColors({
-          ...defaultColors,
-          ...savedState.selectedColors,
-        });
-      } catch (error) {
-        console.error("Error cargando avatar:", error);
-
-        showToast({
-          type: "error",
-          title: "ERROR",
-          message: "No se pudo cargar el avatar",
-        });
+        setSelectedAssets({ ...buildInitialAssets(data), ...savedState.selectedAssets });
+        setSelectedColors({ ...buildInitialColors(paletteData), ...savedState.selectedColors });
+      } catch {
+        showToast({ type: "error", title: "ERROR", message: "No se pudo cargar el avatar" });
       } finally {
         setLoading(false);
       }
     }
-
-    loadAvatar();
+    load();
   }, []);
 
-  const handleSelectAsset = (categoryId: string, asset: AvatarAsset) => {
-    setSelectedAssets((prev) => ({
-      ...prev,
-      [categoryId]: asset,
-    }));
-  };
+  const handleSelectAsset = (categoryId: string, asset: AvatarAsset) =>
+    setSelectedAssets((prev) => ({ ...prev, [categoryId]: asset }));
 
-  const handleRemoveAsset = (categoryId: string) => {
+  const handleRemoveAsset = (categoryId: string) =>
     setSelectedAssets((prev) => {
       const copy = { ...prev };
       delete copy[categoryId];
       return copy;
     });
-  };
 
-  const handleSelectColor = (categoryId: string, color: string) => {
-    setSelectedColors((prev) => ({
-      ...prev,
-      [categoryId]: color,
-    }));
-  };
+  const handleSelectColor = (categoryId: string, color: string) =>
+    setSelectedColors((prev) => ({ ...prev, [categoryId]: color }));
 
   const handleRandomize = () => {
-    const randomAssets: Record<string, AvatarAsset> = {};
-    const randomColors: Record<string, string> = {};
-
+    const assets: Record<string, AvatarAsset> = {};
+    const colors: Record<string, string> = {};
     categories.forEach((cat) => {
       if (cat.assets.length > 0) {
-        const shouldRemove = (cat.removable || cat.removible) && Math.random() < 0.35;
-
-        if (!shouldRemove) {
-          const randomIndex = Math.floor(Math.random() * cat.assets.length);
-          randomAssets[cat.id] = cat.assets[randomIndex];
-        }
+        const skip = (cat.removable || cat.removible) && Math.random() < 0.35;
+        if (!skip) assets[cat.id] = cat.assets[Math.floor(Math.random() * cat.assets.length)];
       }
-
-      const randomColor = getRandomColorForCategory(cat.id, palettes);
-
-      if (randomColor) {
-        randomColors[randomColor.key] = randomColor.color;
-      }
+      const rc = getRandomColorForCategory(cat.id, palettes);
+      if (rc) colors[rc.key] = rc.color;
     });
-
-    setSelectedAssets(randomAssets);
-    setSelectedColors(randomColors);
+    setSelectedAssets(assets);
+    setSelectedColors(colors);
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
-
       await saveFullUserAvatar(selectedAssets, selectedColors);
-
-      showToast({
-        type: "success",
-        title: "¡ÉXITO!",
-        message: "Avatar guardado correctamente",
-      });
-    } catch (error) {
-      console.error("Error guardando avatar:", error);
-
-      showToast({
-        type: "error",
-        title: "ERROR",
-        message: "No se pudo guardar el avatar",
-      });
+      showToast({ type: "success", title: "¡ÉXITO!", message: "Avatar guardado correctamente" });
+    } catch {
+      showToast({ type: "error", title: "ERROR", message: "No se pudo guardar el avatar" });
     } finally {
       setSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center text-muted-foreground font-black">
+        Cargando avatar...
+      </div>
+    );
+  }
+
   return (
-    <section className="relative mt-12 mb-12 h-[760px] overflow-hidden rounded-2xl bg-[#120f2b] shadow-2xl border-4 border-black">
+    <div className="h-full flex gap-4 relative">
+      {/* Toast */}
       {toast && (
-        <div className="absolute right-10 top-8 z-[999] flex w-[470px] items-center gap-5 rounded-xl border-2 border-vcf-orange bg-white px-6 py-5 shadow-2xl">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-vcf-orange text-white">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-2xl font-black">
-              {toast.type === "success" ? "✓" : "!"}
-            </span>
+        <div className="absolute right-0 top-0 z-[999] flex items-center gap-3 rounded-xl border border-vcf-orange bg-card px-4 py-3 shadow-2xl max-w-xs">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-vcf-orange text-white font-black text-sm">
+            {toast.type === "success" ? "✓" : "!"}
           </div>
-
-          <div className="flex-1">
-            <p className="text-2xl font-black text-vcf-orange leading-none">
-              {toast.title}
-            </p>
-            <p className="mt-2 text-base font-black text-black">
-              {toast.message}
-            </p>
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-vcf-orange text-xs">{toast.title}</p>
+            <p className="text-xs text-foreground mt-0.5">{toast.message}</p>
           </div>
-
           <button
             type="button"
             onClick={() => setToast(null)}
-            className="text-4xl font-light leading-none text-gray-500 hover:text-black"
+            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer leading-none"
           >
             ×
           </button>
         </div>
       )}
 
-      {loading ? (
-        <div className="flex h-full items-center justify-center text-white font-black">
-          Cargando avatar...
+      {/* ── Canvas card ── */}
+      <div className="relative flex-1 rounded-2xl overflow-hidden bg-[#120f2b] border border-white/10 shadow-xl">
+        <AvatarCanvas selectedAssets={selectedAssets} selectedColors={selectedColors} />
+
+        {/* Action buttons overlaid top-right */}
+        <div className="absolute top-3 right-3 z-10 flex gap-2">
+          <button
+            type="button"
+            onClick={handleRandomize}
+            disabled={saving}
+            className="rounded-lg bg-black/50 backdrop-blur-sm border border-white/20 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer hover:bg-black/70"
+          >
+            ↻ Aleatorio
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-lg bg-vcf-orange px-4 py-1.5 text-xs font-black text-white shadow-md shadow-vcf-orange/30 disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer"
+          >
+            {saving ? "Guardando..." : "Guardar"}
+          </button>
         </div>
-      ) : (
-        <>
-          <AvatarCanvas
-            selectedAssets={selectedAssets}
-            selectedColors={selectedColors}
-          />
+      </div>
 
-          <div className="absolute right-10 top-10 z-30 flex gap-3">
-            <button
-              type="button"
-              onClick={handleRandomize}
-              disabled={saving}
-              className="rounded-xl bg-white px-5 py-4 font-black text-vcf-orange shadow-lg disabled:opacity-60"
-            >
-              ↻
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="rounded-xl bg-vcf-orange px-7 py-4 font-black text-white shadow-lg disabled:opacity-60"
-            >
-              {saving ? "Guardando..." : "Guardar"}
-            </button>
-          </div>
-
-          <AvatarControls
-            categories={categories}
-            selectedCategory={selectedCategory}
-            selectedAssets={selectedAssets}
-            selectedColors={selectedColors}
-            palettes={palettes}
-            onSelectCategory={setSelectedCategory}
-            onSelectAsset={handleSelectAsset}
-            onRemoveAsset={handleRemoveAsset}
-            onSelectColor={handleSelectColor}
-          />
-        </>
-      )}
-    </section>
+      {/* ── Controls card ── */}
+      <div className="w-[360px] flex-shrink-0 rounded-2xl overflow-hidden bg-card border border-border shadow-xl">
+        <AvatarControls
+          categories={categories}
+          selectedCategory={selectedCategory}
+          selectedAssets={selectedAssets}
+          selectedColors={selectedColors}
+          palettes={palettes}
+          onSelectCategory={setSelectedCategory}
+          onSelectAsset={handleSelectAsset}
+          onRemoveAsset={handleRemoveAsset}
+          onSelectColor={handleSelectColor}
+        />
+      </div>
+    </div>
   );
 }

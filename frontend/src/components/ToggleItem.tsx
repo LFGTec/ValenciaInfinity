@@ -15,7 +15,7 @@ export function ToggleItem({ label, desc, value, onToggle }: ToggleItemProps) {
 
       <button
         onClick={onToggle}
-        className={`w-14 h-8 rounded-full transition-colors shadow-inner ${
+        className={`w-14 h-8 rounded-full transition-colors shadow-inner cursor-pointer ${
           value ? "bg-green-600" : "bg-border"
         }`}
       >

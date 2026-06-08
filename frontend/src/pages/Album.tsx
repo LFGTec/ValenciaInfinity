@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowRight, Gift, Shuffle } from "lucide-react";
 import { CardAlbum } from "../components/features/CardAlbum";
-import { AlbumProgressBar } from "@/components/AlbumProgress";
 
 export default function Album() {
   const { userId } = useParams();
@@ -106,7 +105,9 @@ export default function Album() {
                     </div>
                     <div>
                       <p className="font-black text-foreground">{item.title}</p>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.desc}
+                      </p>
                     </div>
                   </div>
                 ))}
