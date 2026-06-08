@@ -9,7 +9,7 @@ export function Juego() {
   
   const { user, isAuthenticated } = useAuth();
 
-  const unityGameBaseUrl = "https://sprightly-pavlova-a84060.netlify.app";
+  const unityGameBaseUrl = "https://jovial-crumble-b3ee62.netlify.app";
 
   const unityGameUrl = user?.id
     ? `${unityGameBaseUrl}?userId=${encodeURIComponent(user.id)}`
