@@ -44,15 +44,15 @@ export function MatchesPage() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-5xl font-black mb-3 text-foreground">PARTIDOS</h1>
-        <p className="text-base text-muted-foreground">
+        <h1 className="text-3xl md:text-5xl font-black mb-3 text-foreground">PARTIDOS</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Calendario completo de la temporada 2025/26
         </p>
       </div>
 
       {/* Filtros + botón calendario */}
       <div className="flex flex-wrap items-center gap-3 mb-8">
-        <div className="flex gap-3 overflow-x-auto pb-1 flex-1">
+        <div className="flex gap-3 overflow-x-auto py-2 flex-1">
           {FILTROS.map((filtro) => (
             <button
               key={filtro}
@@ -60,7 +60,7 @@ export function MatchesPage() {
                 setFiltroActivo(filtro);
                 setJugadosVisibles(5);
               }}
-              className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all text-base cursor-pointer ${
+              className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all text-base cursor-pointer hover:-translate-y-1 ${
                 filtroActivo === filtro
                   ? "bg-vcf-orange text-white"
                   : "bg-card border-2 border-border hover:border-vcf-orange text-foreground"
@@ -72,14 +72,14 @@ export function MatchesPage() {
         </div>
         <button
           onClick={() => navegar("/estadisticas")}
-          className="flex items-center gap-2 px-5 py-3 bg-card border-2 border-black hover:border-vcf-orange text-foreground hover:text-vcf-orange rounded-xl font-black transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base cursor-pointer"
+          className="flex items-center gap-2 px-4 md:px-5 py-3 bg-card border-2 border-black hover:border-vcf-orange text-foreground hover:text-vcf-orange rounded-xl font-black transition-all shadow-lg hover:-translate-y-1 whitespace-nowrap text-sm md:text-base cursor-pointer"
         >
           <BarChart2 size={20} />
           ESTADÍSTICAS
         </button>
         <button
           onClick={() => setMostrarCalendario(true)}
-          className="flex items-center gap-2 px-5 py-3 bg-white text-black border-2 border-black rounded-xl font-black hover:bg-black hover:text-white transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base cursor-pointer"
+          className="flex items-center gap-2 px-4 md:px-5 py-3 bg-white text-black border-2 border-black rounded-xl font-black hover:bg-black hover:text-white transition-all shadow-lg hover:-translate-y-1 whitespace-nowrap text-sm md:text-base cursor-pointer"
         >
           <Calendar size={20} />
           VER CALENDARIO
@@ -94,9 +94,9 @@ export function MatchesPage() {
           </span>
         </div>
       ) : partidoDestacado ? (
-        <div className="bg-white text-black rounded-2xl p-8 mb-8 shadow-2xl border-2 border-vcf-orange">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div className="flex items-center gap-8">
+        <div className="bg-white text-black rounded-2xl p-5 md:p-8 mb-8 shadow-2xl border-2 border-vcf-orange">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full sm:w-auto">
               <div className="text-center">
                 <div className="text-xs font-bold text-vcf-orange tracking-widest mb-1">
                   PRÓXIMO · {partidoDestacado.competicion}
@@ -112,26 +112,26 @@ export function MatchesPage() {
                   {partidoDestacado.hora}
                 </div>
               </div>
-              <div className="w-px h-16 bg-black/20" />
-              <div className="flex items-center gap-6">
+              <div className="hidden sm:block w-px h-16 bg-black/20" />
+              <div className="flex items-center gap-4 md:gap-6">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full mb-2 mx-auto flex items-center justify-center shadow-xl p-2 border-2 border-vcf-orange">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full mb-2 mx-auto flex items-center justify-center shadow-xl p-2 border-2 border-vcf-orange">
                     <img
                       src={vcfShield}
                       alt="Valencia CF"
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <div className="font-black text-base text-black">
+                  <div className="font-black text-sm md:text-base text-black">
                     VALENCIA CF
                   </div>
                   <div className="text-xs text-black/60">
                     {partidoDestacado.casa ? "Local" : "Visitante"}
                   </div>
                 </div>
-                <div className="text-3xl font-black text-vcf-orange">VS</div>
+                <div className="text-2xl md:text-3xl font-black text-vcf-orange">VS</div>
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full mb-2 mx-auto flex items-center justify-center shadow-xl border-2 border-gray-300 overflow-hidden">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full mb-2 mx-auto flex items-center justify-center shadow-xl border-2 border-gray-300 overflow-hidden">
                     {partidoDestacado.escudoRival ? (
                       <img
                         src={partidoDestacado.escudoRival}
@@ -145,7 +145,7 @@ export function MatchesPage() {
                       </span>
                     )}
                   </div>
-                  <div className="font-black text-base text-black">
+                  <div className="font-black text-sm md:text-base text-black">
                     {partidoDestacado.rival.toUpperCase()}
                   </div>
                   <div className="text-xs text-black/60">
@@ -154,16 +154,16 @@ export function MatchesPage() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-3 min-w-[180px]">
+            <div className="flex flex-row sm:flex-col gap-3 w-full sm:w-auto sm:min-w-[180px]">
               <button
                 onClick={() => navegar("/match-rooms")}
-                className="px-6 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-all shadow-md hover:scale-105 flex items-center gap-2 text-base"
+                className="flex-1 sm:flex-initial px-4 md:px-6 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-all shadow-md hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2 text-sm md:text-base"
               >
                 <Video size={18} /> MATCH ROOM
               </button>
               <button
                 onClick={() => navegar("/fanzone")}
-                className="px-6 py-3 bg-white border-2 border-vcf-orange text-vcf-orange rounded-lg font-black transition-all shadow-md hover:shadow-lg hover:scale-105 text-base"
+                className="flex-1 sm:flex-initial px-4 md:px-6 py-3 bg-white border-2 border-vcf-orange text-vcf-orange rounded-lg font-black transition-all shadow-md hover:-translate-y-1 cursor-pointer text-sm md:text-base text-center"
               >
                 HACER PREDICCIÓN
               </button>
@@ -175,7 +175,7 @@ export function MatchesPage() {
       {/* Próximos partidos */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-3xl font-black text-foreground">
+          <h2 className="text-2xl md:text-3xl font-black text-foreground">
             PRÓXIMOS <span className="text-vcf-orange">PARTIDOS</span>
           </h2>
           <span className="text-muted-foreground font-bold text-sm">
@@ -193,7 +193,7 @@ export function MatchesPage() {
       {/* Últimos resultados */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-3xl font-black text-foreground">
+          <h2 className="text-2xl md:text-3xl font-black text-foreground">
             ÚLTIMOS <span className="text-vcf-orange">RESULTADOS</span>
           </h2>
           <span className="text-muted-foreground font-bold text-sm">

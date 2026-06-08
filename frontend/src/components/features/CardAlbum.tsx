@@ -330,7 +330,7 @@ export function CardAlbum({ userId }: Props) {
 
           {/* Category filter tabs — always visible */}
           <div className="mb-12">
-            <div className="flex overflow-x-auto gap-3 pb-2">
+            <div className="flex overflow-x-auto gap-3 py-2">
               {[
                 { id: "todas", label: "TODAS", count: cards.length },
                 {
@@ -362,7 +362,7 @@ export function CardAlbum({ userId }: Props) {
                 <button
                   key={category.id}
                   onClick={() => handleCategoryChange(category.id)}
-                  className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all cursor-pointer hover:-translate-y-1 ${
                     selectedCategory === category.id
                       ? "bg-vcf-orange text-white shadow-lg"
                       : "bg-white dark:bg-card border-2 border-gray-200 dark:border-border text-foreground hover:border-vcf-orange"

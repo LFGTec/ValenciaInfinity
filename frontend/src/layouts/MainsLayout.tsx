@@ -67,6 +67,7 @@ export default function MainLayout() {
                     tracking-wide
                     transition-all
                     whitespace-nowrap
+                    hover:-translate-y-1
                     ${
                       isActive
                         ? "text-vcf-orange border-b-4 border-vcf-orange"
@@ -87,7 +88,7 @@ export default function MainLayout() {
                   {(user?.current_streak ?? 0) > 0 && (
                     <Link
                       to="/daily-rewards"
-                      className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
+                      className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 hover:border-orange-500/50 transition-all hover:-translate-y-1 cursor-pointer"
                     >
                       <Flame
                         size={16}
@@ -126,7 +127,9 @@ export default function MainLayout() {
                         border border-orange-500/30
                         rounded-lg
                         hover:bg-orange-500/20
-                        transition-colors
+                        transition-all
+                        hover:-translate-y-1
+                        cursor-pointer
                       "
                     >
                       <Flame
@@ -167,7 +170,7 @@ export default function MainLayout() {
                   <div className="relative">
                     <button
                       onClick={() => setShowDropdown(!showDropdown)}
-                      className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-all hover:-translate-y-1 cursor-pointer"
                     >
                       {(user.avatar_url ?? user.user_metadata?.avatar_url) ? (
                         <img
@@ -222,7 +225,7 @@ export default function MainLayout() {
                           <button
                             onClick={handleLogout}
                             disabled={isSigningOut}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
                           >
                             <LogOut size={16} />
                             {isSigningOut ? "Saliendo..." : "Cerrar Sesión"}
@@ -279,11 +282,11 @@ export default function MainLayout() {
                 to={item.path}
                 onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-6 py-4 text-sm font-bold border-l-4 transition-colors
+                  `px-6 py-4 text-sm font-bold border-l-4 transition-all hover:-translate-y-1
                   ${
                     isActive
                       ? "border-vcf-orange text-vcf-orange bg-white/5"
-                      : "border-transparent text-white hover:bg-white/5"
+                      : "border-transparent text-white hover:text-vcf-orange hover:bg-white/5"
                   }`
                 }
               >

@@ -85,7 +85,7 @@ export function Friends() {
             <div className="flex gap-2 mb-8 border-b-2 border-border">
                 <button
                 onClick={() => setActiveTab("friends")}
-                className={`px-6 py-3 font-black transition-all ${
+                className={`px-6 py-3 font-black transition-all cursor-pointer ${
                     activeTab === "friends"
                     ? "border-b-4 border-vcf-orange text-vcf-orange"
                     : "text-muted-foreground hover:text-foreground"
@@ -95,7 +95,7 @@ export function Friends() {
                 </button>
                 <button
                 onClick={() => setActiveTab("requests")}
-                className={`px-6 py-3 font-black transition-all relative ${
+                className={`px-6 py-3 font-black transition-all relative cursor-pointer ${
                     activeTab === "requests"
                     ? "border-b-4 border-vcf-orange text-vcf-orange"
                     : "text-muted-foreground hover:text-foreground"
@@ -110,7 +110,7 @@ export function Friends() {
                 </button>
                 <button
                 onClick={() => setActiveTab("search")}
-                className={`px-6 py-3 font-black transition-all ${
+                className={`px-6 py-3 font-black transition-all cursor-pointer ${
                     activeTab === "search"
                     ? "border-b-4 border-vcf-orange text-vcf-orange"
                     : "text-muted-foreground hover:text-foreground"
@@ -134,7 +134,7 @@ export function Friends() {
                     </p>
                     <button
                         onClick={() => setActiveTab("search")}
-                        className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all"
+                        className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all hover:-translate-y-1 cursor-pointer"
                     >
                         BUSCAR USUARIOS
                     </button>
@@ -211,8 +211,10 @@ export function Friends() {
                                     hover:bg-vcf-orange
                                     hover:text-white
                                     hover:shadow-md
+                                    hover:-translate-y-1
                                     transition-all duration-200
                                     text-sm
+                                    cursor-pointer
                                 "
                             >
                             Mostrar PIN
@@ -239,9 +241,11 @@ export function Friends() {
                             hover:bg-vcf-orange
                             hover:text-white
                             hover:shadow-md
+                            hover:-translate-y-1
                             transition-all duration-200
                             flex items-center justify-center gap-2
                             text-sm
+                            cursor-pointer
                             ">
                                 <BookOpen size={16} />
                                 Ver Álbum 
@@ -260,6 +264,7 @@ export function Friends() {
                                 hover:bg-vcf-orange
                                 hover:text-white
                                 hover:shadow-md
+                                hover:-translate-y-1
                                 transition-all
                                 duration-200
                                 flex
@@ -267,6 +272,7 @@ export function Friends() {
                                 justify-center
                                 gap-2
                                 text-sm
+                                cursor-pointer
                             ">
                                 <Video size={16} />
                                 Match Room
@@ -274,7 +280,7 @@ export function Friends() {
                             </div>
                             <button
                             onClick={() => removeFriend(friend.friendship_id!)}
-                            className="w-full px-3 py-2 bg-muted text-muted-foreground rounded-lg font-bold hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2 text-sm"
+                            className="w-full px-3 py-2 bg-muted text-muted-foreground rounded-lg font-bold hover:bg-red-500 hover:text-white transition-all hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2 text-sm"
                             >
                             <X size={16} />
                             Eliminar Amigo
@@ -301,7 +307,9 @@ export function Friends() {
                     right-4
                     text-muted-foreground
                     hover:text-white
-                    transition-colors
+                    hover:-translate-y-1
+                    transition-all
+                    cursor-pointer
                     "
                 >
                     <X size={22} />
@@ -364,8 +372,9 @@ export function Friends() {
                         bg-vcf-orange
                         text-white
                         font-bold
-                        hover:scale-105
+                        hover:-translate-y-1
                         transition-all
+                        cursor-pointer
                     "
                     >
                     COPIAR PIN
@@ -455,14 +464,14 @@ export function Friends() {
                             <div className="flex gap-2">
                             <button
                                 onClick={() => acceptRequest(user.friendship_id!)}
-                                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <Check size={18} />
                                 ACEPTAR
                             </button>
                             <button
                                 onClick={() => rejectRequest(user.friendship_id!)}
-                                className="flex-1 px-4 py-3 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-3 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <X size={18} />
                                 RECHAZAR
@@ -593,7 +602,7 @@ export function Friends() {
                         ) : (
                             <button
                                 onClick={() => sendRequest(user.id)}
-                                className="w-full px-4 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all flex items-center justify-center gap-2"
+                                className="w-full px-4 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <UserPlus size={18} />
                                 AGREGAR AMIGO

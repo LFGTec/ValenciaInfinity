@@ -12,7 +12,7 @@ export function PlayerCard({ player }: Props) {
 
   return (
     <div
-      className="cursor-pointer flex-shrink-0"
+      className="cursor-pointer flex-shrink-0 transition-transform duration-300 hover:-translate-y-2"
       style={{ perspective: "1000px", width: "260px", height: "360px" }}
       onClick={() => setFlipped(!flipped)}
     >
