@@ -32,17 +32,17 @@ type IconProps = {
   size?: number;
   className?: string;
 };
-
+// que propiedades reciven los iconos 
 type FeatureUsageView = FeatureUsageStat & {
   icon: React.ComponentType<IconProps>;
   color: string;
 };
-
+//tomar los iconos y agregales un icono y un color 
 type ComparisonStatView = ComparisonStat & {
   icon: React.ComponentType<IconProps>;
   color: string;
 };
-
+// el servicio trae el valor y el porcentaje de cambio. el componente le agrega icono y color 
 const featureConfig: Record<
   FeatureUsageStat["key"],
   {
@@ -75,7 +75,7 @@ const featureConfig: Record<
     color: "bg-red-500",
   },
 };
-
+// este asigna un icono y color a cada funcionalidad 
 const comparisonConfig: Record<
   ComparisonStat["key"],
   {
@@ -92,7 +92,7 @@ const comparisonConfig: Record<
     color: "bg-green-600",
   },
 };
-
+//asigna icono y color a cartas itercambiadas y visitas a macth rooms 
 export function AdminStatistics() {
   const [timeRange, setTimeRange] = useState<TimeRange>("week");
   const [loading, setLoading] = useState(true);
@@ -103,7 +103,7 @@ export function AdminStatistics() {
     averageScore: 0,
     completionRate: 0,
   });
-
+// trae datos de usaurios activos tivisa jugadas promedio de puntuacion tasa de finalizacion
   const [topUsers, setTopUsers] = useState<ActiveUserStat[]>([]);
   const [triviaStats, setTriviaStats] = useState<PopularTriviaStat[]>([]);
   const [featureUsage, setFeatureUsage] = useState<FeatureUsageView[]>([]);
