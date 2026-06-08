@@ -275,7 +275,7 @@ export function TriviasQuizzes() {
           <div className="mb-6">
             <button
               onClick={resetQuiz}
-              className="px-4 py-2 bg-black text-white border-2 border-black rounded-lg hover:bg-vcf-orange hover:border-vcf-orange transition-colors font-bold"
+              className="px-4 py-2 bg-black text-white border-2 border-black rounded-lg hover:-translate-y-1 transition-all font-bold cursor-pointer"
             >
               ← VOLVER A TRIVIAS
             </button>
@@ -323,7 +323,7 @@ export function TriviasQuizzes() {
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
                   disabled={selectedAnswer !== null}
-                  className={`w-full p-6 text-left rounded-lg border-2 font-bold transition-all ${selectedAnswer === null
+                  className={`w-full p-6 text-left rounded-lg border-2 font-bold transition-all cursor-pointer ${selectedAnswer === null
                     ? "border-border bg-card hover:border-vcf-orange hover:bg-muted text-foreground"
                     : selectedAnswer === index
                       ? index === currentQ.correct_answer
@@ -354,7 +354,7 @@ export function TriviasQuizzes() {
 
           <button
             onClick={resetQuiz}
-            className="w-full py-4 bg-red-600 text-white rounded-lg font-black hover:bg-red-700 transition-colors shadow-lg"
+            className="w-full py-4 bg-red-600 text-white rounded-lg font-black hover:bg-red-700 hover:-translate-y-1 transition-all shadow-lg cursor-pointer"
           >
             ABANDONAR QUIZ
           </button>
@@ -496,7 +496,7 @@ export function TriviasQuizzes() {
                   ) : (
                     <button
                       onClick={() => handleStartTrivia(trivia)}
-                      className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base w-full"
+                      className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base w-full cursor-pointer"
                     >
                       COMENZAR QUIZ
                     </button>

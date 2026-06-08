@@ -511,15 +511,7 @@ Compra, vende e intercambia cartas con otros fans
                 ? setActiveTab("my_offers")
                 : setTradeFilter(stat.id as "all" | "pending" | "accepted")
             }
-            className={`bg-card border-2 rounded-lg p-4 shadow-md transition-all text-left ${
-              stat.id === "offers"
-                ? activeTab === "my_offers"
-                  ? `${stat.borderColor} bg-opacity-10`
-                  : "border-border hover:border-vcf-orange"
-                : tradeFilter === stat.id
-                ? `${stat.borderColor} bg-opacity-10`
-                : "border-border hover:border-vcf-orange"
-            }`}
+            className="bg-card border-2 border-border rounded-lg p-4 shadow-md text-left"
           >
             <div className="flex items-center justify-between mb-2">
               <div
@@ -549,7 +541,7 @@ Compra, vende e intercambia cartas con otros fans
           <button
             key={tab.id}
                   onClick={() => setActiveTab(tab.id as "trades" | "propose" | "marketplace" | "my_offers")}
-            className={`px-6 py-3 font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+            className={`px-6 py-3 font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === tab.id
                 ? "border-b-4 border-vcf-orange text-vcf-orange"
                 : "text-muted-foreground hover:text-foreground"
@@ -587,7 +579,7 @@ Compra, vende e intercambia cartas con otros fans
               </p>
               <button
                 onClick={() => setActiveTab("propose")}
-                className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all shadow-lg hover:shadow-xl"
+                className="px-6 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] hover:-translate-y-1 transition-all shadow-lg hover:shadow-xl cursor-pointer"
               >
                 Proponer Intercambio
               </button>
@@ -748,7 +740,7 @@ Compra, vende e intercambia cartas con otros fans
                           onClick={() =>
                             handleAcceptTrade(trade.id)
                           }
-                          className="flex-1 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                          className="flex-1 py-3 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] hover:-translate-y-1 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl cursor-pointer"
                         >
                           <Check size={20} />
                           ACEPTAR INTERCAMBIO
@@ -758,7 +750,7 @@ Compra, vende e intercambia cartas con otros fans
                           onClick={() =>
                             handleRejectTrade(trade.id)
                           }
-                          className="flex-1 py-3 bg-black text-white rounded-lg font-bold hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                          className="flex-1 py-3 bg-black text-white rounded-lg font-bold hover:bg-black/80 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl cursor-pointer"
                         >
                           <X size={20} />
                           RECHAZAR
@@ -829,7 +821,7 @@ Compra, vende e intercambia cartas con otros fans
                         setSearchTerm("");
                         setReceiverCards([]);
                       }}
-                      className="p-1 hover:bg-red-500/20 rounded transition-colors"
+                      className="p-1 hover:bg-red-500/20 rounded transition-colors cursor-pointer"
                     >
                       <X size={20} className="text-red-500" />
                     </button>
@@ -938,7 +930,7 @@ Compra, vende e intercambia cartas con otros fans
                             </div>
                             <button
                               onClick={() => removeCardFromTrade(item.card_id)}
-                              className="p-2 hover:bg-red-500/20 rounded transition-colors self-start"
+                              className="p-2 hover:bg-red-500/20 rounded transition-colors self-start cursor-pointer"
                             >
                               <Trash2 size={16} className="text-red-500" />
                             </button>
@@ -951,7 +943,7 @@ Compra, vende e intercambia cartas con otros fans
                   {/* Available Cards to Add */}
                   <button
                     onClick={() => setSelectedCardTab("offered")}
-                    className={`w-full mb-2 py-2 rounded-lg font-bold transition-colors ${
+                    className={`w-full mb-2 py-2 rounded-lg font-bold transition-all hover:-translate-y-1 cursor-pointer ${
                       selectedCardTab === "offered"
                         ? "bg-vcf-orange text-white"
                         : "bg-muted text-foreground hover:bg-muted/80"
@@ -1026,7 +1018,7 @@ Compra, vende e intercambia cartas con otros fans
                                       );
                                       addCardToTrade(card.id, qty);
                                     }}
-                                    className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors"
+                                    className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors cursor-pointer"
                                   >
                                     <Plus size={16} />
                                   </button>
@@ -1071,7 +1063,7 @@ Compra, vende e intercambia cartas con otros fans
                             </div>
                             <button
                               onClick={() => removeCardFromTrade(item.card_id)}
-                              className="p-2 hover:bg-red-500/20 rounded transition-colors"
+                              className="p-2 hover:bg-red-500/20 rounded transition-colors cursor-pointer"
                             >
                               <Trash2 size={16} className="text-red-500" />
                             </button>
@@ -1084,7 +1076,7 @@ Compra, vende e intercambia cartas con otros fans
                   {/* Available Cards to Add */}
                   <button
                     onClick={() => setSelectedCardTab("wanted")}
-                    className={`w-full mb-2 py-2 rounded-lg font-bold transition-colors ${
+                    className={`w-full mb-2 py-2 rounded-lg font-bold transition-all hover:-translate-y-1 cursor-pointer ${
                       selectedCardTab === "wanted"
                         ? "bg-vcf-orange text-white"
                         : "bg-muted text-foreground hover:bg-muted/80"
@@ -1161,7 +1153,7 @@ Compra, vende e intercambia cartas con otros fans
                                     );
                                     addCardToTrade(card.id, qty);
                                   }}
-                                  className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors"
+                                  className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors cursor-pointer"
                                 >
                                   <Plus size={16} />
                                 </button>
@@ -1179,7 +1171,7 @@ Compra, vende e intercambia cartas con otros fans
               <button
                 onClick={handleProposeTrade}
                 disabled={creatingTrade}
-                className="w-full py-4 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2"
               >
                   <UsersRound size={20} />
                 {creatingTrade ? "Proponiendo..." : "PROPONER INTERCAMBIO"}
@@ -1341,7 +1333,7 @@ Compra, vende e intercambia cartas con otros fans
                           }
                         }}
                         disabled={acceptingOffer === listing.id}
-                        className="w-full py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2"
                       >
                         <Check size={16} />
                         {acceptingOffer === listing.id ? "Aceptando..." : "ACEPTAR OFERTA"}
@@ -1374,7 +1366,7 @@ Compra, vende e intercambia cartas con otros fans
                   behavior: "smooth",
                 });
               }}
-              className="px-4 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all hover:-translate-y-1 cursor-pointer flex items-center gap-2"
             >
               <Plus size={18} />
               CREAR OFERTA
@@ -1452,7 +1444,7 @@ Compra, vende e intercambia cartas con otros fans
                       <button
                         type="button"
                         onClick={() => setMarketplaceSelectedTab("offering")}
-                        className={`px-4 py-2 rounded-lg font-bold transition-colors ${
+                        className={`px-4 py-2 rounded-lg font-bold transition-all hover:-translate-y-1 cursor-pointer ${
                           marketplaceSelectedTab === "offering"
                             ? "bg-vcf-orange text-white"
                             : "bg-muted text-foreground hover:bg-muted/80"
@@ -1522,7 +1514,7 @@ Compra, vende e intercambia cartas con otros fans
                               <button
                                 type="button"
                                 onClick={() => removeMarketplaceSelection("offering", item.card_id)}
-                                className="p-2 hover:bg-red-500/20 rounded transition-colors self-start"
+                                className="p-2 hover:bg-red-500/20 rounded transition-colors self-start cursor-pointer"
                               >
                                 <Trash2 size={16} className="text-red-500" />
                               </button>
@@ -1590,7 +1582,7 @@ Compra, vende e intercambia cartas con otros fans
                                       );
                                       updateMarketplaceSelection("offering", card.id, qty);
                                     }}
-                                    className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors"
+                                    className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors cursor-pointer"
                                   >
                                     <Plus size={16} />
                                   </button>
@@ -1621,7 +1613,7 @@ Compra, vende e intercambia cartas con otros fans
                       <button
                         type="button"
                         onClick={() => setMarketplaceSelectedTab("wanted")}
-                        className={`px-4 py-2 rounded-lg font-bold transition-colors ${
+                        className={`px-4 py-2 rounded-lg font-bold transition-all hover:-translate-y-1 cursor-pointer ${
                           marketplaceSelectedTab === "wanted"
                             ? "bg-vcf-orange text-white"
                             : "bg-muted text-foreground hover:bg-muted/80"
@@ -1691,7 +1683,7 @@ Compra, vende e intercambia cartas con otros fans
                               <button
                                 type="button"
                                 onClick={() => removeMarketplaceSelection("wanted", item.card_id)}
-                                className="p-2 hover:bg-red-500/20 rounded transition-colors self-start"
+                                className="p-2 hover:bg-red-500/20 rounded transition-colors self-start cursor-pointer"
                               >
                                 <Trash2 size={16} className="text-red-500" />
                               </button>
@@ -1755,7 +1747,7 @@ Compra, vende e intercambia cartas con otros fans
                                     );
                                     updateMarketplaceSelection("wanted", card.id, qty);
                                   }}
-                                  className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors"
+                                  className="p-1 bg-vcf-orange text-white rounded hover:bg-[#a86d12] transition-colors cursor-pointer"
                                 >
                                   <Plus size={16} />
                                 </button>
@@ -1838,7 +1830,7 @@ Compra, vende e intercambia cartas con otros fans
                   }
                 }}
                 disabled={creatingMarketplaceOffer}
-                className="w-full py-4 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#a86d12] transition-all disabled:opacity-50 hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2"
               >
                 <Plus size={20} />
                 {creatingMarketplaceOffer ? "Publicando..." : "PUBLICAR OFERTA"}
@@ -1884,7 +1876,7 @@ Compra, vende e intercambia cartas con otros fans
                             onClick={async () => {
                               setOfferToCancel({ id: offer.id, title: offer.title });
                             }}
-                            className="p-2 hover:bg-red-500/20 rounded transition-colors"
+                            className="p-2 hover:bg-red-500/20 rounded transition-colors cursor-pointer"
                           >
                             <Trash2 size={18} className="text-red-500" />
                           </button>
@@ -1942,7 +1934,7 @@ Compra, vende e intercambia cartas con otros fans
               <button
                 type="button"
                 onClick={() => setOfferToCancel(null)}
-                className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
                 aria-label="Cerrar"
               >
                 <X size={18} />
@@ -1963,14 +1955,14 @@ Compra, vende e intercambia cartas con otros fans
                     showFeedback("Error al cancelar la oferta", "error");
                   }
                 }}
-                className="flex-1 rounded-lg bg-vcf-orange px-4 py-3 font-bold text-white transition-colors hover:bg-[#a86d12]"
+                className="flex-1 rounded-lg bg-vcf-orange px-4 py-3 font-bold text-white transition-all hover:bg-[#a86d12] hover:-translate-y-1 cursor-pointer"
               >
                 CONTINUAR
               </button>
               <button
                 type="button"
                 onClick={() => setOfferToCancel(null)}
-                className="flex-1 rounded-lg border-2 border-border bg-muted px-4 py-3 font-bold text-foreground transition-colors hover:bg-muted/70"
+                className="flex-1 rounded-lg border-2 border-border bg-muted px-4 py-3 font-bold text-foreground transition-all hover:bg-muted/70 hover:-translate-y-1 cursor-pointer"
               >
                 CANCELAR
               </button>

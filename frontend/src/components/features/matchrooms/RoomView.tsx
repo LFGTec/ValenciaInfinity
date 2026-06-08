@@ -287,7 +287,7 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-xs font-bold transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-xs font-bold transition-colors cursor-pointer ${
                       desktopTab === tab.id
                         ? "bg-vcf-orange/10 text-vcf-orange border-b-2 border-vcf-orange"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50"

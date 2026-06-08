@@ -30,7 +30,7 @@ export function News() {
                     setSelectedCategory(cat as Categoria);
                     setVisibleCount(9);
                   }}
-                  className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all text-base ${
+                  className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all text-base cursor-pointer ${
                     selectedCategory === cat
                       ? "bg-vcf-orange text-white"
                       : "bg-card border-2 border-border hover:border-vcf-orange text-foreground"

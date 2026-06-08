@@ -165,10 +165,7 @@ export function AvatarSection() {
 
   const showToast = (newToast: ToastType) => {
     setToast(newToast);
-
-    setTimeout(() => {
-      setToast(null);
-    }, 3000);
+    setTimeout(() => setToast(null), 3000);
   };
 
   useEffect(() => {
@@ -189,23 +186,11 @@ export function AvatarSection() {
         const defaultColors = buildInitialColors(paletteData);
         const savedState = buildSavedAvatarState(savedAvatar);
 
-        setSelectedAssets({
-          ...defaultAssets,
-          ...savedState.selectedAssets,
-        });
-
-        setSelectedColors({
-          ...defaultColors,
-          ...savedState.selectedColors,
-        });
+        setSelectedAssets({ ...defaultAssets, ...savedState.selectedAssets });
+        setSelectedColors({ ...defaultColors, ...savedState.selectedColors });
       } catch (error) {
         console.error("Error cargando avatar:", error);
-
-        showToast({
-          type: "error",
-          title: "ERROR",
-          message: "No se pudo cargar el avatar",
-        });
+        showToast({ type: "error", title: "ERROR", message: "No se pudo cargar el avatar" });
       } finally {
         setLoading(false);
       }
@@ -215,10 +200,7 @@ export function AvatarSection() {
   }, []);
 
   const handleSelectAsset = (categoryId: string, asset: AvatarAsset) => {
-    setSelectedAssets((prev) => ({
-      ...prev,
-      [categoryId]: asset,
-    }));
+    setSelectedAssets((prev) => ({ ...prev, [categoryId]: asset }));
   };
 
   const handleRemoveAsset = (categoryId: string) => {
@@ -230,10 +212,7 @@ export function AvatarSection() {
   };
 
   const handleSelectColor = (categoryId: string, color: string) => {
-    setSelectedColors((prev) => ({
-      ...prev,
-      [categoryId]: color,
-    }));
+    setSelectedColors((prev) => ({ ...prev, [categoryId]: color }));
   };
 
   const handleRandomize = () => {
@@ -243,7 +222,6 @@ export function AvatarSection() {
     categories.forEach((cat) => {
       if (cat.assets.length > 0) {
         const shouldRemove = (cat.removable || cat.removible) && Math.random() < 0.35;
-
         if (!shouldRemove) {
           const randomIndex = Math.floor(Math.random() * cat.assets.length);
           randomAssets[cat.id] = cat.assets[randomIndex];
@@ -251,7 +229,6 @@ export function AvatarSection() {
       }
 
       const randomColor = getRandomColorForCategory(cat.id, palettes);
-
       if (randomColor) {
         randomColors[randomColor.key] = randomColor.color;
       }
@@ -264,99 +241,94 @@ export function AvatarSection() {
   const handleSave = async () => {
     try {
       setSaving(true);
-
       await saveFullUserAvatar(selectedAssets, selectedColors);
-
-      showToast({
-        type: "success",
-        title: "¡ÉXITO!",
-        message: "Avatar guardado correctamente",
-      });
+      showToast({ type: "success", title: "¡ÉXITO!", message: "Avatar guardado correctamente" });
     } catch (error) {
       console.error("Error guardando avatar:", error);
-
-      showToast({
-        type: "error",
-        title: "ERROR",
-        message: "No se pudo guardar el avatar",
-      });
+      showToast({ type: "error", title: "ERROR", message: "No se pudo guardar el avatar" });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <section className="relative mt-12 mb-12 h-[760px] overflow-hidden rounded-2xl bg-[#120f2b] shadow-2xl border-4 border-black">
+    <section className="mt-12 mb-12 overflow-hidden rounded-2xl bg-[#120f2b] shadow-2xl border border-white/10">
+      {/* Toast */}
       {toast && (
-        <div className="absolute right-10 top-8 z-[999] flex w-[470px] items-center gap-5 rounded-xl border-2 border-vcf-orange bg-white px-6 py-5 shadow-2xl">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-vcf-orange text-white">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-2xl font-black">
-              {toast.type === "success" ? "✓" : "!"}
-            </span>
+        <div className="absolute right-6 top-6 z-[999] flex items-center gap-4 rounded-xl border border-vcf-orange bg-card px-5 py-4 shadow-2xl max-w-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-vcf-orange text-white font-black text-lg">
+            {toast.type === "success" ? "✓" : "!"}
           </div>
-
-          <div className="flex-1">
-            <p className="text-2xl font-black text-vcf-orange leading-none">
-              {toast.title}
-            </p>
-            <p className="mt-2 text-base font-black text-black">
-              {toast.message}
-            </p>
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-vcf-orange text-sm">{toast.title}</p>
+            <p className="text-xs text-foreground mt-0.5">{toast.message}</p>
           </div>
-
           <button
             type="button"
             onClick={() => setToast(null)}
-            className="text-4xl font-light leading-none text-gray-500 hover:text-black"
+            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-lg leading-none"
           >
             ×
           </button>
         </div>
       )}
 
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <div>
+          <h3 className="text-white font-black text-base tracking-wide">PERSONALIZA TU AVATAR</h3>
+          <p className="text-white/40 text-xs font-bold mt-0.5">Elige tu look para la temporada</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleRandomize}
+            disabled={saving}
+            className="rounded-xl bg-white/10 border border-white/20 px-4 py-2 text-sm font-black text-white disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer hover:bg-white/20"
+          >
+            ↻ Aleatorio
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-xl bg-vcf-orange px-5 py-2 text-sm font-black text-white shadow-lg shadow-vcf-orange/20 disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer"
+          >
+            {saving ? "Guardando..." : "Guardar avatar"}
+          </button>
+        </div>
+      </div>
+
+      {/* Body */}
       {loading ? (
-        <div className="flex h-full items-center justify-center text-white font-black">
+        <div className="flex h-[460px] items-center justify-center text-white font-black">
           Cargando avatar...
         </div>
       ) : (
-        <>
-          <AvatarCanvas
-            selectedAssets={selectedAssets}
-            selectedColors={selectedColors}
-          />
-
-          <div className="absolute right-10 top-10 z-30 flex gap-3">
-            <button
-              type="button"
-              onClick={handleRandomize}
-              disabled={saving}
-              className="rounded-xl bg-white px-5 py-4 font-black text-vcf-orange shadow-lg disabled:opacity-60"
-            >
-              ↻
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="rounded-xl bg-vcf-orange px-7 py-4 font-black text-white shadow-lg disabled:opacity-60"
-            >
-              {saving ? "Guardando..." : "Guardar"}
-            </button>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px]">
+          {/* Canvas */}
+          <div className="relative h-[460px]">
+            <AvatarCanvas
+              selectedAssets={selectedAssets}
+              selectedColors={selectedColors}
+            />
           </div>
 
-          <AvatarControls
-            categories={categories}
-            selectedCategory={selectedCategory}
-            selectedAssets={selectedAssets}
-            selectedColors={selectedColors}
-            palettes={palettes}
-            onSelectCategory={setSelectedCategory}
-            onSelectAsset={handleSelectAsset}
-            onRemoveAsset={handleRemoveAsset}
-            onSelectColor={handleSelectColor}
-          />
-        </>
+          {/* Controls panel */}
+          <div className="border-t border-white/10 lg:border-t-0 lg:border-l lg:border-white/10 h-[460px] overflow-y-auto">
+            <AvatarControls
+              categories={categories}
+              selectedCategory={selectedCategory}
+              selectedAssets={selectedAssets}
+              selectedColors={selectedColors}
+              palettes={palettes}
+              onSelectCategory={setSelectedCategory}
+              onSelectAsset={handleSelectAsset}
+              onRemoveAsset={handleRemoveAsset}
+              onSelectColor={handleSelectColor}
+            />
+          </div>
+        </div>
       )}
     </section>
   );

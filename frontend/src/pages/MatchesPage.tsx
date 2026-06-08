@@ -60,7 +60,7 @@ export function MatchesPage() {
                 setFiltroActivo(filtro);
                 setJugadosVisibles(5);
               }}
-              className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all text-base ${
+              className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all text-base cursor-pointer ${
                 filtroActivo === filtro
                   ? "bg-vcf-orange text-white"
                   : "bg-card border-2 border-border hover:border-vcf-orange text-foreground"

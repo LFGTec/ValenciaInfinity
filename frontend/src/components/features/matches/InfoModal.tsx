@@ -23,7 +23,7 @@ export function InfoModal({
           </span>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-muted hover:bg-vcf-red hover:text-white flex items-center justify-center transition-all text-foreground"
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center transition-all text-foreground hover:-translate-y-1 cursor-pointer"
           >
             <X size={16} />
           </button>
