@@ -348,6 +348,7 @@ export default function LogInn() {
                   }}
                 />
                 <input
+                  data-testid="login-email"
                   type="email"
                   required
                   value={email}
@@ -399,6 +400,7 @@ export default function LogInn() {
                   }}
                 />
                 <input
+                  data-testid="login-password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
@@ -511,6 +513,7 @@ export default function LogInn() {
 
             {/* Botón principal */}
             <button
+              data-testid="login-submit"
               type="submit"
               disabled={isLoading || !email || !password}
               style={{

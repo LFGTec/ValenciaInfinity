@@ -320,6 +320,7 @@ export function TriviasQuizzes() {
             <div className="space-y-4">
               {currentQ.options.map((option, index) => (
                 <button
+                  data-testid={`answer-option-${index}`}
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
                   disabled={selectedAnswer !== null}
@@ -353,6 +354,7 @@ export function TriviasQuizzes() {
           </div>
 
           <button
+            data-testid="quit-quiz"
             onClick={resetQuiz}
             className="w-full py-4 bg-red-600 text-white rounded-lg font-black hover:bg-red-700 transition-colors shadow-lg"
           >

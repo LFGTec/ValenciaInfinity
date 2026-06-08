@@ -485,6 +485,7 @@ export function Friends() {
                     size={20}
                     />
                     <input
+                    data-testid="friend-search-input"
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
