@@ -174,7 +174,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="bg-content">
+    <div className="min-h-screen bg-content">
       {/* Hero Section */}
       <section className="relative">
         <div className="h-[450px] md:h-[500px] flex items-center justify-center relative overflow-hidden">
@@ -291,8 +291,9 @@ export default function HomePage() {
               </Link>
 
               <Link
-                to="/shop"
+                to="/ticket"
                 className="px-6 md:px-8 py-3 md:py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 hover:border-gray-100 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 text-sm md:text-base"
+                onClick={() => window.scrollTo(0, 0)}
               >
                 <Ticket size={20} />
                 <span>COMPRAR ENTRADAS</span>
@@ -543,7 +544,7 @@ export default function HomePage() {
               </Link>
               <Link
                 to="/album?scroll=album-book"
-                className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 transition-all shadow-md hover:scale-105"
+                className="px-8 py-4 bg-card border-2 border-border text-vcf-orange rounded-lg font-black hover:bg-muted transition-all shadow-md hover:scale-105"
               >
                 VER ÁLBUM
               </Link>

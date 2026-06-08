@@ -31,7 +31,7 @@ export function MatchesPage() {
   const jugadosFiltrados = filtrar(jugados);
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+    <div className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
       {mostrarCalendario && (
         <CalendarioModal
           partidos={[...jugados, ...proximos]}

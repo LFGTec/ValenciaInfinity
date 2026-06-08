@@ -163,7 +163,7 @@ export function TicketPurchase() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
       {step === "matches" && (
         <MatchSelection
           matches={MATCHES}

@@ -429,9 +429,9 @@ export function TicketSuccess({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* ── Header sticky ── */}
-      <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      <div className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3"></div>
@@ -447,14 +447,14 @@ export function TicketSuccess({
           <div className="w-20 h-20 bg-green-500 rounded-full mx-auto mb-5 flex items-center justify-center shadow-xl animate-bounce">
             <Check size={44} className="text-white" />
           </div>
-          <h1 className="text-4xl font-black text-gray-900 mb-2">
+          <h1 className="text-4xl font-black text-foreground mb-2">
             ¡Entrada confirmada!
           </h1>
-          <p className="text-gray-500">Tu entrada digital está lista</p>
+          <p className="text-muted-foreground">Tu entrada digital está lista</p>
         </div>
 
         {/* Digital ticket card */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-6">
+        <div className="bg-card rounded-3xl shadow-2xl overflow-hidden mb-6">
           {/* Red header */}
           <div className="bg-gradient-to-r from-[#EE3224] to-[#b71c1c] p-6 text-white">
             <div className="flex items-center justify-between mb-5">
@@ -487,7 +487,7 @@ export function TicketSuccess({
           {/* Perforated edge */}
           <div className="relative h-5 bg-[#EE3224]">
             <div
-              className="absolute inset-x-0 bottom-0 h-5 bg-white"
+              className="absolute inset-x-0 bottom-0 h-5 bg-card"
               style={{
                 borderTopLeftRadius: "100%",
                 borderTopRightRadius: "100%",
@@ -497,7 +497,7 @@ export function TicketSuccess({
             {[-1, 1].map((side) => (
               <div
                 key={side}
-                className="absolute top-1/2 -translate-y-1/2 w-9 h-9 bg-gray-50 rounded-full border-2 border-gray-100"
+                className="absolute top-1/2 -translate-y-1/2 w-9 h-9 bg-background rounded-full border-2 border-border"
                 style={{ [side === -1 ? "left" : "right"]: "-18px" }}
               />
             ))}
@@ -514,12 +514,12 @@ export function TicketSuccess({
               ].map(([label, val]) => (
                 <div
                   key={label}
-                  className="text-center bg-gray-50 rounded-xl py-3"
+                  className="text-center bg-muted rounded-xl py-3"
                 >
-                  <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
                     {label}
                   </div>
-                  <div className="font-black text-gray-900 text-lg leading-tight">
+                  <div className="font-black text-foreground text-lg leading-tight">
                     {val}
                   </div>
                 </div>
@@ -536,7 +536,7 @@ export function TicketSuccess({
             </div>
 
             {/* QR Code */}
-            <div className="bg-white border-4 border-gray-100 rounded-2xl p-4 mb-4">
+            <div className="bg-white border-4 border-border rounded-2xl p-4 mb-4">
               <div className="aspect-square w-full max-w-[220px] mx-auto">
                 <QRCode data={ticketCode} canvasRef={qrRef} />
               </div>
@@ -544,10 +544,10 @@ export function TicketSuccess({
 
             {/* Ticket code */}
             <div className="text-center">
-              <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
                 Código de entrada
               </div>
-              <div className="font-mono font-black text-gray-900 text-lg tracking-widest">
+              <div className="font-mono font-black text-foreground text-lg tracking-widest">
                 {ticketCode}
               </div>
             </div>
@@ -566,7 +566,7 @@ export function TicketSuccess({
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-white border-2 border-gray-200 rounded-2xl font-bold text-gray-800 hover:border-gray-400 hover:text-black cursor-pointer transition-all shadow-md active:scale-95 disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-4 bg-card border-2 border-border rounded-2xl font-bold text-foreground hover:border-foreground/40 cursor-pointer transition-all shadow-md active:scale-95 disabled:opacity-60"
           >
             {downloading ? (
               <span className="flex items-center gap-2 text-sm">

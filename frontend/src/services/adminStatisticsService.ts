@@ -40,27 +40,12 @@ export type FeatureUsageStat = {
 };
 
 export type ComparisonStat = {
-  key: "trades" | "matchRooms";
+  key: "trades" | "trivias";
   title: string;
   value: number;
   description: string;
   changePercent: number;
   changeLabel: string;
-};
-
-type TriviaAttemptRow = {
-  user_id: string | null;
-  trivia_id?: string | null;
-  percentage: number | string | null;
-  completed_at: string | null;
-  profiles?: {
-    full_name?: string | null;
-    email?: string | null;
-    puntos?: number | string | null;
-  } | null;
-  trivias?: {
-    title?: string | null;
-  } | null;
 };
 
 const getStartDateByRange = (range: TimeRange): string => {
@@ -71,36 +56,6 @@ const getStartDateByRange = (range: TimeRange): string => {
   if (range === "month") date.setMonth(date.getMonth() - 1);
 
   return date.toISOString();
-};
-
-const getRangeStartDate = (range: TimeRange): Date => {
-  const date = new Date();
-
-  if (range === "day") date.setDate(date.getDate() - 1);
-  if (range === "week") date.setDate(date.getDate() - 7);
-  if (range === "month") date.setMonth(date.getMonth() - 1);
-
-  return date;
-};
-
-const getPreviousRangeStartDate = (range: TimeRange): Date => {
-  const date = getRangeStartDate(range);
-
-  if (range === "day") date.setDate(date.getDate() - 1);
-  if (range === "week") date.setDate(date.getDate() - 7);
-  if (range === "month") date.setMonth(date.getMonth() - 1);
-
-  return date;
-};
-
-const formatDate = (date?: string | null): string => {
-  if (!date) return "Sin fecha";
-
-  return new Date(date).toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 };
 
 const safeCount = async (
@@ -143,100 +98,46 @@ const safeCount = async (
   }
 };
 
-const getCountBetweenDates = async (
-  tableName: string,
-  dateColumn: string,
-  startDate: Date,
-  endDate: Date
-): Promise<number> => {
-  try {
-    const { count, error } = await supabase
-      .from(tableName)
-      .select("*", { count: "exact", head: true })
-      .gte(dateColumn, startDate.toISOString())
-      .lt(dateColumn, endDate.toISOString());
-
-    if (error) throw error;
-
-    return count ?? 0;
-  } catch (error) {
-    console.error(`Error contando ${tableName} entre fechas:`, error);
-    return 0;
-  }
-};
-
-const calculateChangePercent = (
-  currentValue: number,
-  previousValue: number
-): number => {
-  if (previousValue === 0) {
-    return currentValue > 0 ? 100 : 0;
-  }
-
-  return Math.round(((currentValue - previousValue) / previousValue) * 100);
-};
 
 export const getAdminStatsSummary = async (
   range: TimeRange = "week"
 ): Promise<AdminStatsSummary> => {
   const startDate = getStartDateByRange(range);
 
-  let query: any = supabase
+  // Try with date filter; if created_at doesn't exist fall back to all rows
+  const { data: filtered, error: filteredErr } = await supabase
     .from("trivia_attempts")
-    .select("user_id, percentage, completed_at")
-    .gte("completed_at", startDate);
+    .select("user_id, percentage")
+    .gte("created_at", startDate);
 
-  let { data, error } = await query;
-
-  if (error) {
-    console.warn(
-      "No se pudo filtrar trivia_attempts por fecha. Se usará el total general.",
-      error
-    );
-
-    const fallback = await supabase
+  let data: any[] | null;
+  if (filteredErr) {
+    const { data: all, error: allErr } = await supabase
       .from("trivia_attempts")
-      .select("user_id, percentage, completed_at");
-
-    data = fallback.data;
-    error = fallback.error;
+      .select("user_id, percentage");
+    if (allErr) {
+      console.error("Error obteniendo resumen de estadísticas:", allErr);
+      return { activeUsers: 0, triviasPlayed: 0, averageScore: 0, completionRate: 0 };
+    }
+    data = all;
+  } else {
+    data = filtered;
   }
 
-  if (error) {
-    console.error("Error obteniendo resumen de estadísticas:", error);
-
-    return {
-      activeUsers: 0,
-      triviasPlayed: 0,
-      averageScore: 0,
-      completionRate: 0,
-    };
+  if (!data || data.length === 0) {
+    return { activeUsers: 0, triviasPlayed: 0, averageScore: 0, completionRate: 0 };
   }
 
-  const attempts: TriviaAttemptRow[] = (data ?? []) as TriviaAttemptRow[];
-
-  const uniqueUsers = new Set(
-    attempts
-      .map((attempt: TriviaAttemptRow) => attempt.user_id)
-      .filter(Boolean)
+  const uniqueUsers = new Set(data.map((r: any) => r.user_id).filter(Boolean));
+  const averageScore = Math.round(
+    data.reduce((sum: number, r: any) => sum + Number(r.percentage ?? 0), 0) / data.length
   );
-
-  const averageScore =
-    attempts.length > 0
-      ? Math.round(
-          attempts.reduce(
-            (total: number, attempt: TriviaAttemptRow) =>
-              total + Number(attempt.percentage ?? 0),
-            0
-          ) / attempts.length
-        )
-      : 0;
 
   return {
     activeUsers: uniqueUsers.size,
-    triviasPlayed: attempts.length,
+    triviasPlayed: data.length,
     averageScore,
-    completionRate: attempts.length > 0 ? 100 : 0,
+    completionRate: 100,
   };
 };
 
@@ -245,78 +146,54 @@ export const getMostActiveUsers = async (
 ): Promise<ActiveUserStat[]> => {
   const startDate = getStartDateByRange(range);
 
-  let query: any = supabase
+  // Try with date filter; fall back to all rows if created_at doesn't exist
+  const { data: filtered, error: filteredErr } = await supabase
     .from("trivia_attempts")
-    .select(`
-      user_id,
-      completed_at,
-      profiles:user_id (
-        full_name,
-        email,
-        puntos
-      )
-    `)
-    .gte("completed_at", startDate);
+    .select("user_id")
+    .gte("created_at", startDate);
 
-  let { data, error } = await query;
-
-  if (error) {
-    console.warn(
-      "No se pudo filtrar usuarios activos por fecha. Se usará el total general.",
-      error
-    );
-
-    const fallback = await supabase
-      .from("trivia_attempts")
-      .select(`
-        user_id,
-        completed_at,
-        profiles:user_id (
-          full_name,
-          email,
-          puntos
-        )
-      `);
-
-    data = fallback.data;
-    error = fallback.error;
+  let allAttempts: any[];
+  if (filteredErr) {
+    const { data: all } = await supabase.from("trivia_attempts").select("user_id");
+    allAttempts = all ?? [];
+  } else {
+    allAttempts = filtered ?? [];
   }
 
-  if (error) {
-    console.error("Error obteniendo usuarios más activos:", error);
-    return [];
+  if (allAttempts.length === 0) return [];
+
+  // Step 2: count trivias per user
+  const userCountMap = new Map<string, number>();
+  for (const row of allAttempts) {
+    if (!row.user_id) continue;
+    userCountMap.set(row.user_id, (userCountMap.get(row.user_id) ?? 0) + 1);
   }
 
-  const attempts: TriviaAttemptRow[] = (data ?? []) as TriviaAttemptRow[];
-  const groupedUsers = new Map<string, ActiveUserStat>();
-
-  attempts.forEach((attempt: TriviaAttemptRow) => {
-    if (!attempt.user_id) return;
-
-    const profile = Array.isArray(attempt.profiles)
-      ? attempt.profiles[0]
-      : attempt.profiles;
-
-    const current = groupedUsers.get(attempt.user_id) ?? {
-      userId: attempt.user_id,
-      username: profile?.full_name || profile?.email || "Usuario sin nombre",
-      triviasCompleted: 0,
-      points: Number(profile?.puntos ?? 0),
-      lastActive: formatDate(attempt.completed_at),
-    };
-
-    current.triviasCompleted += 1;
-    current.points = Number(profile?.puntos ?? current.points ?? 0);
-    current.lastActive = formatDate(attempt.completed_at);
-
-    groupedUsers.set(attempt.user_id, current);
-  });
-
-  return Array.from(groupedUsers.values())
-    .sort((a: ActiveUserStat, b: ActiveUserStat) => {
-      return b.triviasCompleted - a.triviasCompleted;
-    })
+  // Top 5 by trivia count
+  const top5 = Array.from(userCountMap.entries())
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
+
+  const top5Ids = top5.map(([id]) => id);
+
+  // Step 3: fetch profiles separately
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, puntos")
+    .in("id", top5Ids);
+
+  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+
+  return top5.map(([userId, count]) => {
+    const profile = profileMap.get(userId) as any;
+    return {
+      userId,
+      username: profile?.full_name || profile?.email || "Usuario sin nombre",
+      triviasCompleted: count,
+      points: Number(profile?.puntos ?? 0),
+      lastActive: "-",
+    };
+  });
 };
 
 export const getPopularTrivias = async (
@@ -324,92 +201,54 @@ export const getPopularTrivias = async (
 ): Promise<PopularTriviaStat[]> => {
   const startDate = getStartDateByRange(range);
 
-  let query: any = supabase
+  // Try with date filter; fall back to all rows if created_at doesn't exist
+  const { data: filtered, error: filteredErr } = await supabase
     .from("trivia_attempts")
-    .select(`
-      trivia_id,
-      percentage,
-      completed_at,
-      trivias:trivia_id (
-        title
-      )
-    `)
-    .gte("completed_at", startDate);
+    .select("trivia_id, percentage")
+    .gte("created_at", startDate);
 
-  let { data, error } = await query;
-
-  if (error) {
-    console.warn(
-      "No se pudo filtrar trivias populares por fecha. Se usará el total general.",
-      error
-    );
-
-    const fallback = await supabase
-      .from("trivia_attempts")
-      .select(`
-        trivia_id,
-        percentage,
-        completed_at,
-        trivias:trivia_id (
-          title
-        )
-      `);
-
-    data = fallback.data;
-    error = fallback.error;
+  let attemptsData: any[];
+  if (filteredErr) {
+    const { data: all } = await supabase.from("trivia_attempts").select("trivia_id, percentage");
+    attemptsData = all ?? [];
+  } else {
+    attemptsData = filtered ?? [];
   }
 
-  if (error) {
-    console.error("Error obteniendo trivias populares:", error);
-    return [];
+  if (attemptsData.length === 0) return [];
+
+  // Step 2: group by trivia_id
+  const triviaMap = new Map<string, { participants: number; totalScore: number }>();
+  for (const row of attemptsData) {
+    if (!row.trivia_id) continue;
+    const prev = triviaMap.get(row.trivia_id);
+    triviaMap.set(row.trivia_id, {
+      participants: (prev?.participants ?? 0) + 1,
+      totalScore: (prev?.totalScore ?? 0) + Number(row.percentage ?? 0),
+    });
   }
 
-  const attempts: TriviaAttemptRow[] = (data ?? []) as TriviaAttemptRow[];
-
-  const groupedTrivias = new Map<
-    string,
-    {
-      triviaId: string;
-      title: string;
-      participants: number;
-      totalScore: number;
-    }
-  >();
-
-  attempts.forEach((attempt: TriviaAttemptRow) => {
-    if (!attempt.trivia_id) return;
-
-    const trivia = Array.isArray(attempt.trivias)
-      ? attempt.trivias[0]
-      : attempt.trivias;
-
-    const current = groupedTrivias.get(attempt.trivia_id) ?? {
-      triviaId: attempt.trivia_id,
-      title: trivia?.title || "Trivia sin título",
-      participants: 0,
-      totalScore: 0,
-    };
-
-    current.participants += 1;
-    current.totalScore += Number(attempt.percentage ?? 0);
-
-    groupedTrivias.set(attempt.trivia_id, current);
-  });
-
-  return Array.from(groupedTrivias.values())
-    .map((trivia) => ({
-      triviaId: trivia.triviaId,
-      title: trivia.title,
-      participants: trivia.participants,
-      avgScore:
-        trivia.participants > 0
-          ? Math.round(trivia.totalScore / trivia.participants)
-          : 0,
-    }))
-    .sort((a: PopularTriviaStat, b: PopularTriviaStat) => {
-      return b.participants - a.participants;
-    })
+  // Top 5 by participants
+  const top5 = Array.from(triviaMap.entries())
+    .sort((a, b) => b[1].participants - a[1].participants)
     .slice(0, 5);
+
+  const top5Ids = top5.map(([id]) => id);
+
+  // Step 3: fetch trivia titles separately
+  const { data: trivias } = await supabase
+    .from("trivias")
+    .select("id, title")
+    .in("id", top5Ids);
+
+  const triviaNames = new Map((trivias ?? []).map((t: any) => [t.id, t.title]));
+
+  return top5.map(([triviaId, { participants, totalScore }]) => ({
+    triviaId,
+    title: triviaNames.get(triviaId) || "Trivia sin título",
+    participants,
+    avgScore: participants > 0 ? Math.round(totalScore / participants) : 0,
+  }));
 };
 
 export const getFeatureUsageStats = async (
@@ -418,11 +257,11 @@ export const getFeatureUsageStats = async (
   const [matchRooms, trivias, album, rankings, trades, virtualWorld] =
     await Promise.all([
       safeCount("match_rooms", range, "created_at"),
-      safeCount("trivia_attempts", range, "completed_at"),
+      safeCount("trivia_attempts", range, "created_at"),
       safeCount("user_cards", range, "created_at"),
-      safeCount("profiles"),
+      safeCount("profiles", range, "created_at"),
       safeCount("trade_requests", range, "created_at"),
-      safeCount("user_locations", range, "updated_at"),
+      safeCount("user_locations", range, "created_at"),
     ]);
 
   return [
@@ -430,37 +269,37 @@ export const getFeatureUsageStats = async (
       key: "matchRooms",
       name: "Match Rooms",
       value: matchRooms,
-      description: "Salas creadas",
+      description: "Salas en el período",
     },
     {
       key: "trivias",
       name: "Trivias",
       value: trivias,
-      description: "Intentos registrados",
+      description: "Intentos en el período",
     },
     {
       key: "album",
       name: "Álbum",
       value: album,
-      description: "Cartas guardadas",
+      description: "Cartas en el período",
     },
     {
       key: "rankings",
       name: "Rankings",
       value: rankings,
-      description: "Usuarios registrados",
+      description: "Usuarios en el período",
     },
     {
       key: "trades",
       name: "Intercambios",
       value: trades,
-      description: "Solicitudes de intercambio",
+      description: "Solicitudes en el período",
     },
     {
       key: "virtualWorld",
       name: "Mundo Virtual",
       value: virtualWorld,
-      description: "Usuarios con ubicación",
+      description: "Ubicaciones en el período",
     },
   ];
 };
@@ -468,50 +307,28 @@ export const getFeatureUsageStats = async (
 export const getComparisonStats = async (
   range: TimeRange = "week"
 ): Promise<ComparisonStat[]> => {
-  const now = new Date();
-  const currentStart = getRangeStartDate(range);
-  const previousStart = getPreviousRangeStartDate(range);
-
-  const [tradesCurrent, tradesPrevious, matchRoomsCurrent, matchRoomsPrevious] =
-    await Promise.all([
-      getCountBetweenDates("trade_requests", "created_at", currentStart, now),
-      getCountBetweenDates(
-        "trade_requests",
-        "created_at",
-        previousStart,
-        currentStart
-      ),
-      getCountBetweenDates("match_rooms", "created_at", currentStart, now),
-      getCountBetweenDates(
-        "match_rooms",
-        "created_at",
-        previousStart,
-        currentStart
-      ),
-    ]);
-
-  const tradesChange = calculateChangePercent(tradesCurrent, tradesPrevious);
-  const matchRoomsChange = calculateChangePercent(
-    matchRoomsCurrent,
-    matchRoomsPrevious
-  );
+  // Use safeCount with range — falls back to total if created_at doesn't exist
+  const [tradesCurrent, triviasCurrent] = await Promise.all([
+    safeCount("trade_requests", range, "created_at"),
+    safeCount("trivia_attempts", range, "created_at"),
+  ]);
 
   return [
     {
-      key: "trades",
+      key: "trades" as const,
       title: "Cartas Intercambiadas",
       value: tradesCurrent,
-      description: "Solicitudes de intercambio",
-      changePercent: tradesChange,
-      changeLabel: `${tradesChange >= 0 ? "+" : ""}${tradesChange}% vs período anterior`,
+      description: "Solicitudes en el período",
+      changePercent: 0,
+      changeLabel: "Período seleccionado",
     },
     {
-      key: "matchRooms",
-      title: "Visitas a Match Rooms",
-      value: matchRoomsCurrent,
-      description: "Actividad en Match Rooms",
-      changePercent: matchRoomsChange,
-      changeLabel: `${matchRoomsChange >= 0 ? "+" : ""}${matchRoomsChange}% vs período anterior`,
+      key: "trivias" as const,
+      title: "Trivias Jugadas",
+      value: triviasCurrent,
+      description: "Intentos en el período",
+      changePercent: 0,
+      changeLabel: "Período seleccionado",
     },
   ];
 };

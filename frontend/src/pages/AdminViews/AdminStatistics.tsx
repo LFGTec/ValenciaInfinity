@@ -87,9 +87,9 @@ const comparisonConfig: Record<
     icon: BookOpen,
     color: "bg-blue-600",
   },
-  matchRooms: {
-    icon: MessageSquare,
-    color: "bg-green-600",
+  trivias: {
+    icon: Gamepad2,
+    color: "bg-purple-600",
   },
 };
 

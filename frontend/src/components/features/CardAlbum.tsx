@@ -78,7 +78,7 @@ export function CardAlbum({ userId }: Props) {
         setCards(data);
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "No se pudo cargar el album";
+          err instanceof Error ? err.message : "No se pudo cargar el álbum";
         setError(message);
       } finally {
         setLoading(false);
@@ -210,7 +210,7 @@ export function CardAlbum({ userId }: Props) {
   // Show loading state
   if (loading) {
     return (
-      <div className="team-album-loading">Cargando album de cartas...</div>
+      <div className="team-album-loading">Cargando álbum de cartas...</div>
     );
   }
 
@@ -230,7 +230,7 @@ export function CardAlbum({ userId }: Props) {
               <h1 className="text-3xl md:text-4xl font-black mb-1">
                 ÁLBUM DE <span className="text-vcf-orange">CARTAS</span>
               </h1>
-              <p className="text-sm md:text-base text-gray-600">
+              <p className="text-sm md:text-base text-muted-foreground">
                 {obtainedCards} de {totalCards} cartas coleccionadas ({progress}
                 %)
               </p>

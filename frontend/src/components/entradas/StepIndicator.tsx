@@ -19,8 +19,8 @@ export function StepIndicator({ current }: { current: number }) {
                   done
                     ? "bg-green-100 text-green-600 border-2 border-green-400"
                     : active
-                      ? "bg-black text-white shadow-sm"
-                      : "bg-gray-100 text-gray-400 border-2 border-gray-200"
+                      ? "bg-foreground text-background shadow-sm"
+                      : "bg-muted text-muted-foreground border-2 border-border"
                 }`}
               >
                 {done ? <Check size={13} strokeWidth={3} /> : n}
@@ -28,10 +28,10 @@ export function StepIndicator({ current }: { current: number }) {
               <span
                 className={`text-[9px] font-bold hidden lg:block leading-none ${
                   active
-                    ? "text-black"
+                    ? "text-foreground"
                     : done
                       ? "text-green-600"
-                      : "text-gray-400"
+                      : "text-muted-foreground"
                 }`}
               >
                 {label}
@@ -42,7 +42,7 @@ export function StepIndicator({ current }: { current: number }) {
             {i < STEPS.length - 1 && (
               <div
                 className={`w-8 h-0.5 mt-3.5 mx-0.5 rounded-full transition-all hidden sm:block ${
-                  done ? "bg-green-300" : "bg-gray-200"
+                  done ? "bg-green-300" : "bg-border"
                 }`}
               />
             )}

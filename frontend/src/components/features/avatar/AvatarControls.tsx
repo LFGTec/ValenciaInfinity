@@ -222,11 +222,11 @@ export function AvatarControls({
     canPaintAsset(selectedCategory, selectedAsset);
 
   return (
-    <div className="absolute bottom-0 left-1/2 z-30 w-[88%] -translate-x-1/2 rounded-t-2xl bg-black/45 backdrop-blur-md px-6 pt-6 pb-0">
+    <div className="absolute bottom-0 left-1/2 z-30 w-[88%] -translate-x-1/2 rounded-t-2xl bg-black/45 backdrop-blur-md px-4 pt-3 pb-0">
       {mode === "customize" && (
         <>
           {canShowColors && (
-            <div className="mb-5 flex gap-3">
+            <div className="mb-2 flex gap-2">
               {paletteColors.map((color: string) => {
                 const isSelected = selectedColor === color;
 
@@ -236,7 +236,7 @@ export function AvatarControls({
                     type="button"
                     onClick={() => onSelectColor(colorCategory, color)}
                     style={{ backgroundColor: color }}
-                    className={`w-8 h-8 rounded-md border-2 transition ${
+                    className={`w-6 h-6 rounded-md border-2 transition ${
                       isSelected
                         ? "scale-110 border-vcf-orange"
                         : "border-white"
@@ -247,15 +247,15 @@ export function AvatarControls({
             </div>
           )}
 
-          <div className="mb-5 flex flex-wrap gap-8">
+          <div className="mb-2 flex flex-wrap gap-4">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => onSelectCategory(cat.id)}
-                className={`pb-2 text-lg font-black text-white transition ${
+                className={`pb-1 text-sm font-black text-white transition ${
                   selectedCategory === cat.id
-                    ? "border-b-4 border-white"
+                    ? "border-b-2 border-white"
                     : "opacity-80 hover:opacity-100"
                 }`}
               >
@@ -264,12 +264,12 @@ export function AvatarControls({
             ))}
           </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-6">
+          <div className="flex gap-2 overflow-x-auto pb-3">
             {currentCategory?.removable && selectedAssets[currentCategory.id] && (
               <button
                 type="button"
                 onClick={() => onRemoveAsset(currentCategory.id)}
-                className="min-w-[95px] h-[95px] rounded-xl border-2 border-white bg-black/40 text-white font-black"
+                className="min-w-[68px] h-[68px] rounded-xl border-2 border-white bg-black/40 text-white font-black text-sm"
               >
                 Quitar
               </button>
@@ -284,7 +284,7 @@ export function AvatarControls({
                   key={asset.id}
                   type="button"
                   onClick={() => onSelectAsset(currentCategory.id, asset)}
-                  className={`min-w-[95px] h-[95px] rounded-xl border-2 bg-black/40 p-2 text-white transition ${
+                  className={`min-w-[68px] h-[68px] rounded-xl border-2 bg-black/40 p-1.5 text-white transition ${
                     isSelected
                       ? "border-white"
                       : "border-white/30 hover:border-white"
@@ -315,7 +315,7 @@ export function AvatarControls({
         <button
           type="button"
           onClick={() => setMode("customize")}
-          className="bg-vcf-orange py-5 text-center text-lg font-black text-white"
+          className="bg-vcf-orange py-3 text-center text-sm font-black text-white"
         >
           Customizar avatar
         </button>
@@ -323,7 +323,7 @@ export function AvatarControls({
         <button
           type="button"
           onClick={() => setMode("view")}
-          className="bg-white py-5 text-center text-lg font-black text-vcf-orange"
+          className="bg-white py-3 text-center text-sm font-black text-vcf-orange"
         >
           Visualización
         </button>

@@ -29,7 +29,7 @@ export default function SeatGrid({ seats, activeZone, onSeatClick }: Props) {
 
         return (
           <div key={bi}>
-            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-[5px]">
+            <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-[5px]">
               {sectorName(SEAT_BLOCKS[bi])}
             </div>
 
@@ -39,7 +39,7 @@ export default function SeatGrid({ seats, activeZone, onSeatClick }: Props) {
               {Array.from({ length: cols }, (_, c) => (
                 <span
                   key={c}
-                  className="w-[9px] text-[8px] text-[#3a3a50] text-center shrink-0 leading-none"
+                  className="w-[9px] text-[8px] text-muted-foreground text-center shrink-0 leading-none"
                 >
                   {(c + 1) % 5 === 1 || c + 1 === cols ? c + 1 : ""}
                 </span>

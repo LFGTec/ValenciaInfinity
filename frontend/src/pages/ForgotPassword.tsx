@@ -52,7 +52,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-background">
       {/* ── Panel izquierdo ── */}
       <div
         className="hidden lg:flex flex-1 relative flex-col items-center justify-center overflow-hidden"
@@ -121,7 +121,7 @@ export default function ForgotPassword() {
       {/* ── Panel derecho – Formulario ── */}
       <div
         className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-y-auto"
-        style={{ background: "#f5f5f5" }}
+        style={{ background: "var(--background)" }}
       >
         {/* Línea acento móvil */}
         <div
@@ -136,14 +136,14 @@ export default function ForgotPassword() {
               style={{
                 fontWeight: 900,
                 fontSize: "1.8rem",
-                color: "#1a1a1a",
+                color: "var(--foreground)",
                 marginBottom: "6px",
                 lineHeight: 1.15,
               }}
             >
               {submitted ? "Verifica tu correo" : "¿Olvidaste tu contraseña?"}
             </h2>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>
+            <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)", margin: 0 }}>
               {submitted
                 ? "Hemos enviado instrucciones a tu correo"
                 : "Ingresa tu correo electrónico para recibir un enlace de recuperación"}
@@ -175,10 +175,10 @@ export default function ForgotPassword() {
               >
                 <Check size={32} style={{ color: "#22c55e" }} />
               </div>
-              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#1a1a1a", marginBottom: "8px" }}>
+              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--foreground)", marginBottom: "8px" }}>
                 Correo enviado exitosamente
               </h3>
-              <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "20px" }}>
+              <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)", marginBottom: "20px" }}>
                 Revisa tu bandeja de entrada (y spam) para el enlace de
                 recuperación. El enlace expira en 24 horas.
               </p>
@@ -216,7 +216,7 @@ export default function ForgotPassword() {
                       display: "block",
                       fontSize: "0.875rem",
                       marginBottom: "8px",
-                      color: "#374151",
+                      color: "var(--foreground)",
                       fontWeight: 600,
                     }}
                   >
@@ -249,11 +249,11 @@ export default function ForgotPassword() {
                         paddingBottom: "12px",
                         borderRadius: "12px",
                         fontSize: "0.875rem",
-                        background: "#f9fafb",
+                        background: "var(--input-background)",
                         border: emailError
                           ? "1px solid #ef4444"
-                          : "1px solid #e5e7eb",
-                        color: "#1a1a1a",
+                          : "1px solid var(--border)",
+                        color: "var(--foreground)",
                         outline: "none",
                         boxSizing: "border-box",
                       }}
@@ -261,7 +261,7 @@ export default function ForgotPassword() {
                       onBlur={(e) =>
                         (e.currentTarget.style.borderColor = emailError
                           ? "#ef4444"
-                          : "#e5e7eb")
+                          : "var(--border)")
                       }
                     />
                   </div>
