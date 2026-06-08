@@ -252,7 +252,7 @@ export function CardExchange() {
     const success = await acceptTrade(tradeId);
     if (success) {
       showFeedback(
-        "Felicidades. Las cartas intercambiadas se anadiran a tu album.",
+        "Felicidades. Las cartas intercambiadas se añadirán a tu álbum.",
         "success"
       );
     } else {

@@ -270,7 +270,7 @@ export default function MainLayout() {
               { path: "/matches", label: "PARTIDOS" },
               { path: "/news", label: "NOTICIAS" },
               { path: "/fanzone", label: "ZONA FAN" },
-              { path: "/juego", label: "JUEGO" },
+              { path: "/juego", label: "MESTALLA RIVALS" },
               { path: "/store", label: "TIENDA" },
               { path: "/ticket", label: "ENTRADAS" },
             ].map((item) => (
