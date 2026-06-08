@@ -151,7 +151,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-background">
       {/* Panel izquierdo */}
       <div
         className="hidden lg:flex flex-1 relative flex-col items-center justify-center overflow-hidden"
@@ -265,7 +265,7 @@ export default function SignUp() {
       {/* Panel derecho */}
       <div
         className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-y-auto"
-        style={{ background: "#f5f5f5" }}
+        style={{ background: "var(--background)" }}
       >
         <div
           className="absolute top-0 left-0 w-full h-1 lg:hidden"
@@ -296,7 +296,7 @@ export default function SignUp() {
               />
             </div>
             <div>
-              <p style={{ fontWeight: 900, fontSize: "1.125rem", color: "#1a1a1a", margin: 0 }}>
+              <p style={{ fontWeight: 900, fontSize: "1.125rem", color: "var(--foreground)", margin: 0 }}>
                 VALENCIA CF
               </p>
               <p style={{ fontSize: "0.7rem", fontWeight: 700, color: "#ff671f", letterSpacing: "2px", margin: 0 }}>
@@ -311,14 +311,14 @@ export default function SignUp() {
               style={{
                 fontWeight: 900,
                 fontSize: "1.8rem",
-                color: "#1a1a1a",
+                color: "var(--foreground)",
                 marginBottom: "6px",
                 lineHeight: 1.15,
               }}
             >
               Crea tu cuenta
             </h2>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>
+            <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)", margin: 0 }}>
               Únete a la comunidad de fans del Valencia CF
             </p>
           </div>
@@ -350,7 +350,7 @@ export default function SignUp() {
             {/* Email */}
             <div>
               <label
-                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "#374151", fontWeight: 600 }}
+                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "var(--foreground)", fontWeight: 600 }}
               >
                 Correo electrónico
               </label>
@@ -381,14 +381,14 @@ export default function SignUp() {
                     paddingBottom: "12px",
                     borderRadius: "12px",
                     fontSize: "0.875rem",
-                    background: "#f9fafb",
-                    border: emailError ? "1px solid #ef4444" : "1px solid #e5e7eb",
-                    color: "#1a1a1a",
+                    background: "var(--input-background)",
+                    border: emailError ? "1px solid #ef4444" : "1px solid var(--border)",
+                    color: "var(--foreground)",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = emailError ? "#ef4444" : "#e5e7eb")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = emailError ? "#ef4444" : "var(--border)")}
                 />
               </div>
               {emailError && (
@@ -401,7 +401,7 @@ export default function SignUp() {
             {/* Contraseña */}
             <div>
               <label
-                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "#374151", fontWeight: 600 }}
+                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "var(--foreground)", fontWeight: 600 }}
               >
                 Contraseña
               </label>
@@ -432,14 +432,14 @@ export default function SignUp() {
                     paddingBottom: "12px",
                     borderRadius: "12px",
                     fontSize: "0.875rem",
-                    background: "#f9fafb",
-                    border: passwordErrors.length > 0 && password ? "1px solid #ef4444" : "1px solid #e5e7eb",
-                    color: "#1a1a1a",
+                    background: "var(--input-background)",
+                    border: passwordErrors.length > 0 && password ? "1px solid #ef4444" : "1px solid var(--border)",
+                    color: "var(--foreground)",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = passwordErrors.length > 0 ? "#ef4444" : "#e5e7eb")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = passwordErrors.length > 0 ? "#ef4444" : "var(--border)")}
                 />
                 <button
                   type="button"
@@ -557,7 +557,7 @@ export default function SignUp() {
             {/* Confirmar contraseña */}
             <div>
               <label
-                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "#374151", fontWeight: 600 }}
+                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "var(--foreground)", fontWeight: 600 }}
               >
                 Confirmar contraseña
               </label>
@@ -588,12 +588,12 @@ export default function SignUp() {
                     paddingBottom: "12px",
                     borderRadius: "12px",
                     fontSize: "0.875rem",
-                    background: "#f9fafb",
+                    background: "var(--input-background)",
                     border:
                       confirmPassword && password !== confirmPassword
                         ? "1px solid #ef4444"
-                        : "1px solid #e5e7eb",
-                    color: "#1a1a1a",
+                        : "1px solid var(--border)",
+                    color: "var(--foreground)",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
@@ -695,7 +695,7 @@ export default function SignUp() {
           {/* Sign in link */}
           <p
             className="text-center mt-10 text-sm"
-            style={{ color: "#6b7280" }}
+            style={{ color: "var(--muted-foreground)" }}
           >
             ¿Ya tienes cuenta?{" "}
             <button

@@ -174,7 +174,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="bg-content">
+    <div className="min-h-screen bg-content">
       {/* Hero Section */}
       <section className="relative">
         <div className="h-[450px] md:h-[500px] flex items-center justify-center relative overflow-hidden">

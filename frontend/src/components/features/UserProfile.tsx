@@ -107,7 +107,7 @@ export function UserProfile() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+    <div className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
       <div className="mb-8">
         <h1 className="text-5xl font-black mb-4 text-foreground">
           MI <span className="text-vcf-orange">PERFIL</span>

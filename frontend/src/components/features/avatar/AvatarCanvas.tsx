@@ -11,7 +11,7 @@ export function AvatarCanvas({ selectedAssets = {}, selectedColors = {} }: Props
   return (
     <Canvas
       camera={{
-        position: [-1, 1, 5],
+        position: [-1, 1, 8],
         fov: 45,
       }}
       gl={{

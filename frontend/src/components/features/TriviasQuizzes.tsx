@@ -364,7 +364,7 @@ export function TriviasQuizzes() {
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 py-6 bg-content">
+    <div className="min-h-screen max-w-[1600px] mx-auto px-4 py-6 bg-content">
       <div className="mb-6">
         <h1 className="text-5xl font-black mb-4 text-foreground">
           TRIVIAS & <span className="text-vcf-orange">QUIZZES</span>

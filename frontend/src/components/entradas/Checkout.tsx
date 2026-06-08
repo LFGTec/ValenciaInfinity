@@ -235,7 +235,7 @@ function ProcessingOverlay({ step }: { step: number }) {
   const done = step === 3;
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
-      <div className="bg-white rounded-3xl p-10 max-w-sm w-full mx-4 shadow-2xl text-center">
+      <div className="bg-card rounded-3xl p-10 max-w-sm w-full mx-4 shadow-2xl text-center">
         <div
           className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center transition-all duration-500 ${done ? "bg-green-100" : "bg-[#EE3224]/10"}`}
         >
@@ -245,10 +245,10 @@ function ProcessingOverlay({ step }: { step: number }) {
             <Loader2 size={40} className="text-[#EE3224] animate-spin" />
           )}
         </div>
-        <div className="text-xl font-black text-gray-900 mb-3">
+        <div className="text-xl font-black text-foreground mb-3">
           {done ? "¡Pago realizado!" : "Procesando pago"}
         </div>
-        <div className="text-gray-600 text-sm min-h-[1.5rem] transition-all">
+        <div className="text-muted-foreground text-sm min-h-[1.5rem] transition-all">
           {STEPS[step]}
         </div>
         {!done && (
@@ -410,9 +410,9 @@ export function Checkout({
     <>
       {processing && <ProcessingOverlay step={procStep} />}
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
           <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
             <button
               onClick={onBack}
@@ -422,7 +422,7 @@ export function Checkout({
               Volver
             </button>
             <div className="text-center">
-              <div className="text-sm font-black text-gray-900">
+              <div className="text-sm font-black text-foreground">
                 Pago seguro
               </div>
               <div className="flex items-center justify-center gap-1 text-xs text-green-600">
@@ -435,10 +435,10 @@ export function Checkout({
         </div>
 
         <div className="max-w-5xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-black text-gray-900 mb-2">
+          <h1 className="text-3xl font-black text-foreground mb-2">
             Finalizar compra
           </h1>
-          <p className="text-gray-500 text-sm mb-8">
+          <p className="text-muted-foreground text-sm mb-8">
             Introduce los datos de tu tarjeta para completar la simulación
           </p>
 
@@ -456,12 +456,12 @@ export function Checkout({
               />
 
               {/* Form card */}
-              <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg">
+              <div className="bg-card border-2 border-border rounded-2xl p-6 shadow-lg">
                 <div className="flex items-center gap-2 mb-6">
                   <div className="w-8 h-8 bg-[#EE3224]/10 rounded-lg flex items-center justify-center">
                     <span className="text-[#EE3224] font-black text-sm">1</span>
                   </div>
-                  <h3 className="text-lg font-black text-gray-900">
+                  <h3 className="text-lg font-black text-foreground">
                     Datos de la tarjeta
                   </h3>
                 </div>
@@ -469,7 +469,7 @@ export function Checkout({
                 <div className="space-y-5">
                   {/* Card number */}
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-foreground mb-2">
                       Número de tarjeta
                     </label>
                     <div className="relative">
@@ -483,7 +483,7 @@ export function Checkout({
                         }
                         placeholder="1234 5678 9012 3456"
                         maxLength={19}
-                        className={`w-full px-4 py-3 pr-14 bg-gray-50 border-2 rounded-xl text-gray-900 font-mono placeholder-gray-400 focus:outline-none transition-colors text-lg tracking-widest ${
+                        className={`w-full px-4 py-3 pr-14 bg-muted border-2 rounded-xl text-foreground font-mono placeholder:text-muted-foreground focus:outline-none transition-colors text-lg tracking-widest ${
                           errors.number
                             ? "border-red-400 focus:border-red-500"
                             : rawDigits.length === 16
@@ -505,7 +505,7 @@ export function Checkout({
                   {/* Expiry + CVV */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                      <label className="block text-sm font-bold text-foreground mb-2">
                         Fecha de caducidad
                       </label>
                       <input
@@ -519,7 +519,7 @@ export function Checkout({
                         }
                         placeholder="MM/AA"
                         maxLength={5}
-                        className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl text-gray-900 font-mono placeholder-gray-400 focus:outline-none transition-colors text-lg tracking-widest ${
+                        className={`w-full px-4 py-3 bg-muted border-2 rounded-xl text-foreground font-mono placeholder:text-muted-foreground focus:outline-none transition-colors text-lg tracking-widest ${
                           errors.expiry
                             ? "border-red-400 focus:border-red-500"
                             : isValidExpiry(expiry)
@@ -530,7 +530,7 @@ export function Checkout({
                       {errors.expiry && <FieldError msg={errors.expiry} />}
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                      <label className="block text-sm font-bold text-foreground mb-2">
                         CVV{" "}
                         <span className="font-normal text-gray-400 text-xs">
                           (3 dígitos al dorso)
@@ -548,7 +548,7 @@ export function Checkout({
                         }}
                         placeholder="•••"
                         maxLength={3}
-                        className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl text-gray-900 font-mono placeholder-gray-400 focus:outline-none transition-colors text-lg tracking-widest ${
+                        className={`w-full px-4 py-3 bg-muted border-2 rounded-xl text-foreground font-mono placeholder:text-muted-foreground focus:outline-none transition-colors text-lg tracking-widest ${
                           errors.cvv
                             ? "border-red-400 focus:border-red-500"
                             : cvv.length === 3
@@ -564,7 +564,7 @@ export function Checkout({
 
                   {/* Cardholder name */}
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-foreground mb-2">
                       Nombre del titular
                     </label>
                     <input
@@ -573,7 +573,7 @@ export function Checkout({
                       onChange={handleName}
                       onBlur={() => setTouched((t) => ({ ...t, name: true }))}
                       placeholder="NOMBRE APELLIDO"
-                      className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl text-gray-900 font-bold placeholder-gray-400 focus:outline-none transition-colors uppercase tracking-wide ${
+                      className={`w-full px-4 py-3 bg-muted border-2 rounded-xl text-foreground font-bold placeholder:text-muted-foreground focus:outline-none transition-colors uppercase tracking-wide ${
                         errors.name
                           ? "border-red-400 focus:border-red-500"
                           : name.trim().length >= 3
@@ -587,7 +587,7 @@ export function Checkout({
               </div>
 
               {/* Security badges */}
-              <div className="flex gap-4 text-xs text-gray-400">
+              <div className="flex gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Lock size={12} className="text-green-500" />
                   Cifrado SSL 256-bit
@@ -601,17 +601,17 @@ export function Checkout({
 
             {/* ── Right: Order summary ── */}
             <div className="lg:col-span-2">
-              <div className="sticky top-24 bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-black text-gray-900 mb-4">
+              <div className="sticky top-24 bg-card border-2 border-border rounded-2xl p-6 shadow-lg">
+                <h3 className="text-lg font-black text-foreground mb-4">
                   Resumen del pedido
                 </h3>
 
                 {/* Match */}
                 <div className="mb-4">
-                  <div className="text-sm font-black text-gray-900">
+                  <div className="text-sm font-black text-foreground">
                     {match.homeTeam} vs {match.awayTeam}
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     {new Date(match.date).toLocaleDateString("es-ES", {
                       weekday: "long",
                       day: "numeric",
@@ -619,13 +619,13 @@ export function Checkout({
                     })}{" "}
                     · {match.time}h
                   </div>
-                  <div className="text-xs text-gray-500">{match.stadium}</div>
+                  <div className="text-xs text-muted-foreground">{match.stadium}</div>
                 </div>
 
                 {/* Desglose de entradas */}
-                <div className="border-t border-gray-100 pt-4 pb-2 space-y-2">
+                <div className="border-t border-border pt-4 pb-2 space-y-2">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-black text-gray-500 uppercase tracking-wide">
+                    <span className="text-xs font-black text-muted-foreground uppercase tracking-wide">
                       Entradas
                     </span>
                     <span className="text-xs bg-[#EE3224]/10 text-[#EE3224] font-bold px-2 py-0.5 rounded-full border border-[#EE3224]/20">
@@ -637,18 +637,18 @@ export function Checkout({
                     {ticketItems.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100"
+                        className="flex items-center justify-between bg-muted rounded-xl px-3 py-2.5 border border-border"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <span
                             className="w-2 h-2 rounded-full shrink-0"
                             style={{ background: item.color }}
                           />
-                          <span className="text-xs font-medium text-gray-700 truncate">
+                          <span className="text-xs font-medium text-foreground truncate">
                             {item.label}
                           </span>
                         </div>
-                        <span className="text-sm font-black text-gray-900 ml-2 shrink-0">
+                        <span className="text-sm font-black text-foreground ml-2 shrink-0">
                           €{item.price.toFixed(2)}
                         </span>
                       </div>
@@ -669,9 +669,9 @@ export function Checkout({
                   />
                 </div>
 
-                <div className="border-t border-gray-200 pt-4 mb-6">
+                <div className="border-t border-border pt-4 mb-6">
                   <div className="flex justify-between items-center">
-                    <span className="font-black text-gray-900">Total</span>
+                    <span className="font-black text-foreground">Total</span>
                     <span className="text-3xl font-black text-[#EE3224]">
                       €{total.toFixed(2)}
                     </span>
@@ -698,7 +698,7 @@ export function Checkout({
                   </p>
                 )}
 
-                <p className="text-[11px] text-gray-400 text-center mt-3">
+                <p className="text-[11px] text-muted-foreground text-center mt-3">
                   Simulación — no se realizará ningún cargo real
                 </p>
               </div>
@@ -732,9 +732,9 @@ function SummaryRow({
 }) {
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-gray-500">{label}</span>
+      <span className="text-muted-foreground">{label}</span>
       <span
-        className={`font-bold ${muted ? "text-gray-400" : "text-gray-900"}`}
+        className={`font-bold ${muted ? "text-muted-foreground" : "text-foreground"}`}
       >
         {value}
       </span>

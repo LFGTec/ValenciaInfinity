@@ -26,7 +26,7 @@ export default function Album() {
   }, [searchParams]);
 
   return (
-    <div className="bg-content">
+    <div className="min-h-screen bg-content">
       <div id="card-album">
         <CardAlbum userId={userId} />
       </div>

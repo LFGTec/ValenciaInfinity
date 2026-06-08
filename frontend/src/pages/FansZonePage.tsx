@@ -10,7 +10,7 @@ import { AvatarSection } from "../components/features/avatar/AvatarSection";
 export function FansZonePage() {
   
   return (
-    <div className=" mx-auto px-4 py-12 bg-content">
+    <div className="min-h-screen mx-auto px-4 py-12 bg-content">
       
      
       <div className="mb-10">

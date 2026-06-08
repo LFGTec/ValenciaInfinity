@@ -11,7 +11,7 @@ export function News() {
   };
 
   return (
-    <section className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+    <section className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
       <div>
         <div className="mb-8">
           <h1 className="text-5xl font-black mb-3 text-foreground">NOTICIAS</h1>
