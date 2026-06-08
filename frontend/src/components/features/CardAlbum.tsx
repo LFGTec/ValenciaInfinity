@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { useSetAtom } from "jotai";
-import { pageAtom } from "../UI";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useAtom, useSetAtom } from "jotai";
+import { easing } from "maath";
+import { pageAtom, buildPages } from "../UI";
 import { Book } from "../Book";
 import { useAuth } from "../../hooks/useAuth";
 import {
@@ -14,9 +15,33 @@ import {
 } from "../../services/cardsService";
 import { PackOpenAnimation } from "./PackOpenAnimation";
 import { useVisitingAlbum } from "@/hooks/useVisitingAlbum";
-import { Star, Trophy } from "lucide-react";
 import { VisitorAlbumHeader } from "../album/visitorAlbum";
 import { AlbumProgressBar } from "../AlbumProgress";
+
+// Smoothly re-centers the book depending on open/closed state.
+// Closed (cover or back-cover): single page → shift left by half a page width.
+// Open: both pages symmetric around x=0 → no offset.
+function BookWrapper({ cards }: { cards: Card[] }) {
+  const [page] = useAtom(pageAtom);
+  const groupRef = useRef<import("three").Group>(null);
+  const pagesCount = useMemo(() => buildPages(cards).length, [cards]);
+
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    // Front cover: page extends right → shift left to center it
+    // Back cover:  page extends left  → shift right to center it
+    // Open:        both pages symmetric around x=0 → no offset
+    const targetX = page === 0 ? -0.64 : page === pagesCount ? 0.64 : 0;
+    easing.damp(groupRef.current.position, "x", targetX, 0.25, delta);
+  });
+
+  return (
+    // Start already at the closed position (page=0 on mount)
+    <group ref={groupRef} position={[-0.64, -0.05, 0]}>
+      <Book cards={cards} />
+    </group>
+  );
+}
 
 type Props = {
   userId?: string;
@@ -127,8 +152,11 @@ export function CardAlbum({ userId }: Props) {
     totalCards > 0 ? Math.round((obtainedCards / totalCards) * 100) : 0;
 
   const filteredCards = useMemo(() => {
+    const seen = new Set<string>();
     return cards.filter((card) => {
-      
+      if (seen.has(card.id)) return false;
+      seen.add(card.id);
+
       const matchesCategory =
         selectedCategory === "todas" ||
         (selectedCategory === "jugadores" && card.type === "jugador") ||
@@ -137,18 +165,16 @@ export function CardAlbum({ userId }: Props) {
         (selectedCategory === "Comun" && card.rarity === "Comun") ||
         (selectedCategory === "Raro" && card.rarity === "Raro");
 
-      return  matchesCategory;
+      return matchesCategory;
     });
   }, [cards, searchQuery, selectedCategory]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setPage(0);
   };
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    setPage(0);
   };
   // Handle pack opening and card reveal
   const handleOpenPack = async (packId: string) => {
@@ -251,104 +277,100 @@ export function CardAlbum({ userId }: Props) {
 
           {/* Progress card */}
           <AlbumProgressBar
-  obtained={obtainedCards}
-  total={totalCards}
-  missing={missingCards}
-  progress={progress}
-  duplicated={duplicatedCards}
-/>
-          
+            obtained={obtainedCards}
+            total={totalCards}
+            missing={missingCards}
+            progress={progress}
+            duplicated={duplicatedCards}
+          />
 
-          {/* Packs */}
-          <div className="bg-card border-2 border-vcf-orange dark:border-border backdrop-blur-sm rounded-lg px-6 py-4 mb-12 transition-colors">
-            <div className="mb-4">
-              <p className="text-xl font-black text-foreground">
-                SOBRES <span className="text-vcf-orange">SIN ABRIR</span>
-              </p>
+          {/* Packs — only shown on own album */}
+          {!isVisiting && (
+            <div className="bg-card border-2 border-vcf-orange dark:border-border backdrop-blur-sm rounded-lg px-6 py-4 mb-6 transition-colors">
+              <div className="mb-4">
+                <p className="text-xl font-black text-foreground">
+                  SOBRES <span className="text-vcf-orange">SIN ABRIR</span>
+                </p>
 
-              <p className="text-sm text-muted-foreground">
-                {packsLoading
-                  ? "Cargando..."
-                  : `Tienes ${packs.length} ${packs.length === 1 ? "sobre" : "sobres"} esperando ser ${packs.length === 1 ? "abierto" : "abiertos"}`}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 px-6 py-4">
-              {packs.length > 0 &&
-                packs.map((pack) => (
-                  <div
-                    key={pack.id}
-                    onClick={() => handleOpenPack(pack.id)}
-                    className="border-2 border-vcf-orange dark:border-border rounded-lg aspect-square bg-gray-50 dark:bg-muted hover:bg-vcf-orange/10 dark:hover:bg-neutral-800 transition-colors cursor-pointer flex items-center justify-center"
-                  >
-                    {openingPackId === pack.id ? (
-                      <div className="text-center">
-                        <div className="animate-spin mb-2">📦</div>
-                        <p className="text-xs font-bold text-vcf-orange">Abriendo...</p>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-4xl">📦</p>
-                        <p className="text-xs font-bold text-muted-foreground mt-2">
-                          Sobre
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-
-            {/* Search and filter section */}
-            <div className="mb-6">
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
-                {/* Search input */}
-            
-
-                {/* Category filter tabs */}
-                <div className="flex overflow-x-auto gap-3 pb-2">
-                  {[
-                    { id: "todas", label: "TODAS", count: cards.length },
-                    {
-                      id: "jugadores",
-                      label: "JUGADORES",
-                      count: cards.filter((c) => c.type === "jugador").length,
-                    },
-                    {
-                      id: "leyendas",
-                      label: "LEYENDAS",
-                      count: cards.filter((c) => c.rarity === "Legendario")
-                        .length,
-                    },
-                    {
-                      id: "Epica",
-                      label: "ÉPICA",
-                      count: cards.filter((c) => c.rarity === "Epica").length,
-                    },
-                    {
-                      id: "Comun",
-                      label: "COMUN",
-                      count: cards.filter((c) => c.rarity === "Comun").length,
-                    },
-                    {
-                      id: "Raro",
-                      label: "RARO",
-                      count: cards.filter((c) => c.rarity === "Raro").length,
-                    },
-                  ].map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => handleCategoryChange(category.id)}
-                      className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all ${
-                        selectedCategory === category.id
-                          ? "bg-vcf-orange text-white shadow-lg"
-                          : "bg-white dark:bg-card border-2 border-gray-200 dark:border-border text-foreground hover:border-vcf-orange"
-                      }`}
-                    >
-                      {category.label} ({category.count})
-                    </button>
-                  ))}
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  {packsLoading
+                    ? "Cargando..."
+                    : `Tienes ${packs.length} ${packs.length === 1 ? "sobre" : "sobres"} esperando ser ${packs.length === 1 ? "abierto" : "abiertos"}`}
+                </p>
               </div>
+
+              <div className="grid grid-cols-3 gap-4 px-6 py-4">
+                {packs.length > 0 &&
+                  packs.map((pack) => (
+                    <div
+                      key={pack.id}
+                      onClick={() => handleOpenPack(pack.id)}
+                      className="border-2 border-vcf-orange dark:border-border rounded-lg aspect-square bg-gray-50 dark:bg-muted hover:bg-vcf-orange/10 dark:hover:bg-neutral-800 transition-colors cursor-pointer flex items-center justify-center"
+                    >
+                      {openingPackId === pack.id ? (
+                        <div className="text-center">
+                          <div className="animate-spin mb-2">📦</div>
+                          <p className="text-xs font-bold text-vcf-orange">
+                            Abriendo...
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <p className="text-4xl">📦</p>
+                          <p className="text-xs font-bold text-muted-foreground mt-2">
+                            Sobre
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Category filter tabs — always visible */}
+          <div className="mb-12">
+            <div className="flex overflow-x-auto gap-3 pb-2">
+              {[
+                { id: "todas", label: "TODAS", count: cards.length },
+                {
+                  id: "jugadores",
+                  label: "JUGADORES",
+                  count: cards.filter((c) => c.type === "jugador").length,
+                },
+                {
+                  id: "leyendas",
+                  label: "LEYENDAS",
+                  count: cards.filter((c) => c.rarity === "Legendario").length,
+                },
+                {
+                  id: "Epica",
+                  label: "ÉPICA",
+                  count: cards.filter((c) => c.rarity === "Epica").length,
+                },
+                {
+                  id: "Comun",
+                  label: "COMUN",
+                  count: cards.filter((c) => c.rarity === "Comun").length,
+                },
+                {
+                  id: "Raro",
+                  label: "RARO",
+                  count: cards.filter((c) => c.rarity === "Raro").length,
+                },
+              ].map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryChange(category.id)}
+                  className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    selectedCategory === category.id
+                      ? "bg-vcf-orange text-white shadow-lg"
+                      : "bg-white dark:bg-card border-2 border-gray-200 dark:border-border text-foreground hover:border-vcf-orange"
+                  }`}
+                >
+                  {category.label} ({category.count})
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -357,23 +379,21 @@ export function CardAlbum({ userId }: Props) {
       {/* 3D Book canvas container */}
       <div id="album-book" className="album-canvas-wrapper">
         <Canvas
-          camera={{ fov: 35, position: [1.7, 0.15, 3.4] }}
+          camera={{ fov: 45, position: [0, 0.1, 4.0] }}
           dpr={[1, 1.8]}
           shadows
         >
           <color attach="background" args={["#ffffff"]} />
           <ambientLight intensity={0.8} />
           <directionalLight
-            position={[2, 3, 2]}
+            position={[0, 3, 2]}
             intensity={1.3}
             castShadow
             shadow-mapSize-width={1024}
             shadow-mapSize-height={1024}
           />
 
-          <group position={[-0.1, -0.05, 0]}>
-            <Book cards={filteredCards} />
-          </group>
+          <BookWrapper cards={filteredCards} />
         </Canvas>
       </div>
 
