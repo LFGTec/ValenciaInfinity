@@ -50,7 +50,7 @@ export function Friends() {
     }, [searchQuery]);
 
     if (loading) {
-        return <div>Cargando...</div>;
+        return <div className="min-h-screen" />;
     }
 
     return (

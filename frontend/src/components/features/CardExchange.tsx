@@ -252,7 +252,7 @@ export function CardExchange() {
     const success = await acceptTrade(tradeId);
     if (success) {
       showFeedback(
-        "Felicidades. Las cartas intercambiadas se anadiran a tu album.",
+        "Felicidades. Las cartas intercambiadas se añadirán a tu álbum.",
         "success"
       );
     } else {
@@ -434,7 +434,7 @@ export function CardExchange() {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 py-6 bg-content">
+    <div className="min-h-screen max-w-[1600px] mx-auto px-4 py-6 bg-content">
       <div className="mb-6">
         <h1 className="text-5xl font-black mb-4 text-foreground">
           INTERCAMBIO DE{" "}

@@ -145,7 +145,7 @@ export default function LogInn() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-background">
       {/* ── Panel izquierdo ── */}
       <div
         className="hidden lg:flex flex-1 relative flex-col items-center justify-center overflow-hidden"
@@ -263,7 +263,7 @@ export default function LogInn() {
       {/* ── Panel derecho – Formulario ── */}
       <div
         className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-y-auto"
-        style={{ background: "#f5f5f5" }}
+        style={{ background: "var(--background)" }}
       >
         {/* Línea acento móvil */}
         <div
@@ -295,7 +295,7 @@ export default function LogInn() {
               />
             </div>
             <div>
-              <p style={{ fontWeight: 900, fontSize: "1.125rem", color: "#1a1a1a", margin: 0 }}>
+              <p style={{ fontWeight: 900, fontSize: "1.125rem", color: "var(--foreground)", margin: 0 }}>
                 VALENCIA CF
               </p>
               <p style={{ fontSize: "0.7rem", fontWeight: 700, color: "#ff671f", letterSpacing: "2px", margin: 0 }}>
@@ -310,14 +310,14 @@ export default function LogInn() {
               style={{
                 fontWeight: 900,
                 fontSize: "1.8rem",
-                color: "#1a1a1a",
+                color: "var(--foreground)",
                 marginBottom: "6px",
                 lineHeight: 1.15,
               }}
             >
               Bienvenido de vuelta
             </h2>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>
+            <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)", margin: 0 }}>
               Inicia sesión para acceder a tu cuenta de fan
             </p>
           </div>
@@ -330,7 +330,7 @@ export default function LogInn() {
             {/* Email */}
             <div>
               <label
-                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "#374151", fontWeight: 600 }}
+                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "var(--foreground)", fontWeight: 600 }}
               >
                 Correo electrónico
               </label>
@@ -361,14 +361,14 @@ export default function LogInn() {
                     paddingBottom: "12px",
                     borderRadius: "12px",
                     fontSize: "0.875rem",
-                    background: "#f9fafb",
-                    border: emailError ? "1px solid #ef4444" : "1px solid #e5e7eb",
-                    color: "#1a1a1a",
+                    background: "var(--input-background)",
+                    border: emailError ? "1px solid #ef4444" : "1px solid var(--border)",
+                    color: "var(--foreground)",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = emailError ? "#ef4444" : "#e5e7eb")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = emailError ? "#ef4444" : "var(--border)")}
                 />
               </div>
               {emailError && (
@@ -381,7 +381,7 @@ export default function LogInn() {
             {/* Contraseña */}
             <div>
               <label
-                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "#374151", fontWeight: 600 }}
+                style={{ display: "block", fontSize: "0.875rem", marginBottom: "8px", color: "var(--foreground)", fontWeight: 600 }}
               >
                 Contraseña
               </label>
@@ -412,14 +412,14 @@ export default function LogInn() {
                     paddingBottom: "12px",
                     borderRadius: "12px",
                     fontSize: "0.875rem",
-                    background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
-                    color: "#1a1a1a",
+                    background: "var(--input-background)",
+                    border: "1px solid var(--border)",
+                    color: "var(--foreground)",
                     outline: "none",
                     boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#ff671f")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
                 />
                 <button
                   type="button"
@@ -552,11 +552,11 @@ export default function LogInn() {
 
           {/* Divider */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "36px", marginBottom: "24px" }}>
-            <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
-            <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 500, whiteSpace: "nowrap" }}>
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+            <span style={{ fontSize: "0.75rem", color: "var(--muted-foreground)", fontWeight: 500, whiteSpace: "nowrap" }}>
               O continúa con
             </span>
-            <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
           </div>
 
           {/* Botón Google */}
@@ -569,9 +569,9 @@ export default function LogInn() {
               borderRadius: "12px",
               fontSize: "0.9rem",
               fontWeight: 600,
-              color: "#1a1a1a",
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
+              color: "var(--foreground)",
+              background: "var(--card)",
+              border: "1px solid var(--border)",
               cursor: isLoading ? "not-allowed" : "pointer",
               opacity: isLoading ? 0.6 : 1,
               display: "flex",
@@ -580,8 +580,8 @@ export default function LogInn() {
               gap: "10px",
               transition: "background 0.15s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f9fafb")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--muted)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--card)")}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -593,7 +593,7 @@ export default function LogInn() {
           </button>
 
           {/* Registro */}
-          <p style={{ textAlign: "center", marginTop: "36px", paddingBottom: "16px", fontSize: "0.875rem", color: "#6b7280" }}>
+          <p style={{ textAlign: "center", marginTop: "36px", paddingBottom: "16px", fontSize: "0.875rem", color: "var(--muted-foreground)" }}>
             ¿No tienes cuenta?{" "}
             <button
               onClick={() => navigate("/signup")}

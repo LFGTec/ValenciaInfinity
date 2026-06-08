@@ -7,7 +7,7 @@ export function TeamPage() {
  
   const { players: teamPlayers, loading } = usePlayers();
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) return <div className="min-h-screen" />;
 
   return (
     <div className="min-h-screen bg-content">

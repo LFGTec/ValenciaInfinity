@@ -40,7 +40,7 @@ export default function UserConfig(){
     !user?.isGoogleUser;
 
     return (
-        <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+        <div className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
   
             {/* Header */}
             <div className="mb-8">

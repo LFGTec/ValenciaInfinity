@@ -31,23 +31,23 @@ export function AlbumProgressBar({
       </div>
 
       <div className="grid grid-cols-4 gap-3">
-        <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
+        <div className="bg-muted rounded-lg px-3 py-2 text-center">
           <p className="text-2xl md:text-3xl font-black text-vcf-orange">
             {obtained}
           </p>
-          <p className="text-xs text-gray-600 font-medium">Obtenidas</p>
+          <p className="text-xs text-muted-foreground font-medium">Obtenidas</p>
         </div>
-        <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-          <p className="text-2xl md:text-3xl font-black text-black">
+        <div className="bg-muted rounded-lg px-3 py-2 text-center">
+          <p className="text-2xl md:text-3xl font-black text-foreground">
             {missing}
           </p>
-          <p className="text-xs text-gray-600 font-medium">Faltantes</p>
+          <p className="text-xs text-muted-foreground font-medium">Faltantes</p>
         </div>
-        <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
+        <div className="bg-muted rounded-lg px-3 py-2 text-center">
           <p className="text-2xl md:text-3xl font-black text-vcf-orange">{duplicated}</p>
-          <p className="text-xs text-gray-600 font-medium">Duplicadas</p>
+          <p className="text-xs text-muted-foreground font-medium">Duplicadas</p>
         </div>
-        <div className="bg-gray-50 dark:bg-muted rounded-lg px-3 py-2 text-center">
+        <div className="bg-muted rounded-lg px-3 py-2 text-center">
           <p className="text-2xl md:text-3xl font-black text-foreground">0</p>
           <p className="text-xs text-muted-foreground font-medium">
             Legendarias
