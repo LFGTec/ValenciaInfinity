@@ -139,6 +139,7 @@ function GridSection({
                     RECLAMADO
                   </span>
                 </div>
+                
               ) : todayReward?.available ? (
                 <button
                   onClick={handleClaim}
