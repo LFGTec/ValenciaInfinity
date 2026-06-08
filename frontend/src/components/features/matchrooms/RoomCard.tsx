@@ -49,7 +49,7 @@ export function RoomCard({ room, variant, onJoin, onDelete }: RoomCardProps) {
 
         <motion.button
           onClick={() => onJoin?.(room)}
-          className="w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black text-base"
+          className="w-full py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black text-base cursor-pointer"
           whileHover={{ scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
           whileTap={{ scale: 0.97 }}
           transition={spring}
@@ -84,7 +84,7 @@ export function RoomCard({ room, variant, onJoin, onDelete }: RoomCardProps) {
         {room.invite_code && (
           <motion.button
             onClick={copyInviteLink}
-            className="px-4 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black flex items-center gap-2"
+            className="px-4 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black flex items-center gap-2 cursor-pointer"
             whileHover={{ scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
             whileTap={{ scale: 0.97 }}
             transition={spring}
@@ -96,7 +96,7 @@ export function RoomCard({ room, variant, onJoin, onDelete }: RoomCardProps) {
         {onDelete && (
           <motion.button
             onClick={() => onDelete(room.id)}
-            className="px-4 py-3 bg-muted border-2 border-border text-foreground rounded-lg font-black"
+            className="px-4 py-3 bg-muted border-2 border-border text-foreground rounded-lg font-black cursor-pointer"
             whileHover={{ scale: 1.05, borderColor: "#e05516" }}
             whileTap={{ scale: 0.97 }}
             transition={spring}

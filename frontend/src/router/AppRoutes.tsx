@@ -32,10 +32,11 @@ import { EstadisticasPage } from "@/pages/EstadisticasPage";
 import { CardExchange } from "@/components/features/CardExchange";
 import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
+import { AvatarPage } from "@/pages/AvatarPage";
 import { DailyRewards } from "@/pages/DailyRewards";
 import UserConfig from "@/components/features/UserConfig";
 import { TicketPurchase } from "@/pages/TicketsPage";
-import {StorePage}  from "@/pages/StorePage" 
+import { StorePage } from "@/pages/StorePage";
 
 function RedirectHome() {
   const navigate = useNavigate();
@@ -79,6 +80,7 @@ export default function AppRoutes() {
           <Route path="/ticket" element={<TicketPurchase />} />
           <Route path="/settings" element={<UserConfig />} />
           <Route path="/store" element={<StorePage />} />
+          <Route path="/avatar" element={<AvatarPage />} />
         </Route>
 
         {/* Catch-all dentro del layout */}

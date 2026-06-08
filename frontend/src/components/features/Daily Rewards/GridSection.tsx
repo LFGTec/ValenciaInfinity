@@ -200,7 +200,7 @@ function GridSection({
       <section>
         <button
           onClick={() => setCalendarOpen((o) => !o)}
-          className="w-full flex items-center justify-between px-6 py-4 bg-card border-2 border-border rounded-2xl hover:border-vcf-orange/50 transition-all group"
+          className="w-full flex items-center justify-between px-6 py-4 bg-card border-2 border-border rounded-2xl hover:border-vcf-orange/50 transition-all group cursor-pointer"
         >
           <div className="flex items-center gap-4">
             <span className="text-xl font-black text-foreground group-hover:text-vcf-orange transition-colors">

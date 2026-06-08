@@ -100,7 +100,7 @@ export function MatchRooms() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 font-bold transition-all ${
+            className={`px-6 py-3 font-bold transition-all cursor-pointer ${
               activeTab === tab.id
                 ? "border-b-4 border-vcf-orange text-vcf-orange"
                 : "text-muted-foreground hover:text-foreground"
@@ -154,7 +154,7 @@ export function MatchRooms() {
               <p className="text-2xl font-black mb-2">No tienes salas</p>
               <motion.button
                 onClick={() => setActiveTab("create")}
-                className="mt-4 px-6 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black"
+                className="mt-4 px-6 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black cursor-pointer"
                 whileHover={{ scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}

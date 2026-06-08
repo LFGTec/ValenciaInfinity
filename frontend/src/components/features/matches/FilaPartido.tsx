@@ -109,7 +109,7 @@ export function FilaPartido({
         )}
         <button
           onClick={() => onInfo(partido)}
-          className="px-4 py-2 bg-white border-2 border-white text-vcf-orange rounded-lg text-base font-black hover:bg-gray-100 transition-all shadow-md hover:scale-105"
+          className="px-4 py-2 bg-white border-2 border-white text-vcf-orange rounded-lg text-base font-black transition-all shadow-md hover:-translate-y-1 cursor-pointer"
         >
           INFO
         </button>

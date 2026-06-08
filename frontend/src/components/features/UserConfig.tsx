@@ -73,7 +73,7 @@ export default function UserConfig(){
 
                         <button
                         onClick={toggleTheme}
-                        className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 ${
+                        className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 cursor-pointer ${
                             darkMode ? "bg-vcf-orange" : "bg-muted"
                         }`}
                         >
