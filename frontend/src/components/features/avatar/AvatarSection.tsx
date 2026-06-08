@@ -28,7 +28,6 @@ function normalize(value?: string) {
 
 function getPaletteColors(colors: any): string[] {
   if (Array.isArray(colors)) return colors;
-
   if (typeof colors === "string") {
     try {
       const parsed = JSON.parse(colors);
@@ -37,16 +36,13 @@ function getPaletteColors(colors: any): string[] {
       return [];
     }
   }
-
   return [];
 }
 
 function sameCategory(a?: string, b?: string) {
   const x = normalize(a);
   const y = normalize(b);
-
   if (x === y) return true;
-
   const aliases: Record<string, string[]> = {
     cabeza: ["cabeza", "head", "cara", "face"],
     cabello: ["cabello", "hair", "pelo", "cejas", "barba"],
@@ -56,99 +52,54 @@ function sameCategory(a?: string, b?: string) {
     sombrero: ["sombrero", "hat"],
     zapatos: ["zapatos", "shoes"],
   };
-
   return Object.values(aliases).some(
     (group) => group.includes(x) && group.includes(y)
   );
 }
 
 function getColorCategory(categoryId: string) {
-  const category = normalize(categoryId);
-
-  if (
-    category === "cabello" ||
-    category === "cejas" ||
-    category === "barba" ||
-    category === "hair" ||
-    category === "eyebrow" ||
-    category === "eyebrows" ||
-    category === "facialhair"
-  ) {
-    return "Cabello";
-  }
-
-  if (category === "nariz" || category === "nose") {
-    return "Cabeza";
-  }
-
-  if (category === "pantalon" || category === "bottom") {
-    return "Pantalón";
-  }
-
-  if (category === "playera" || category === "top") {
-    return "Playera";
-  }
-
-  if (category === "lentes" || category === "glasses") {
-    return "Lentes";
-  }
-
-  if (category === "sombrero" || category === "hat") {
-    return "Sombrero";
-  }
-
-  if (category === "zapatos" || category === "shoes") {
-    return "Zapatos";
-  }
-
+  const c = normalize(categoryId);
+  if (["cabello","cejas","barba","hair","eyebrow","eyebrows","facialhair"].includes(c)) return "Cabello";
+  if (["nariz","nose"].includes(c)) return "Cabeza";
+  if (["pantalon","bottom"].includes(c)) return "Pantalón";
+  if (["playera","top"].includes(c)) return "Playera";
+  if (["lentes","glasses"].includes(c)) return "Lentes";
+  if (["sombrero","hat"].includes(c)) return "Sombrero";
+  if (["zapatos","shoes"].includes(c)) return "Zapatos";
   return categoryId;
 }
 
 function buildInitialAssets(categories: AvatarCategory[]) {
   const initialAssets: Record<string, AvatarAsset> = {};
-
   categories.forEach((cat) => {
     if (cat.assets.length > 0 && !cat.removable && !cat.removible) {
       initialAssets[cat.id] = cat.assets[0];
     }
   });
-
   return initialAssets;
 }
 
 function buildInitialColors(palettes: any[]) {
   const initialColors: Record<string, string> = {};
-
   palettes.forEach((palette: any) => {
     const colors = getPaletteColors(palette?.colores);
-
     if (palette?.categoria && colors.length > 0) {
       initialColors[palette.categoria] = colors[0];
     }
   });
-
   return initialColors;
 }
 
 function getRandomColorForCategory(categoryId: string, palettes: any[]) {
   const colorCategory = getColorCategory(categoryId);
-
-  const palette = palettes.find((p) => {
-    return (
-      sameCategory(p?.categoria, colorCategory) ||
-      sameCategory(p?.nombre, colorCategory)
-    );
-  });
-
+  const palette = palettes.find((p) =>
+    sameCategory(p?.categoria, colorCategory) || sameCategory(p?.nombre, colorCategory)
+  );
   const colors = getPaletteColors(palette?.colores);
-
   if (colors.length === 0) return null;
-
-  const randomColorIndex = Math.floor(Math.random() * colors.length);
-
   return {
     key: palette?.categoria || colorCategory,
-    color: colors[randomColorIndex],
+    color: colors[Math.floor(Math.random() * colors.length)],
   };
 }
 
@@ -160,82 +111,60 @@ export function AvatarSection() {
   const [palettes, setPalettes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [toast, setToast] = useState<ToastType | null>(null);
 
-  const showToast = (newToast: ToastType) => {
-    setToast(newToast);
+  const showToast = (t: ToastType) => {
+    setToast(t);
     setTimeout(() => setToast(null), 3000);
   };
 
   useEffect(() => {
-    async function loadAvatar() {
+    async function load() {
       try {
         const data = await getAvatarCategories();
         const paletteData = await getAvatarPalettes();
         const savedAvatar = await getUserAvatar();
-
         setCategories(data);
         setPalettes(paletteData);
-
-        if (data.length > 0) {
-          setSelectedCategory(data[0].id);
-        }
-
-        const defaultAssets = buildInitialAssets(data);
-        const defaultColors = buildInitialColors(paletteData);
+        if (data.length > 0) setSelectedCategory(data[0].id);
         const savedState = buildSavedAvatarState(savedAvatar);
-
-        setSelectedAssets({ ...defaultAssets, ...savedState.selectedAssets });
-        setSelectedColors({ ...defaultColors, ...savedState.selectedColors });
-      } catch (error) {
-        console.error("Error cargando avatar:", error);
+        setSelectedAssets({ ...buildInitialAssets(data), ...savedState.selectedAssets });
+        setSelectedColors({ ...buildInitialColors(paletteData), ...savedState.selectedColors });
+      } catch {
         showToast({ type: "error", title: "ERROR", message: "No se pudo cargar el avatar" });
       } finally {
         setLoading(false);
       }
     }
-
-    loadAvatar();
+    load();
   }, []);
 
-  const handleSelectAsset = (categoryId: string, asset: AvatarAsset) => {
+  const handleSelectAsset = (categoryId: string, asset: AvatarAsset) =>
     setSelectedAssets((prev) => ({ ...prev, [categoryId]: asset }));
-  };
 
-  const handleRemoveAsset = (categoryId: string) => {
+  const handleRemoveAsset = (categoryId: string) =>
     setSelectedAssets((prev) => {
       const copy = { ...prev };
       delete copy[categoryId];
       return copy;
     });
-  };
 
-  const handleSelectColor = (categoryId: string, color: string) => {
+  const handleSelectColor = (categoryId: string, color: string) =>
     setSelectedColors((prev) => ({ ...prev, [categoryId]: color }));
-  };
 
   const handleRandomize = () => {
-    const randomAssets: Record<string, AvatarAsset> = {};
-    const randomColors: Record<string, string> = {};
-
+    const assets: Record<string, AvatarAsset> = {};
+    const colors: Record<string, string> = {};
     categories.forEach((cat) => {
       if (cat.assets.length > 0) {
-        const shouldRemove = (cat.removable || cat.removible) && Math.random() < 0.35;
-        if (!shouldRemove) {
-          const randomIndex = Math.floor(Math.random() * cat.assets.length);
-          randomAssets[cat.id] = cat.assets[randomIndex];
-        }
+        const skip = (cat.removable || cat.removible) && Math.random() < 0.35;
+        if (!skip) assets[cat.id] = cat.assets[Math.floor(Math.random() * cat.assets.length)];
       }
-
-      const randomColor = getRandomColorForCategory(cat.id, palettes);
-      if (randomColor) {
-        randomColors[randomColor.key] = randomColor.color;
-      }
+      const rc = getRandomColorForCategory(cat.id, palettes);
+      if (rc) colors[rc.key] = rc.color;
     });
-
-    setSelectedAssets(randomAssets);
-    setSelectedColors(randomColors);
+    setSelectedAssets(assets);
+    setSelectedColors(colors);
   };
 
   const handleSave = async () => {
@@ -243,48 +172,54 @@ export function AvatarSection() {
       setSaving(true);
       await saveFullUserAvatar(selectedAssets, selectedColors);
       showToast({ type: "success", title: "¡ÉXITO!", message: "Avatar guardado correctamente" });
-    } catch (error) {
-      console.error("Error guardando avatar:", error);
+    } catch {
       showToast({ type: "error", title: "ERROR", message: "No se pudo guardar el avatar" });
     } finally {
       setSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center text-muted-foreground font-black">
+        Cargando avatar...
+      </div>
+    );
+  }
+
   return (
-    <section className="mt-12 mb-12 overflow-hidden rounded-2xl bg-[#120f2b] shadow-2xl border border-white/10">
+    <div className="h-full flex gap-4 relative">
       {/* Toast */}
       {toast && (
-        <div className="absolute right-6 top-6 z-[999] flex items-center gap-4 rounded-xl border border-vcf-orange bg-card px-5 py-4 shadow-2xl max-w-sm">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-vcf-orange text-white font-black text-lg">
+        <div className="absolute right-0 top-0 z-[999] flex items-center gap-3 rounded-xl border border-vcf-orange bg-card px-4 py-3 shadow-2xl max-w-xs">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-vcf-orange text-white font-black text-sm">
             {toast.type === "success" ? "✓" : "!"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-black text-vcf-orange text-sm">{toast.title}</p>
+            <p className="font-black text-vcf-orange text-xs">{toast.title}</p>
             <p className="text-xs text-foreground mt-0.5">{toast.message}</p>
           </div>
           <button
             type="button"
             onClick={() => setToast(null)}
-            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-lg leading-none"
+            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer leading-none"
           >
             ×
           </button>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <div>
-          <h3 className="text-white font-black text-base tracking-wide">PERSONALIZA TU AVATAR</h3>
-          <p className="text-white/40 text-xs font-bold mt-0.5">Elige tu look para la temporada</p>
-        </div>
-        <div className="flex gap-2">
+      {/* ── Canvas card ── */}
+      <div className="relative flex-1 rounded-2xl overflow-hidden bg-[#120f2b] border border-white/10 shadow-xl">
+        <AvatarCanvas selectedAssets={selectedAssets} selectedColors={selectedColors} />
+
+        {/* Action buttons overlaid top-right */}
+        <div className="absolute top-3 right-3 z-10 flex gap-2">
           <button
             type="button"
             onClick={handleRandomize}
             disabled={saving}
-            className="rounded-xl bg-white/10 border border-white/20 px-4 py-2 text-sm font-black text-white disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer hover:bg-white/20"
+            className="rounded-lg bg-black/50 backdrop-blur-sm border border-white/20 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer hover:bg-black/70"
           >
             ↻ Aleatorio
           </button>
@@ -292,44 +227,27 @@ export function AvatarSection() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="rounded-xl bg-vcf-orange px-5 py-2 text-sm font-black text-white shadow-lg shadow-vcf-orange/20 disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer"
+            className="rounded-lg bg-vcf-orange px-4 py-1.5 text-xs font-black text-white shadow-md shadow-vcf-orange/30 disabled:opacity-50 transition-all hover:-translate-y-1 cursor-pointer"
           >
-            {saving ? "Guardando..." : "Guardar avatar"}
+            {saving ? "Guardando..." : "Guardar"}
           </button>
         </div>
       </div>
 
-      {/* Body */}
-      {loading ? (
-        <div className="flex h-[460px] items-center justify-center text-white font-black">
-          Cargando avatar...
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px]">
-          {/* Canvas */}
-          <div className="relative h-[460px]">
-            <AvatarCanvas
-              selectedAssets={selectedAssets}
-              selectedColors={selectedColors}
-            />
-          </div>
-
-          {/* Controls panel */}
-          <div className="border-t border-white/10 lg:border-t-0 lg:border-l lg:border-white/10 h-[460px] overflow-y-auto">
-            <AvatarControls
-              categories={categories}
-              selectedCategory={selectedCategory}
-              selectedAssets={selectedAssets}
-              selectedColors={selectedColors}
-              palettes={palettes}
-              onSelectCategory={setSelectedCategory}
-              onSelectAsset={handleSelectAsset}
-              onRemoveAsset={handleRemoveAsset}
-              onSelectColor={handleSelectColor}
-            />
-          </div>
-        </div>
-      )}
-    </section>
+      {/* ── Controls card ── */}
+      <div className="w-[360px] flex-shrink-0 rounded-2xl overflow-hidden bg-card border border-border shadow-xl">
+        <AvatarControls
+          categories={categories}
+          selectedCategory={selectedCategory}
+          selectedAssets={selectedAssets}
+          selectedColors={selectedColors}
+          palettes={palettes}
+          onSelectCategory={setSelectedCategory}
+          onSelectAsset={handleSelectAsset}
+          onRemoveAsset={handleRemoveAsset}
+          onSelectColor={handleSelectColor}
+        />
+      </div>
+    </div>
   );
 }
