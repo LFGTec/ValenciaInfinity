@@ -64,6 +64,11 @@ function detectarCategoria(titulo: string, descripcion: string): Categoria {
   return "EQUIPO";
 }
 
+function decodeEntities(text: string): string {
+  const doc = new DOMParser().parseFromString(text, "text/html");
+  return doc.body.textContent ?? text;
+}
+
 function getText(el: Element, tag: string): string {
   return el.getElementsByTagName(tag)[0]?.textContent?.trim() ?? "";
 }
@@ -109,10 +114,10 @@ async function fetchRSS(source: { key: string; name: string }): Promise<Noticia[
   const items = Array.from(doc.getElementsByTagName("item")).slice(0, 15);
 
   return items.map((item) => {
-    const titulo = getText(item, "title");
-    const descripcion = getText(item, "description")
-      .replace(/<[^>]*>/g, "")
-      .slice(0, 200);
+    const titulo = decodeEntities(getText(item, "title"));
+    const descripcion = decodeEntities(
+      getText(item, "description").replace(/<[^>]*>/g, "")
+    ).slice(0, 200);
     return {
       titulo,
       descripcion,
