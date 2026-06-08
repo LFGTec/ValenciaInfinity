@@ -40,7 +40,7 @@ describe("Amigos", () => {
     .click();
 
     cy.get('[data-testid="friend-search-input"]')
-      .type("Angel García");
+      .type("Juan Pablo");
 
     cy.contains("AGREGAR AMIGO")
       .first()

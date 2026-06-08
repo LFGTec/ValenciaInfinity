@@ -142,6 +142,7 @@ function GridSection({
                 
               ) : todayReward?.available ? (
                 <button
+                  data-testid="claim-reward-button"
                   onClick={handleClaim}
                   className="flex items-center gap-3 px-8 py-4 bg-vcf-orange text-white rounded-xl font-black text-lg hover:bg-[#e05516] transition-all shadow-lg hover:shadow-vcf-orange/40 hover:scale-105"
                 >

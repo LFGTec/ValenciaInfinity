@@ -225,6 +225,7 @@ export function TriviasQuizzes() {
             </div>
 
             <button
+              data-testid="continue-after-quiz"
               onClick={resetQuiz}
               className="w-full py-4 bg-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-colors shadow-lg"
             >
@@ -497,6 +498,7 @@ export function TriviasQuizzes() {
                     </button>
                   ) : (
                     <button
+                      data-testid={`start-trivia-${trivia.id}`}
                       onClick={() => handleStartTrivia(trivia)}
                       className="px-6 md:px-8 py-3 md:py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:border-[#e05516] transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base w-full"
                     >

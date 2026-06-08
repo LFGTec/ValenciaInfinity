@@ -277,6 +277,7 @@ export function CardAlbum({ userId }: Props) {
               {packs.length > 0 &&
                 packs.map((pack) => (
                   <div
+                    data-testid={`pack-${pack.id}`}
                     key={pack.id}
                     onClick={() => handleOpenPack(pack.id)}
                     className="border-2 border-vcf-orange dark:border-border rounded-lg aspect-square bg-gray-50 dark:bg-muted hover:bg-vcf-orange/10 dark:hover:bg-neutral-800 transition-colors cursor-pointer flex items-center justify-center"
@@ -284,7 +285,7 @@ export function CardAlbum({ userId }: Props) {
                     {openingPackId === pack.id ? (
                       <div className="text-center">
                         <div className="animate-spin mb-2">📦</div>
-                        <p className="text-xs font-bold text-vcf-orange">Abriendo...</p>
+                        <p data-testid="opening-pack" className="text-xs font-bold text-vcf-orange">Abriendo...</p>
                       </div>
                     ) : (
                       <div className="text-center">

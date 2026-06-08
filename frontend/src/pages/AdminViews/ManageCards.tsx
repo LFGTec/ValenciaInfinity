@@ -203,6 +203,7 @@ export function ManageCards(){
                             size={20}
                         />
                         <input
+                            data-testid="search-card-input"
                             type="text"
                             placeholder="Buscar cartas por nombre..."
                             value={searchTerm}
@@ -213,6 +214,7 @@ export function ManageCards(){
 
                         {/* Add Button */}
                         <button
+                        data-testid="add-card-button"
                         onClick={() => setShowForm(true)}
                         className="w-full md:w-auto px-6 py-3 bg-black border-2 border-black text-white rounded-lg font-black hover:bg-gray-900 hover:border-gray-900 transition-all shadow-md hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2"
                         >
@@ -284,12 +286,13 @@ export function ManageCards(){
 
                             {/* Actions */}
                             <div className="flex gap-2 mt-3">
-                            <button className="flex-1 px-3 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all"
+                            <button data-testid="edit-card-button" className="flex-1 px-3 py-2 bg-vcf-orange text-white rounded-lg font-bold hover:bg-[#e05516] transition-all"
                             onClick={() => {handleEdit(card)}}>
                                 Editar
                             </button>
 
-                            <button
+                            <button 
+                                data-testid={`delete-card-${card.id}`}
                                 onClick={() =>
                                 setConfirmDelete({
                                     open: true,
@@ -334,6 +337,7 @@ export function ManageCards(){
                         {editingCard ? "EDITAR " : "AGREGAR NUEVA" } <span className="text-vcf-orange">CARTA</span>
                     </h2>
                     <button
+                        data-testid="add-card-button"
                         onClick={() => {setShowForm(false);  setEditingCard(null); resetForm();}}
                         className="p-2 hover:bg-muted rounded-lg transition-colors"
                     >
@@ -349,6 +353,7 @@ export function ManageCards(){
                         Nombre de la Carta *
                         </label>
                         <input
+                        data-testid="card-name-input"
                         type="text"
                         required
                         value={formData.name}
@@ -367,6 +372,7 @@ export function ManageCards(){
                         </label>
                         <div className="relative">
                         <select
+                          data-testid="card-type-select"
                             value={formData.type}
                             onChange={(e) =>
                             setForm({ ...formData, type: e.target.value })
@@ -414,6 +420,7 @@ export function ManageCards(){
                         Temporada *
                         </label>
                         <input
+                        data-testid="card-season-input"
                         type="number"
                         required
                         value={formData.season}
@@ -437,6 +444,7 @@ export function ManageCards(){
 
                         return (
                             <button
+                            data-testid={`rarity-${cat.id}`}
                             key={cat.id}
                             type="button"
                             onClick={() =>
@@ -524,6 +532,7 @@ export function ManageCards(){
                         CANCELAR
                         </button>
                         <button
+                        data-testid="save-card-button"
                         type="submit"
                         className="flex-1 px-6 py-3 bg-black border-2 border-black text-white rounded-lg font-bold hover:bg-gray-900 hover:border-gray-900 transition-all shadow-md hover:shadow-lg hover:scale-105"
                         >
@@ -559,6 +568,7 @@ export function ManageCards(){
 
                 <div className="flex gap-3">
                     <button
+
                     onClick={() =>
                         setConfirmDelete({
                         open: false,
@@ -572,6 +582,7 @@ export function ManageCards(){
                     </button>
 
                     <button
+                    data-testid="confirm-delete-card"
                     onClick={confirmDeleteCard}
                     className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700"
                     >

@@ -258,6 +258,7 @@ export function StorePage() {
                   </button>
                 ) : (
                   <button
+                    data-testid={product.id === "sobre" ? "buy-pack-button" : "buy-card-button"}
                     onClick={() => product.id === "carta" ? setShowCardPicker(true) : handleBuy(product)}
 
                     disabled={isBuying || !canAfford}
