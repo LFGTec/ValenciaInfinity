@@ -50,16 +50,16 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
   }
 
   return (
-    <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+    <div className="bg-card border-2 border-border rounded-2xl shadow-xl overflow-hidden">
       {/* ── Cabecera zona ── */}
-      <div className="p-5 border-b border-gray-100">
+      <div className="p-5 border-b border-border">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => {
               setSelectedZone(null);
               flyToDefault();
             }}
-            className="flex items-center gap-1.5 text-black hover:text-gray-900 transition-colors text-sm font-bold cursor-pointer border border-1 border-black p-2 rounded-2xl hover:-translate-y-1"
+            className="flex items-center gap-1.5 text-foreground hover:text-foreground/70 transition-colors text-sm font-bold cursor-pointer border border-border p-2 rounded-2xl hover:-translate-y-1"
           >
             <ChevronLeft size={16} />
             Cambiar zona
@@ -76,7 +76,7 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
               >
                 {selectedZone}
               </div>
-              <div className="text-xs text-gray-400 mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 desde {ZONE_PRICES[selectedZone]}€/entrada
               </div>
             </div>
@@ -85,28 +85,27 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-gray-50 rounded-xl py-3 text-center border border-gray-100">
+          <div className="bg-muted rounded-xl py-3 text-center border border-border">
             <div className="text-xl font-black" style={{ color: zoneColor }}>
               {freeCount}
             </div>
-            <div className="text-[10px] text-gray-500 uppercase tracking-wide font-bold mt-0.5">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wide font-bold mt-0.5">
               Libres
             </div>
           </div>
-          <div className="bg-gray-50 rounded-xl py-3 text-center border border-gray-100">
-            <div className="text-xl font-black text-black">{takenCount}</div>
-            <div className="text-[10px] text-black uppercase tracking-wide font-bold mt-0.5">
+          <div className="bg-muted rounded-xl py-3 text-center border border-border">
+            <div className="text-xl font-black text-foreground">{takenCount}</div>
+            <div className="text-[10px] text-foreground uppercase tracking-wide font-bold mt-0.5">
               Ocupados
             </div>
           </div>
-          <div className="bg-gray-50 rounded-xl py-3 text-center border border-gray-100">
+          <div className="bg-muted rounded-xl py-3 text-center border border-border">
             <div
-              className="text-xl font-black"
-              style={{ color: pickedCount > 0 ? "#6b7280" : undefined }}
+              className="text-xl font-black text-muted-foreground"
             >
               {pickedCount > 0 ? pickedCount : "—"}
             </div>
-            <div className="text-[10px] text-gray-500 uppercase tracking-wide font-bold mt-0.5">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wide font-bold mt-0.5">
               Elegidos
             </div>
           </div>
@@ -114,12 +113,12 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
       </div>
 
       {/* ── Grid de asientos ── */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-black text-gray-900">
+          <h3 className="text-sm font-black text-foreground">
             Plano de asientos
           </h3>
-          <span className="text-xs text-gray-400">Click para seleccionar</span>
+          <span className="text-xs text-muted-foreground">Click para seleccionar</span>
         </div>
         <SeatGrid
           seats={seats}
@@ -129,18 +128,18 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
 
         {/* Leyenda */}
         <div className="flex items-center gap-4 mt-3 flex-wrap">
-          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span
               className="w-3 h-3 rounded-sm shrink-0"
               style={{ background: zoneColor }}
             />
             Libre
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="w-3 h-3 rounded-sm bg-black shrink-0" />
             Ocupado
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="w-3 h-3 rounded-sm bg-gray-500 shrink-0" />
             Seleccionado
           </span>
@@ -151,8 +150,8 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
       {selectedSeats.length > 0 ? (
         <div className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-black text-gray-900">Mis entradas</h3>
-            <span className="text-xs bg-gray-200 text-black font-bold px-2 py-0.5 rounded-full border border-black/40">
+            <h3 className="text-sm font-black text-foreground">Mis entradas</h3>
+            <span className="text-xs bg-muted text-foreground font-bold px-2 py-0.5 rounded-full border border-border">
               {selectedSeats.length}/8
             </span>
           </div>
@@ -161,7 +160,7 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
             {selectedSeats.map((s) => (
               <div
                 key={s.id}
-                className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100"
+                className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2.5 border border-border"
               >
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
@@ -171,19 +170,19 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
                   }}
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-bold text-gray-900">
+                  <span className="text-sm font-bold text-foreground">
                     {s.zone}
                   </span>
-                  <span className="text-xs text-gray-500 ml-1.5">
+                  <span className="text-xs text-muted-foreground ml-1.5">
                     Fila {s.row} · Asiento {s.col}
                   </span>
                 </div>
-                <span className="text-sm font-black text-gray-900">
+                <span className="text-sm font-black text-foreground">
                   {ZONE_PRICES[s.zone]}€
                 </span>
                 <button
                   onClick={() => removeSeat(s.id)}
-                  className="w-5 h-5 rounded-full bg-gray-200 hover:bg-red-100 hover:text-[#EE3224] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-muted hover:bg-red-100 hover:text-[#EE3224] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
                 >
                   <X size={11} />
                 </button>
@@ -192,22 +191,22 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
           </div>
 
           {/* Resumen precio */}
-          <div className="space-y-1.5 mb-4 pt-3 border-t border-gray-100">
+          <div className="space-y-1.5 mb-4 pt-3 border-t border-border">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Subtotal</span>
-              <span className="font-bold text-gray-900">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-bold text-foreground">
                 €{subtotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Gestión (10%)</span>
-              <span className="font-bold text-gray-400">
+              <span className="text-muted-foreground">Gestión (10%)</span>
+              <span className="font-bold text-muted-foreground">
                 €{fees.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-              <span className="font-black text-gray-900">Total</span>
-              <span className="text-2xl font-black text-black">
+            <div className="flex justify-between items-center pt-2 border-t border-border">
+              <span className="font-black text-foreground">Total</span>
+              <span className="text-2xl font-black text-foreground">
                 €{(subtotal + fees).toFixed(2)}
               </span>
             </div>
@@ -223,13 +222,13 @@ export default function ZonePanel({ onConfirmSeat }: Props) {
         </div>
       ) : (
         <div className="p-5 text-center">
-          <div className="w-12 h-12 bg-gray-100 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-            <Users size={22} className="text-gray-400" />
+          <div className="w-12 h-12 bg-muted rounded-2xl mx-auto mb-3 flex items-center justify-center">
+            <Users size={22} className="text-muted-foreground" />
           </div>
-          <p className="text-sm font-bold text-gray-700 mb-1">
+          <p className="text-sm font-bold text-foreground mb-1">
             Ningún asiento seleccionado
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Haz click en un asiento libre del plano
           </p>
         </div>

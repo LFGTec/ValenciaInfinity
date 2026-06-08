@@ -230,7 +230,7 @@ export function CardAlbum({ userId }: Props) {
               <h1 className="text-3xl md:text-4xl font-black mb-1">
                 ÁLBUM DE <span className="text-vcf-orange">CARTAS</span>
               </h1>
-              <p className="text-sm md:text-base text-gray-600">
+              <p className="text-sm md:text-base text-muted-foreground">
                 {obtainedCards} de {totalCards} cartas coleccionadas ({progress}
                 %)
               </p>

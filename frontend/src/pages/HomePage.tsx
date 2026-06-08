@@ -543,7 +543,7 @@ export default function HomePage() {
               </Link>
               <Link
                 to="/album?scroll=album-book"
-                className="px-8 py-4 bg-white border-2 border-white text-vcf-orange rounded-lg font-black hover:bg-gray-100 transition-all shadow-md hover:scale-105"
+                className="px-8 py-4 bg-card border-2 border-border text-vcf-orange rounded-lg font-black hover:bg-muted transition-all shadow-md hover:scale-105"
               >
                 VER ÁLBUM
               </Link>
