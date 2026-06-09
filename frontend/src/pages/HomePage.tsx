@@ -445,7 +445,7 @@ export default function HomePage() {
             </h2>
 
             <Link
-              to="/juego"
+              to="/trivias"
               className="flex items-center gap-2 text-sm font-bold text-vcf-orange hover:text-vcf-blue hover:gap-3 transition-all"
             >
               VER TODOS <ArrowRight size={16} />

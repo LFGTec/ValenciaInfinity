@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { 
-  Home, TrendingUp, Users, BookOpen, 
+import {
+  Home, TrendingUp, Users, BookOpen,
   Gamepad2, Calendar, Trophy, Settings, Menu, LogOut, ChevronLeft,
-  BarChart3
+  BarChart3, ArrowLeft
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";
 
@@ -12,6 +12,7 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { signOut, isSigningOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await signOut();
@@ -87,7 +88,13 @@ export default function AdminLayout() {
         } transition-all duration-300 min-h-screen`}
       >
         <div className="p-8 max-w-7xl mx-auto">
-          {/* Aquí es donde se renderizarán las sub-páginas (AdminDashboard, AdminUsers, etc.) */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 mb-6 text-gray-400 hover:text-white hover:-translate-y-1 transition-all cursor-pointer font-bold text-sm"
+          >
+            <ArrowLeft size={16} />
+            Volver
+          </button>
           <Outlet />
         </div>
       </main>

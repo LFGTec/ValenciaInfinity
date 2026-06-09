@@ -5,6 +5,7 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
+  ArrowLeft,
 } from "lucide-react";
 import type { Match } from "@/pages/TicketsPage";
 import vcfShield from "../../assets/EscudoValenciaCF.png";
@@ -14,10 +15,12 @@ export function MatchSelection({
   matches,
   stepNumber,
   onSelectMatch,
+  onBack,
 }: {
   matches: Match[];
   stepNumber: number;
   onSelectMatch: (match: Match) => void;
+  onBack: () => void;
 }) {
   const getAvailabilityBadge = (availability: Match["availability"]) => {
     switch (availability) {
@@ -51,8 +54,14 @@ export function MatchSelection({
       <div className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Izquierda: placeholder para centrar el título */}
-            <div className="w-24" />
+            {/* Izquierda: volver a la página anterior */}
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:-translate-y-1 transition-all cursor-pointer font-bold text-sm"
+            >
+              <ArrowLeft size={16} />
+              Volver
+            </button>
 
             {/* Centro: título */}
             <div className="text-center hidden sm:block">
