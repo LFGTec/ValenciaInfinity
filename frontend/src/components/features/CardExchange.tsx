@@ -10,6 +10,8 @@ import {
   ShoppingCart,
   Gift,
   TrendingUp,
+  ChevronDown,
+  History,
 } from "lucide-react";
 import { useTrades } from "../../hooks/useTrades";
 import { useAuth } from "../../hooks/useAuth";
@@ -67,6 +69,7 @@ export function CardExchange() {
   const [selectedCardTab, setSelectedCardTab] = useState<"offered" | "wanted">("offered");
   const [creatingTrade, setCreatingTrade] = useState(false);
   const [offerToCancel, setOfferToCancel] = useState<PendingCancelOffer | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error" | "warning";
     message: string;
@@ -565,10 +568,7 @@ Compra, vende e intercambia cartas con otros fans
             <div className="text-center py-8 text-muted-foreground">
               Cargando intercambios...
             </div>
-          ) : trades.length === 0 || trades.filter((t) => {
-            if (tradeFilter === "all") return true;
-            return t.status === tradeFilter;
-          }).length === 0 ? (
+          ) : trades.length === 0 ? (
             <div className="text-center py-12">
               <MessageSquare size={48} className="mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-2xl font-bold mb-2 text-foreground">
@@ -586,11 +586,10 @@ Compra, vende e intercambia cartas con otros fans
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Active (pending) trades */}
               {trades
-                .filter((trade) => {
-                  if (tradeFilter === "all") return true;
-                  return trade.status === tradeFilter;
-                })
+                .filter((t) => t.status === "pending")
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                 .map((trade) => {
                 const isRequester = trade.requester_id === user?.id;
                 const otherPartyProfile = isRequester
@@ -760,6 +759,130 @@ Compra, vende e intercambia cartas con otros fans
                   </div>
                 );
               })}
+
+              {/* Historial collapsible */}
+              {trades.some((t) => t.status !== "pending") && (
+                <div>
+                  <button
+                    onClick={() => setShowHistory((v) => !v)}
+                    className="flex items-center gap-2 w-full py-3 px-4 bg-card border-2 border-border rounded-lg font-black text-foreground hover:border-vcf-orange transition-all cursor-pointer"
+                  >
+                    <History size={18} className="text-vcf-orange" />
+                    <span className="flex-1 text-left">
+                      HISTORIAL{" "}
+                      <span className="text-muted-foreground font-bold text-sm">
+                        ({trades.filter((t) => t.status !== "pending").length})
+                      </span>
+                    </span>
+                    <ChevronDown
+                      size={18}
+                      className={`text-muted-foreground transition-transform duration-200 ${showHistory ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {showHistory && (
+                    <div className="mt-4 space-y-6">
+                      {trades
+                        .filter((t) => t.status !== "pending")
+                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                        .map((trade) => {
+                          const isRequester = trade.requester_id === user?.id;
+                          const otherPartyProfile = isRequester
+                            ? trade.receiver_profile
+                            : trade.requester_profile;
+                          const offeredCards = trade.trade_items?.filter((item) => item.side === "offered") || [];
+                          const wantedCards = trade.trade_items?.filter((item) => item.side === "wanted") || [];
+
+                          return (
+                            <div
+                              key={trade.id}
+                              className="bg-card border-2 border-border rounded-lg p-6 shadow-md opacity-80"
+                            >
+                              <div className="flex items-center justify-between mb-6">
+                                <div>
+                                  <h3 className="text-xl font-black mb-1 text-foreground">
+                                    Intercambio con{" "}
+                                    <span className="text-vcf-orange">
+                                      {otherPartyProfile?.full_name || otherPartyProfile?.email || "Usuario"}
+                                    </span>
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {new Date(trade.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <span
+                                  className={`px-4 py-2 rounded-full text-sm font-bold ${
+                                    trade.status === "accepted"
+                                      ? "bg-green-500/20 text-green-600"
+                                      : "bg-red-500/20 text-red-600"
+                                  }`}
+                                >
+                                  {trade.status === "accepted" ? "ACEPTADO" : "RECHAZADO"}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                  <h4 className="font-bold mb-3 text-sm text-muted-foreground">
+                                    {isRequester ? "OFRECISTE:" : "TE OFRECIÓ:"}
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {offeredCards.map((item) => (
+                                      <div key={item.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg shadow-sm">
+                                        <div className="w-12 h-16 bg-gradient-to-br from-orange-50 to-yellow-50 rounded flex-shrink-0 shadow-md relative flex items-center justify-center p-1">
+                                          {item.card?.image_url && (
+                                            <img src={item.card.image_url} alt={item.card.name} className="w-full h-full object-contain" />
+                                          )}
+                                        </div>
+                                        <div className="flex-1">
+                                          <div className="font-bold text-sm text-foreground mb-1">{item.card?.name || "Carta"}</div>
+                                          <div className="text-xs text-muted-foreground space-y-0.5">
+                                            {item.card?.type && <div>Tipo: {item.card.type}</div>}
+                                            {item.card?.rarity && <div>Categoría: {item.card.rarity}</div>}
+                                            {item.quantity > 1 && <div className="font-bold text-vcf-orange">x{item.quantity}</div>}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-center">
+                                  <div className="text-4xl font-black text-vcf-orange">⇄</div>
+                                </div>
+
+                                <div>
+                                  <h4 className="font-bold mb-3 text-sm text-muted-foreground">
+                                    {isRequester ? "SOLICITASTE:" : "SOLICITÓ:"}
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {wantedCards.map((item) => (
+                                      <div key={item.id} className="flex items-center gap-3 p-3 bg-black/10 rounded-lg shadow-sm">
+                                        <div className="w-12 h-16 bg-gradient-to-br from-orange-50 to-yellow-50 rounded flex-shrink-0 shadow-md relative flex items-center justify-center p-1">
+                                          {item.card?.image_url && (
+                                            <img src={item.card.image_url} alt={item.card.name} className="w-full h-full object-contain" />
+                                          )}
+                                        </div>
+                                        <div className="flex-1">
+                                          <div className="font-bold text-sm text-foreground mb-1">{item.card?.name || "Carta"}</div>
+                                          <div className="text-xs text-muted-foreground space-y-0.5">
+                                            {item.card?.type && <div>Tipo: {item.card.type}</div>}
+                                            {item.card?.rarity && <div>Rareza: {item.card.rarity}</div>}
+                                            {item.quantity > 1 && <div className="font-bold text-vcf-orange">x{item.quantity}</div>}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
