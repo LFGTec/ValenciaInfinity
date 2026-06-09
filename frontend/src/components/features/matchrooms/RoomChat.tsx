@@ -1,13 +1,31 @@
-import { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Users, Smile } from "lucide-react";
+import { useRef, useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Users, Smile, MessageSquareText } from "lucide-react";
 import type { EmojiMessage } from "@/hooks/useRoomChat";
 
 const EMOJI_GRID = [
-  "⚽", "🔥", "👏", "😱", "💪", "🎉", "😤", "❤️",
-  "🏆", "😭", "🤩", "👊", "🦇", "😡", "🙏", "⚡",
-  "🥅", "🤣", "😍", "💥", "🫡", "🎯", "😮", "🧡",
+  "⚽", "🔥", "👏", "😱", "💪", "🎉", "🏆", "🦇",
+  "❤️", "😤", "😡", "😭", "🤩", "👊", "🙏", "⚡",
+  "🥅", "🎯", "💥", "🤣", "😍", "😮", "🧡", "🫡",
+  "🥶", "🤬", "🎊", "🫶", "🤦", "💔", "🫠", "🏅",
 ];
+
+const QUICK_PHRASES = [
+  "¡Goool! ⚽",
+  "¡Vamos VCF! 🦇",
+  "¡Qué pase! 👏",
+  "¡Penalti! 😱",
+  "¡Árbitro! 😡",
+  "¡Fuera de juego!",
+  "¡Qué golazo! 🔥",
+  "¡Campeones! 🏆",
+  "¡Nooo! 😭",
+  "¡Eso es! 💪",
+  "¡Qué fallo! 🤦",
+  "¡Portero! 🥅",
+];
+
+type PickerTab = "emojis" | "frases";
 
 interface RoomChatProps {
   messages: EmojiMessage[];
@@ -19,6 +37,7 @@ interface RoomChatProps {
 
 export function RoomChat({ messages, spectatorCount, currentUserId, currentUserAvatarUrl, onSendEmoji }: RoomChatProps) {
   const messagesRef = useRef<HTMLDivElement>(null);
+  const [pickerTab, setPickerTab] = useState<PickerTab>("emojis");
 
   useEffect(() => {
     const el = messagesRef.current;
@@ -85,14 +104,16 @@ export function RoomChat({ messages, spectatorCount, currentUserId, currentUserA
               })()}
 
               {/* Bubble */}
-              <div className={`flex flex-col gap-0.5 max-w-[70%] ${isOwn ? "items-end" : "items-start"}`}>
+              <div className={`flex flex-col gap-0.5 max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
                 <span className="text-[9px] font-bold px-1 text-muted-foreground">
                   {isOwn ? "Tú" : msg.username}
                 </span>
                 <div
-                  className={`px-2.5 py-1.5 rounded-2xl text-xl leading-none ${
+                  className={`px-2.5 py-1.5 rounded-2xl leading-snug ${
+                    msg.emoji.length > 4 ? "text-[11px] font-bold" : "text-xl leading-none"
+                  } ${
                     isOwn
-                      ? "bg-muted/80 rounded-br-sm border border-border"
+                      ? "bg-vcf-orange/15 rounded-br-sm border border-vcf-orange/30"
                       : "bg-muted rounded-bl-sm"
                   }`}
                 >
@@ -104,26 +125,83 @@ export function RoomChat({ messages, spectatorCount, currentUserId, currentUserA
         })}
       </div>
 
-      {/* Emoji picker */}
-      <div className="px-2.5 py-2 border-t border-border flex-shrink-0">
-        <p className="text-[9px] text-muted-foreground font-black tracking-widest mb-1.5 flex items-center gap-1.5">
-          <span className="w-3 h-px bg-vcf-orange/50 inline-block" />
-          REACCIONA
-          <span className="w-3 h-px bg-vcf-orange/50 inline-block" />
-        </p>
-        <div className="grid grid-cols-8 gap-0.5">
-          {EMOJI_GRID.map((emoji) => (
-            <motion.button
-              key={emoji}
-              onClick={() => onSendEmoji(emoji)}
-              className="text-base p-1 rounded-lg hover:bg-vcf-orange/15 transition-colors cursor-pointer"
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.8 }}
-              transition={{ type: "spring", stiffness: 500, damping: 15 }}
-            >
-              {emoji}
-            </motion.button>
-          ))}
+      {/* Picker */}
+      <div className="border-t border-border flex-shrink-0">
+        {/* Tabs */}
+        <div className="flex border-b border-border">
+          <button
+            onClick={() => setPickerTab("emojis")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-black tracking-widest transition-all cursor-pointer ${
+              pickerTab === "emojis"
+                ? "text-vcf-orange border-b-2 border-vcf-orange bg-vcf-orange/5"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Smile size={11} />
+            EMOJIS
+          </button>
+          <button
+            onClick={() => setPickerTab("frases")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-black tracking-widest transition-all cursor-pointer ${
+              pickerTab === "frases"
+                ? "text-vcf-orange border-b-2 border-vcf-orange bg-vcf-orange/5"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <MessageSquareText size={11} />
+            FRASES
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="px-2.5 py-2">
+          <AnimatePresence mode="wait">
+            {pickerTab === "emojis" ? (
+              <motion.div
+                key="emojis"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="grid grid-cols-8 gap-0.5"
+              >
+                {EMOJI_GRID.map((emoji) => (
+                  <motion.button
+                    key={emoji}
+                    onClick={() => onSendEmoji(emoji)}
+                    className="text-base p-1 rounded-lg hover:bg-vcf-orange/15 transition-colors cursor-pointer"
+                    whileHover={{ scale: 1.25, y: -2 }}
+                    whileTap={{ scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  >
+                    {emoji}
+                  </motion.button>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="frases"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="grid grid-cols-2 gap-1.5"
+              >
+                {QUICK_PHRASES.map((phrase) => (
+                  <motion.button
+                    key={phrase}
+                    onClick={() => onSendEmoji(phrase)}
+                    className="px-2 py-1.5 rounded-xl border border-border bg-muted/50 text-[10px] font-black text-foreground hover:bg-vcf-orange hover:text-white hover:border-vcf-orange transition-colors cursor-pointer text-left leading-tight"
+                    whileHover={{ y: -3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  >
+                    {phrase}
+                  </motion.button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
