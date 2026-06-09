@@ -254,7 +254,9 @@ export function CardAlbum({ userId }: Props) {
           <div className="mb-6">
             <div className="mb-4">
               <h1 className="text-3xl md:text-4xl font-black mb-1">
-                ÁLBUM DE <span className="text-vcf-orange">CARTAS</span>
+                {isVisiting && friend
+                  ? <>PERFIL DE <span className="text-vcf-orange">{friend.full_name.split(" ")[0].toUpperCase()}</span></>
+                  : <>ÁLBUM DE <span className="text-vcf-orange">CARTAS</span></>}
               </h1>
               <p className="text-sm md:text-base text-muted-foreground">
                 {obtainedCards} de {totalCards} cartas coleccionadas ({progress}

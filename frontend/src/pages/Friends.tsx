@@ -249,7 +249,7 @@ export function Friends() {
                             cursor-pointer
                             ">
                                 <BookOpen size={16} />
-                                Ver Álbum 
+                                Ver Perfil
                             </Link>
                             <Link to="/match-rooms" 
                             className="

@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef } from "react";
 import { useAnimations, useGLTF } from "@react-three/drei";
-import { Color } from "three";
+import { Color, LoopOnce } from "three";
 import type { Group, Skeleton, Object3D } from "three";
 import type { AvatarAsset as AvatarAssetType } from "../../../services/avatarService";
 import { AvatarAsset } from "./AvatarAsset";
@@ -8,6 +8,8 @@ import { AvatarAsset } from "./AvatarAsset";
 type Props = {
   selectedAssets: Record<string, AvatarAssetType>;
   selectedColors: Record<string, string>;
+  animation?: string;
+  onAnimationEnd?: () => void;
 };
 
 function normalize(value?: string) {
@@ -156,8 +158,9 @@ function applyMaterialColor(obj: any, color: string) {
   });
 }
 
-export function AvatarModel({ selectedAssets, selectedColors }: Props) {
+export function AvatarModel({ selectedAssets, selectedColors, animation = "Idle", onAnimationEnd }: Props) {
   const group = useRef<Group>(null);
+  const prevActionRef = useRef<any>(null);
 
   const { nodes } = useGLTF("/models/Armature.glb") as any;
   const { animations } = useGLTF("/models/Poses.glb") as any;
@@ -169,14 +172,40 @@ export function AvatarModel({ selectedAssets, selectedColors }: Props) {
   const skinColor = getSkinColor(selectedColors);
 
   useEffect(() => {
-    const idle = actions?.Idle;
+    if (!actions) return;
+    const idle = actions.Idle;
 
-    idle?.reset().fadeIn(0.2).play();
+    const prev = prevActionRef.current;
+
+    if (animation === "Idle" || !actions[animation]) {
+      if (prev && prev !== idle) prev.fadeOut(0.3);
+      idle?.reset().fadeIn(0.3).play();
+      prevActionRef.current = idle ?? null;
+      return () => { idle?.fadeOut(0.2); };
+    }
+
+    const next = actions[animation];
+    if (prev && prev !== next) prev.fadeOut(0.3);
+
+    next.reset();
+    next.setLoop(LoopOnce, 1);
+    next.clampWhenFinished = true;
+    next.fadeIn(0.3).play();
+    prevActionRef.current = next;
+
+    const durationMs = next.getClip().duration * 1000;
+    const timer = setTimeout(() => {
+      next.fadeOut(0.4);
+      idle?.reset().fadeIn(0.4).play();
+      prevActionRef.current = idle ?? null;
+      onAnimationEnd?.();
+    }, durationMs + 800);
 
     return () => {
-      idle?.fadeOut(0.2).stop();
+      clearTimeout(timer);
+      next.fadeOut(0.2);
     };
-  }, [actions]);
+  }, [actions, animation, onAnimationEnd]);
 
   useEffect(() => {
     if (!group.current) return;
