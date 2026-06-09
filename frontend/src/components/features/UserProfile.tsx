@@ -107,7 +107,7 @@ export function UserProfile() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+    <div className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
       <div className="mb-8">
         <h1 className="text-5xl font-black mb-4 text-foreground">
           MI <span className="text-vcf-orange">PERFIL</span>
@@ -127,7 +127,7 @@ export function UserProfile() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
-            className={`px-6 py-3 font-bold transition-all flex items-center gap-2 ${
+            className={`px-6 py-3 font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === tab.id
                 ? "border-b-4 border-vcf-orange text-vcf-orange"
                 : "text-muted-foreground hover:text-foreground"
@@ -251,14 +251,14 @@ export function UserProfile() {
                   <button
                     onClick={handleSaveName}
                     disabled={saving}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-vcf-orange text-white font-black rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-60"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-vcf-orange text-white font-black rounded-lg hover:bg-orange-600 transition-all hover:-translate-y-1 cursor-pointer disabled:opacity-60"
                   >
                     <Save size={16} />
                     {saving ? "GUARDANDO..." : "GUARDAR"}
                   </button>
                   <button
                     onClick={handleCancelEdit}
-                    className="flex items-center gap-2 px-5 py-2.5 border-2 border-border text-muted-foreground font-black rounded-lg hover:text-foreground hover:border-foreground transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 border-2 border-border text-muted-foreground font-black rounded-lg hover:text-foreground hover:border-foreground transition-all hover:-translate-y-1 cursor-pointer"
                   >
                     <X size={16} />
                     CANCELAR
@@ -270,7 +270,7 @@ export function UserProfile() {
                     setNameValue(user?.full_name ?? "");
                     setEditing(true);
                   }}
-                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-vcf-orange text-vcf-orange font-black rounded-lg cursor-pointer "
+                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-vcf-orange text-vcf-orange font-black rounded-lg transition-all hover:-translate-y-1 cursor-pointer"
                 >
                   <Edit size={16} />
                   EDITAR NOMBRE

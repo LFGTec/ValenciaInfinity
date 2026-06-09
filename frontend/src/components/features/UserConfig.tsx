@@ -40,7 +40,7 @@ export default function UserConfig(){
     !user?.isGoogleUser;
 
     return (
-        <div className="max-w-[1400px] mx-auto px-4 py-12 bg-content">
+        <div className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
   
             {/* Header */}
             <div className="mb-8">
@@ -73,7 +73,7 @@ export default function UserConfig(){
 
                         <button
                         onClick={toggleTheme}
-                        className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 ${
+                        className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 cursor-pointer ${
                             darkMode ? "bg-vcf-orange" : "bg-muted"
                         }`}
                         >

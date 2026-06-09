@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainsLayout";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -31,10 +32,19 @@ import { EstadisticasPage } from "@/pages/EstadisticasPage";
 import { CardExchange } from "@/components/features/CardExchange";
 import { AdminStatistics } from "@/pages/AdminViews/AdminStatistics";
 
+import { AvatarPage } from "@/pages/AvatarPage";
 import { DailyRewards } from "@/pages/DailyRewards";
 import UserConfig from "@/components/features/UserConfig";
 import { TicketPurchase } from "@/pages/TicketsPage";
-import {StorePage}  from "@/pages/StorePage" 
+import { StorePage } from "@/pages/StorePage";
+
+function RedirectHome() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/home", { replace: true });
+  }, [navigate]);
+  return null;
+}
 
 export default function AppRoutes() {
   return (
@@ -70,10 +80,14 @@ export default function AppRoutes() {
           <Route path="/ticket" element={<TicketPurchase />} />
           <Route path="/settings" element={<UserConfig />} />
           <Route path="/store" element={<StorePage />} />
+          <Route path="/avatar" element={<AvatarPage />} />
         </Route>
+
+        {/* Catch-all dentro del layout */}
+        <Route path="*" element={<RedirectHome />} />
       </Route>
 
-      {/*Rutas de Admin*/}  
+      {/*Rutas de Admin*/}
       <Route element={<ProtectedRoute adminOnly={true} />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin/statistics" element={<AdminStatistics />} />
@@ -83,7 +97,9 @@ export default function AppRoutes() {
           <Route path="/admin/rewards" element={<ManageRewards />} />
         </Route>
       </Route>
-      
+
+      {/* Catch-all global */}
+      <Route path="*" element={<RedirectHome />} />
     </Routes>
   );
 }

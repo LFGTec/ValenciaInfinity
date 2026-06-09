@@ -12,8 +12,8 @@ const RAREZA_COLORS: Record<string, { bg: string }> = {
 };
 const DEFAULT_COLOR = { bg: "#374151" };
 
-export const COLS = 4;
-export const ROWS = 4;
+export const COLS = 3;
+export const ROWS = 3;
 export const CARDS_PER_FACE = COLS * ROWS;
 
 const PAD_X = 10;

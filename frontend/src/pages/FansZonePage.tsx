@@ -1,16 +1,15 @@
 import {
   Video, BookOpen, Gamepad2,
-  Share2, Globe, ArrowRight,  Heart,
-  Users
+  Share2, Globe, ArrowRight, Heart,
+  Users, UserCircle2
 } from 'lucide-react';
-import { NavLink } from "react-router-dom";
-
-import { AvatarSection } from "../components/features/avatar/AvatarSection";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export function FansZonePage() {
-  
+  const navigate = useNavigate();
+
   return (
-    <div className=" mx-auto px-4 py-12 bg-content">
+    <div className="min-h-screen mx-auto px-4 py-12 bg-content">
       
      
       <div className="mb-10">
@@ -66,18 +65,27 @@ export function FansZonePage() {
       </div>
 
      
-      <div className="rounded-xl bg-card p-6 mb-6 border border-border">
-        <h2 className="text-4xl md:text-5xl font-black text-foreground">
-          PERSONALIZA TU <span className="text-vcf-orange">AVATAR</span>
-        </h2>
-
-        <p className="mt-2 text-muted-foreground text-base">
-          Crea tu identidad única como valencianista
-        </p>
-      </div>
-
-      <div>
-        <AvatarSection />
+      <div className="rounded-xl bg-card border-2 border-vcf-orange/70 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-lg">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-xl bg-vcf-orange/10 flex items-center justify-center flex-shrink-0">
+            <UserCircle2 size={32} className="text-vcf-orange" strokeWidth={2} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-foreground">
+              PERSONALIZA TU <span className="text-vcf-orange">AVATAR</span>
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Crea tu identidad única como valencianista
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => navigate("/avatar")}
+          className="flex items-center gap-2 px-6 py-3 bg-vcf-orange text-white rounded-xl font-black text-sm shadow-lg shadow-vcf-orange/20 transition-all hover:-translate-y-1 cursor-pointer whitespace-nowrap"
+        >
+          PERSONALIZAR
+          <ArrowRight size={16} strokeWidth={3} />
+        </button>
       </div>
 
     </div>

@@ -115,7 +115,7 @@ export function Juego() {
 
                       <button 
                         onClick={handleLoadGame}
-                        className="group bg-vcf-orange hover:bg-[#a86d12] text-white font-black px-10 py-5 rounded-2xl transition-all shadow-2xl hover:shadow-vcf-orange/50 hover:scale-110 flex items-center gap-4 text-xl"
+                        className="group bg-vcf-orange hover:bg-[#a86d12] text-white font-black px-10 py-5 rounded-2xl transition-all shadow-2xl hover:shadow-vcf-orange/50 hover:scale-110 flex items-center gap-4 text-xl cursor-pointer"
                       >
                         <Play size={28} fill="white" className="group-hover:scale-110 transition-transform" />
                         INICIAR JUEGO

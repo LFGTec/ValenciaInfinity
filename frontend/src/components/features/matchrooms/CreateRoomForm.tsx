@@ -149,7 +149,7 @@ export function CreateRoomForm({ userId, onCreateRoom }: CreateRoomFormProps) {
             <motion.button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-xl font-black flex items-center justify-center gap-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-vcf-orange border-2 border-vcf-orange text-white rounded-xl font-black flex items-center justify-center gap-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               whileHover={loading ? {} : { scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
               whileTap={loading ? {} : { scale: 0.97 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}

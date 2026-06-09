@@ -92,6 +92,7 @@ export function StorePage() {
 
   const filteredCards = useMemo(() => {
     return allCards.filter((card) => {
+      if (card.rarity === "Legendario") return false;
       const matchesSearch =
         cardSearch.trim() === "" ||
         card.name.toLowerCase().includes(cardSearch.toLowerCase());
@@ -102,7 +103,11 @@ export function StorePage() {
   }, [allCards, cardSearch, selectedRarity]);
 
   const rarities = useMemo(() => {
-    const set = new Set(allCards.map((c) => c.rarity).filter(Boolean));
+    const set = new Set(
+      allCards
+        .map((c) => c.rarity)
+        .filter((r): r is string => Boolean(r) && r !== "Legendario")
+    );
     return ["todas", ...Array.from(set)] as string[];
   }, [allCards]);
 
@@ -265,7 +270,7 @@ export function StorePage() {
                       w-full flex items-center justify-center gap-2 py-3 rounded-xl font-black text-sm uppercase tracking-wide transition-all
                       ${
                         canAfford
-                          ? "bg-vcf-orange hover:bg-orange-400 text-white shadow-lg shadow-vcf-orange/30 active:scale-95"
+                          ? "bg-vcf-orange hover:bg-orange-400 text-white shadow-lg shadow-vcf-orange/30 hover:-translate-y-1 cursor-pointer"
                           : "bg-background border border-border text-muted-foreground cursor-not-allowed"
                       }
                     `}
@@ -333,7 +338,7 @@ export function StorePage() {
               </div>
               <button
                 onClick={() => { setShowCardPicker(false); setSelectedCard(null); }}
-                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                className="p-2 rounded-lg hover:bg-muted transition-all hover:-translate-y-1 cursor-pointer"
               >
                 <X size={18} className="text-muted-foreground" />
               </button>
@@ -387,7 +392,7 @@ export function StorePage() {
                         selectedCard?.id === card.id
                           ? "border-vcf-orange shadow-lg shadow-vcf-orange/30 scale-105"
                           : "border-border hover:border-vcf-orange/50"
-                      }`}
+                      } cursor-pointer`}
                     >
                       {card.image_url ? (
                         <img
@@ -440,7 +445,7 @@ export function StorePage() {
                 disabled={!selectedCard || buyingCard || currentPoints < PRODUCTS[1].price}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-sm uppercase transition-all ${
                   selectedCard && currentPoints >= PRODUCTS[1].price
-                    ? "bg-vcf-orange hover:bg-orange-400 text-white shadow-lg shadow-vcf-orange/30 active:scale-95"
+                    ? "bg-vcf-orange hover:bg-orange-400 text-white shadow-lg shadow-vcf-orange/30 hover:-translate-y-1 cursor-pointer"
                     : "bg-muted text-muted-foreground cursor-not-allowed"
                 }`}
               >

@@ -20,14 +20,16 @@ export function buildPages(cards: Card[]): AlbumPage[] {
 
   const pages: AlbumPage[] = [{ front: "__cover__", back: chunks[0] }];
 
-  for (let i = 1; i < chunks.length - 1; i += 2) {
-    pages.push({ front: chunks[i], back: chunks[i + 1] ?? chunks[i] });
+  for (let i = 1; i < chunks.length; i += 2) {
+    pages.push({
+      front: chunks[i],
+      back: i + 1 < chunks.length ? chunks[i + 1] : "__back__",
+    });
   }
 
-  if (chunks.length > 1) {
-    pages.push({ front: chunks[chunks.length - 1], back: "__back__" });
-  } else {
-    // Only one chunk — cover already shows it; just add back cover
+  // If the last page still has content on its back, add a back-cover-only page
+  // so the book end always shows the back cover texture.
+  if (Array.isArray(pages[pages.length - 1].back)) {
     pages.push({ front: "__back__", back: "__back__" });
   }
 

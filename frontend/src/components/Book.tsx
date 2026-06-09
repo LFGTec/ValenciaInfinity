@@ -26,9 +26,9 @@ import { pageAtom, buildPages, type AlbumPage } from "./UI";
 
 const easingFactor = 0.5;
 const easingFactorFold = 0.3;
-const insideCurveStrength = 0.18;
-const outsideCurveStrength = 0.05;
-const turningCurveStrength = 0.09;
+const insideCurveStrength = 0.2;
+const outsideCurveStrength = 0.02;
+const turningCurveStrength = 0.04;
 
 const PAGE_WIDTH = 1.28;
 const PAGE_HEIGHT = 1.71;
@@ -41,7 +41,7 @@ const pageGeometry = new BoxGeometry(
   PAGE_HEIGHT,
   PAGE_DEPTH,
   PAGE_SEGMENTS,
-  2
+  2,
 );
 pageGeometry.translate(PAGE_WIDTH / 2, 0, 0);
 
@@ -59,8 +59,14 @@ for (let i = 0; i < posAttr.count; i++) {
   skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
 }
 
-pageGeometry.setAttribute("skinIndex", new Uint16BufferAttribute(skinIndexes, 4));
-pageGeometry.setAttribute("skinWeight", new Float32BufferAttribute(skinWeights, 4));
+pageGeometry.setAttribute(
+  "skinIndex",
+  new Uint16BufferAttribute(skinIndexes, 4),
+);
+pageGeometry.setAttribute(
+  "skinWeight",
+  new Float32BufferAttribute(skinWeights, 4),
+);
 
 const whiteColor = new Color("white");
 const emissiveColor = new Color("orange");
@@ -140,8 +146,16 @@ const Page = ({
 
     const mats = mesh.material as MeshStandardMaterial[];
     const targetEmissive = highlighted ? 0.22 : 0;
-    mats[4].emissiveIntensity = MathUtils.lerp(mats[4].emissiveIntensity, targetEmissive, 0.1);
-    mats[5].emissiveIntensity = MathUtils.lerp(mats[5].emissiveIntensity, targetEmissive, 0.1);
+    mats[4].emissiveIntensity = MathUtils.lerp(
+      mats[4].emissiveIntensity,
+      targetEmissive,
+      0.1,
+    );
+    mats[5].emissiveIntensity = MathUtils.lerp(
+      mats[5].emissiveIntensity,
+      targetEmissive,
+      0.1,
+    );
 
     if (lastOpened.current !== opened) {
       turnedAt.current = Date.now();
@@ -174,7 +188,13 @@ const Page = ({
         foldRotationAngle = 0;
       }
 
-      easing.dampAngle(target.rotation, "y", rotationAngle, easingFactor, delta);
+      easing.dampAngle(
+        target.rotation,
+        "y",
+        rotationAngle,
+        easingFactor,
+        delta,
+      );
 
       const foldIntensity =
         i > 8
@@ -185,7 +205,7 @@ const Page = ({
         "x",
         foldRotationAngle * foldIntensity,
         easingFactorFold,
-        delta
+        delta,
       );
     }
   });
@@ -223,15 +243,15 @@ function resolveTextures(pages: AlbumPage[]) {
       pageData.front === "__cover__"
         ? createCoverTexture()
         : pageData.front === "__back__"
-        ? createBackTexture()
-        : createCardTexture(pageData.front as Card[]);
+          ? createBackTexture()
+          : createCardTexture(pageData.front as Card[]);
 
     const backTexture =
       pageData.back === "__back__"
         ? createBackTexture()
         : pageData.back === "__cover__"
-        ? createCoverTexture()
-        : createCardTexture(pageData.back as Card[]);
+          ? createCoverTexture()
+          : createCardTexture(pageData.back as Card[]);
 
     return { frontTexture, backTexture };
   });

@@ -116,7 +116,7 @@ export function RoomChat({ messages, spectatorCount, currentUserId, currentUserA
             <motion.button
               key={emoji}
               onClick={() => onSendEmoji(emoji)}
-              className="text-base p-1 rounded-lg hover:bg-vcf-orange/15 transition-colors"
+              className="text-base p-1 rounded-lg hover:bg-vcf-orange/15 transition-colors cursor-pointer"
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.8 }}
               transition={{ type: "spring", stiffness: 500, damping: 15 }}

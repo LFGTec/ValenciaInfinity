@@ -38,55 +38,51 @@ export function VirtualWorld() {
    
 
     return(
-        <div className="max-w-[1600px] mx-auto px-4 py-6 bg-content">
-            <div className="mb-6">
-                <h1 className="text-5xl font-black mb-4 text-foreground">
-                MUNDO <span className="text-vcf-orange">VIRTUAL</span>
+        <div className="h-[calc(100vh-90px)] overflow-hidden flex flex-col max-w-[1600px] mx-auto px-4 bg-content">
+            <div className="flex-shrink-0 pt-6 pb-4">
+                <h1 className="text-5xl font-black mb-2 text-foreground">
+                    MUNDO <span className="text-vcf-orange">VIRTUAL</span>
                 </h1>
-                <p className="text-xl text-muted-foreground">
-                Conecta con fans del Valencia CF en tiempo real
+                <p className="text-base text-muted-foreground">
+                    Conecta con fans del Valencia CF en tiempo real
                 </p>
             </div>
 
-            {/*Espacio para el Mapa*/}
+            <div className="flex-1 min-h-0 pb-4 flex flex-col">
+                {/* Top bar */}
+                <div className="flex-shrink-0 bg-card border-2 border-vcf-blue rounded-t-xl px-4 py-3 flex items-center justify-between">
+                    <button
+                        onClick={handleActivate}
+                        disabled={loadinguserLocation || locationSaved}
+                        className={`
+                            px-4 py-2 rounded-lg font-bold transition-colors text-sm flex items-center gap-2
+                            ${!locationSaved
+                                ? "bg-vcf-orange text-white hover:bg-[#a86d12] cursor-pointer"
+                                : isVisible
+                                ? "bg-green-600 text-white cursor-default"
+                                : "bg-gray-500 text-white cursor-default"
+                            }
+                            ${loadinguserLocation ? "opacity-70 cursor-wait" : ""}
+                        `}
+                    >
+                        <Navigation size={16} />
+                        {loadinguserLocation
+                            ? "Cargando..."
+                            : !locationSaved
+                            ? "Activar ubicación"
+                            : isVisible
+                            ? "Compartiendo ubicación"
+                            : "No compartiendo ubicación"}
+                    </button>
+                </div>
 
-            <div className="bg-card border-2 border-vcf-blue rounded-t-xl p-4 flex items-center justify-between">
-                <button
-                onClick={handleActivate}
-                disabled={loadinguserLocation || locationSaved}
-                className={`
-                    px-4 py-2 rounded-lg font-bold transition-colors text-sm flex items-center gap-2
-                    ${
-                    !locationSaved
-                        ? "bg-vcf-orange text-white hover:bg-[#a86d12]"
-                        : isVisible
-                        ? "bg-green-600 text-white cursor-default"
-                        : "bg-gray-500 text-white cursor-default"
-                    }
-                    ${loadinguserLocation ? "opacity-70 cursor-wait" : ""}
-                `}
-                >
-                <Navigation size={16} />            
-                {loadinguserLocation
-                ? "Cargando..."
-                : !locationSaved
-                ? "Activar ubicación"
-                : isVisible
-                ? "Compartiendo ubicación"
-                : "No compartiendo ubicación"}
-                </button>
+                {/* Map - fills remaining height */}
+                <div className="flex-1 min-h-0 bg-card border-2 border-vcf-blue border-t-0 rounded-b-xl overflow-hidden shadow-2xl">
+                    {loading && <div className="p-6">Cargando mapa...</div>}
+                    {error && <div className="p-6 text-red-500">{error}</div>}
+                    {!loading && !error && <Map data={typedData} />}
+                </div>
             </div>
-
-            <div className="bg-card border-2 border-vcf-blue border-t-0 rounded-b-xl overflow-hidden shadow-2xl">
-
-                {loading && <div className="p-6">Cargando mapa...</div>}
-                {error && <div className="p-6 text-red-500">{error}</div>}
-
-                {!loading && !error && (
-                    <Map data={typedData} />
-                )}
-            </div>
-
         </div>
     );
 }
