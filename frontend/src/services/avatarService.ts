@@ -253,6 +253,35 @@ export async function getUserAvatar() {
   return data ?? [];
 }
 
+export async function getUserAvatarByUserId(userId: string) {
+  const { data, error } = await supabase
+    .from("AvatarUsuario")
+    .select(`
+      id,
+      user_id,
+      categoria,
+      pieza_id,
+      color,
+      AvatarPiezas (
+        id,
+        categoria,
+        etiqueta_categoria,
+        posicion_categoria,
+        posicion_item,
+        nombre,
+        ruta_archivo,
+        ruta_thumbnail,
+        removible,
+        activo
+      )
+    `)
+    .eq("user_id", userId);
+
+  if (error) throw error;
+
+  return data ?? [];
+}
+
 export function buildSavedAvatarState(savedAvatar: any[]) {
   const selectedAssets: Record<string, AvatarAsset> = {};
   const selectedColors: Record<string, string> = {};
