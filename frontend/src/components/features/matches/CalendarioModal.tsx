@@ -74,7 +74,7 @@ export function CalendarioModal({
           </button>
           <button
             onClick={onClose}
-            className="ml-4 w-9 h-9 rounded-full bg-muted hover:bg-vcf-red hover:text-white flex items-center justify-center transition-all text-foreground"
+            className="ml-4 w-9 h-9 rounded-full bg-muted flex items-center justify-center transition-all text-foreground cursor-pointer hover:-translate-y-1"
           >
             <X size={16} />
           </button>

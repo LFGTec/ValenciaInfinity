@@ -4,7 +4,6 @@ import {
   Users,
   Share2,
   Check,
-  ArrowLeft,
   Clock,
   BarChart2,
   List,
@@ -113,17 +112,6 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
           <div className="flex items-center justify-between gap-2">
             {/* Left */}
             <div className="flex items-center gap-2 min-w-0">
-              <motion.button
-                onClick={onLeave}
-                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-vcf-orange/5 transition-colors font-bold flex-shrink-0 cursor-pointer"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
-                <ArrowLeft size={14} />
-                <span className="hidden sm:inline text-xs">Salir</span>
-              </motion.button>
-
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-black text-foreground truncate">

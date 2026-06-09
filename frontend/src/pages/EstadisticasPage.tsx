@@ -1,6 +1,5 @@
 import React from "react";
-import { ArrowLeft, BarChart2, Home, Plane, Trophy } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { BarChart2, Home, Plane, Trophy } from "lucide-react";
 import { usePartidosVCF } from "../hooks/usePartidosVCF";
 import { useTablaLiga } from "../hooks/useTablaLiga";
 import { EstadisticasTemporadaCard } from "../components/features/EstadisticasTemporada";
@@ -50,7 +49,6 @@ function FormaBadge({ resultado }: { resultado: "W" | "D" | "L" }) {
 }
 
 export function EstadisticasPage() {
-  const navegar = useNavigate();
   const { jugados, estadisticas, cargando } = usePartidosVCF();
   const { tabla, cargando: cargandoTabla, error: errorTabla } = useTablaLiga();
 
@@ -111,13 +109,6 @@ export function EstadisticasPage() {
     <div className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
       {/* Header */}
       <div className="mb-8">
-        <button
-          onClick={() => navegar("/matches")}
-          className="flex items-center gap-2 px-5 py-3 bg-card border-2 border-black hover:border-vcf-orange text-foreground hover:text-vcf-orange rounded-xl font-black transition-all shadow-lg hover:scale-105 whitespace-nowrap text-base cursor-pointer mb-4"
-        >
-          <ArrowLeft size={18} />
-          Volver a Partidos
-        </button>
         <div className="flex items-center gap-3">
           <BarChart2 size={32} className="text-vcf-orange" />
           <div>
