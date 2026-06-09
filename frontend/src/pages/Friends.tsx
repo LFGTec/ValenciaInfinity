@@ -83,7 +83,7 @@ export function Friends() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 md:gap-2 mb-8 border-b-2 border-border overflow-x-auto">
+            <div className="flex gap-1 md:gap-2 mb-8 border-b-2 border-border overflow-x-auto overflow-y-visible pt-2">
                 <button
                 onClick={() => setActiveTab("friends")}
                 className={`px-3 md:px-6 py-3 font-black transition-all cursor-pointer text-sm md:text-base whitespace-nowrap ${
@@ -419,29 +419,23 @@ export function Friends() {
                             key={user.id}
                             className="bg-card border-2 border-vcf-orange rounded-lg p-6 shadow-md hover:shadow-xl transition-all"
                         >
-                            <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
+                            <div className="flex items-center gap-4 mb-4 min-w-0">
                                 <img
                                     src={user.avatar_url}
                                     alt={user.full_name}
-                                    className="w-16 h-16 rounded-full object-cover border-2 border-vcf-orange"
+                                    className="w-16 h-16 rounded-full object-cover border-2 border-vcf-orange flex-shrink-0"
                                 />
-                                
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-foreground">
+                                <div className="min-w-0">
+                                    <h3 className="font-black text-foreground break-words">
                                         {user.full_name}
                                     </h3>
-
                                     <div className="flex items-center gap-1 mt-1">
-                                        <MapPin size={12} className="text-vcf-orange" />
-                                        <span className="text-xs text-muted-foreground">
+                                        <MapPin size={12} className="text-vcf-orange flex-shrink-0" />
+                                        <span className="text-xs text-muted-foreground truncate">
                                             {user.location || "No mostrando ubicación"}
                                         </span>
                                     </div>
                                 </div>
-                            </div>
                             </div>
 
                             <div className="flex justify-center mb-4">
