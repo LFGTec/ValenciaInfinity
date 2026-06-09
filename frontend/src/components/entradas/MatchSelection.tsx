@@ -5,6 +5,7 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
+  ArrowLeft,
 } from "lucide-react";
 import type { Match } from "@/pages/TicketsPage";
 import vcfShield from "../../assets/EscudoValenciaCF.png";
@@ -14,10 +15,12 @@ export function MatchSelection({
   matches,
   stepNumber,
   onSelectMatch,
+  onBack,
 }: {
   matches: Match[];
   stepNumber: number;
   onSelectMatch: (match: Match) => void;
+  onBack: () => void;
 }) {
   const getAvailabilityBadge = (availability: Match["availability"]) => {
     switch (availability) {
@@ -51,15 +54,23 @@ export function MatchSelection({
       <div className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Izquierda: placeholder para centrar el título */}
-            <div className="w-24" />
+            {/* Izquierda: volver a la página anterior */}
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:-translate-y-1 transition-all cursor-pointer font-bold text-sm"
+            >
+              <ArrowLeft size={16} />
+              Volver
+            </button>
 
             {/* Centro: título */}
             <div className="text-center hidden sm:block">
               <div className="text-sm font-black text-foreground">
                 Compra de entradas
               </div>
-              <div className="text-xs text-muted-foreground">Elige tu partido</div>
+              <div className="text-xs text-muted-foreground">
+                Elige tu partido
+              </div>
             </div>
 
             {/* Derecha: pasos */}
@@ -71,7 +82,7 @@ export function MatchSelection({
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* ── Título ── */}
         <h1 className="mb-3 text-5xl font-black text-foreground">
-          PRÓXIMOS PARTIDOS
+          PRÓXIMOS <span className="text-vcf-orange">PARTIDOS</span>
         </h1>
         <p className="text-muted-foreground text-sm mb-8">
           Selecciona el encuentro y elige tu asiento en Mestalla
@@ -98,7 +109,11 @@ export function MatchSelection({
                   {/* Local */}
                   <div className="flex-1 text-center">
                     <div className="w-14 h-14 bg-card rounded-2xl mx-auto mb-2 flex items-center justify-center shadow-md border border-border p-1">
-                      <img src={vcfShield} alt={match.homeTeam} className="w-full h-full object-contain" />
+                      <img
+                        src={vcfShield}
+                        alt={match.homeTeam}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div className="font-black text-foreground text-sm">
                       {match.homeTeam}
@@ -106,7 +121,9 @@ export function MatchSelection({
                   </div>
 
                   <div className="px-4 flex flex-col items-center gap-1">
-                    <div className="text-xl font-black text-muted-foreground">VS</div>
+                    <div className="text-xl font-black text-muted-foreground">
+                      VS
+                    </div>
                   </div>
 
                   {/* Visitante */}
@@ -118,7 +135,10 @@ export function MatchSelection({
                         className="w-full h-full object-contain"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
-                          e.currentTarget.parentElement!.innerHTML = `<span class="font-black text-gray-600 text-xs">${match.awayTeam.split(" ").map(w => w[0]).join("")}</span>`;
+                          e.currentTarget.parentElement!.innerHTML = `<span class="font-black text-gray-600 text-xs">${match.awayTeam
+                            .split(" ")
+                            .map((w) => w[0])
+                            .join("")}</span>`;
                         }}
                       />
                     </div>

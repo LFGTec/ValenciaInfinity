@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
+import { Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getPublicRooms,
@@ -8,6 +9,7 @@ import {
   deleteRoom,
   subscribeToRooms,
   getRoomByInviteCode,
+  getRoomById,
   getOrCreateMainRoom,
   type RoomDB,
 } from "@/services/matchRoomsService";
@@ -25,12 +27,18 @@ const tabs: { id: Tab; label: string }[] = [
 
 export function MatchRooms() {
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>("discover");
   const [selectedRoom, setSelectedRoom] = useState<RoomDB | null>(null);
   const [publicRooms, setPublicRooms] = useState<RoomDB[]>([]);
   const [myRooms, setMyRooms] = useState<RoomDB[]>([]);
   const [loading, setLoading] = useState(true);
+  const [codeInput, setCodeInput] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [initializing, setInitializing] = useState(
+    () => !!(searchParams.get("room") || searchParams.get("code"))
+  );
 
   const currentUser = user
     ? {
@@ -54,14 +62,29 @@ export function MatchRooms() {
     }
   };
 
-  // Handle invite code from URL
+  // Restore room from URL on refresh (?room=ID) or invite link (?code=XXX)
   useEffect(() => {
+    const roomId = searchParams.get("room");
     const code = searchParams.get("code");
-    if (!code) return;
-    getRoomByInviteCode(code).then((room) => {
-      if (room) setSelectedRoom(room);
-    });
-  }, [searchParams]);
+
+    if (roomId) {
+      getRoomById(roomId).then((room) => {
+        if (room) setSelectedRoom(room);
+        else setSearchParams({}, { replace: true });
+        setInitializing(false);
+      });
+    } else if (code) {
+      getRoomByInviteCode(code).then((room) => {
+        if (room) {
+          setSelectedRoom(room);
+          setSearchParams({ room: room.id }, { replace: true });
+        } else {
+          setSearchParams({}, { replace: true });
+        }
+        setInitializing(false);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     loadRooms();
@@ -69,16 +92,49 @@ export function MatchRooms() {
     return () => { channel.unsubscribe(); };
   }, [user?.id]);
 
+  const joinRoom = (room: RoomDB) => {
+    setSelectedRoom(room);
+    setSearchParams({ room: room.id }, { replace: true });
+  };
+
+  const leaveRoom = () => {
+    setSelectedRoom(null);
+    setSearchParams({}, { replace: true });
+  };
+
   const handleDelete = async (roomId: string) => {
     await deleteRoom(roomId);
   };
+
+  const handleJoinByCode = async () => {
+    const trimmed = codeInput.trim().toUpperCase();
+    if (!trimmed) return;
+    setCodeLoading(true);
+    setCodeError(null);
+    const room = await getRoomByInviteCode(trimmed);
+    setCodeLoading(false);
+    if (room) {
+      setCodeInput("");
+      joinRoom(room);
+    } else {
+      setCodeError("Código no encontrado. Verifica que sea correcto.");
+    }
+  };
+
+  if (initializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-content">
+        <Loader2 size={36} className="animate-spin text-vcf-orange" />
+      </div>
+    );
+  }
 
   if (selectedRoom && currentUser) {
     return (
       <RoomView
         room={selectedRoom}
         user={currentUser}
-        onLeave={() => setSelectedRoom(null)}
+        onLeave={leaveRoom}
       />
     );
   }
@@ -114,6 +170,41 @@ export function MatchRooms() {
       {/* Discover */}
       {activeTab === "discover" && (
         <div>
+          {/* Join by code */}
+          <div className="bg-card border-2 border-border rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-vcf-orange/10 flex items-center justify-center">
+                <Lock size={20} className="text-vcf-orange" />
+              </div>
+              <div>
+                <p className="font-black text-foreground text-sm">SALA PRIVADA</p>
+                <p className="text-xs text-muted-foreground">Ingresa el código que te compartieron</p>
+              </div>
+            </div>
+            <div className="flex flex-1 gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                value={codeInput}
+                onChange={(e) => { setCodeInput(e.target.value.toUpperCase()); setCodeError(null); }}
+                onKeyDown={(e) => e.key === "Enter" && handleJoinByCode()}
+                placeholder="Ej: VCF-XXXX"
+                maxLength={8}
+                className="flex-1 px-4 py-2.5 bg-background border-2 border-border rounded-xl font-bold text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-vcf-orange transition-colors tracking-widest uppercase"
+              />
+              <button
+                onClick={handleJoinByCode}
+                disabled={!codeInput.trim() || codeLoading}
+                className="flex items-center gap-2 px-5 py-2.5 bg-vcf-orange text-white rounded-xl font-black text-sm transition-all hover:-translate-y-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 shadow-lg shadow-vcf-orange/20"
+              >
+                {codeLoading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} strokeWidth={3} />}
+                UNIRSE
+              </button>
+            </div>
+            {codeError && (
+              <p className="text-xs text-red-500 font-bold w-full sm:w-auto">{codeError}</p>
+            )}
+          </div>
+
           <div className="flex items-center gap-3 mb-6">
             <div className="w-3 h-3 bg-vcf-red rounded-full animate-pulse" />
             <h2 className="text-3xl font-black text-foreground">
@@ -135,7 +226,7 @@ export function MatchRooms() {
                   key={room.id}
                   room={room}
                   variant="discover"
-                  onJoin={setSelectedRoom}
+                  onJoin={joinRoom}
                 />
               ))}
             </div>
@@ -169,7 +260,7 @@ export function MatchRooms() {
                   key={room.id}
                   room={room}
                   variant="mine"
-                  onJoin={setSelectedRoom}
+                  onJoin={joinRoom}
                   onDelete={handleDelete}
                 />
               ))}
@@ -183,7 +274,7 @@ export function MatchRooms() {
         <CreateRoomForm
           userId={user?.id ?? ""}
           onCreateRoom={(room) => {
-            setSelectedRoom(room);
+            joinRoom(room);
           }}
         />
       )}

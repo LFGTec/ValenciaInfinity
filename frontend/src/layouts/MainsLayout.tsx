@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import {
   Menu,
@@ -9,6 +9,7 @@ import {
   Settings,
   ChevronDown,
   Flame,
+  ArrowLeft,
 } from "lucide-react";
 import vcfShield from "../assets/EscudoValenciaCF.png";
 import valenciaPointsIcon from "../assets/ValenciaPoints.png";
@@ -18,9 +19,12 @@ import { formatNumber } from "@/utils/formatNumbers";
 export default function MainLayout() {
   const { user, isAuthenticated, signOut, isSigningOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const showBackButton = location.pathname !== "/home" && location.pathname !== "/ticket";
 
   const handleLogout = async () => {
     const { error } = await signOut();
@@ -60,14 +64,13 @@ export default function MainLayout() {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) => `
-                    px-2 xl:px-3 2xl:px-4
+                    group px-2 xl:px-3 2xl:px-4
                     py-2
                     font-bold
                     text-xs xl:text-sm
                     tracking-wide
-                    transition-all
                     whitespace-nowrap
-                    hover:-translate-y-1
+                    transition-colors
                     ${
                       isActive
                         ? "text-vcf-orange border-b-4 border-vcf-orange"
@@ -75,7 +78,9 @@ export default function MainLayout() {
                     }
                   `}
                 >
-                  {item.label}
+                  <span className="inline-block transition-transform duration-200 group-hover:-translate-y-1">
+                    {item.label}
+                  </span>
                 </NavLink>
               ))}
             </nav>
@@ -246,7 +251,7 @@ export default function MainLayout() {
 
               {/* Mobile Menu Toggle */}
               <button
-                className="xl:hidden text-white"
+                className="xl:hidden text-white hover:-translate-y-1 transition-transform duration-200 cursor-pointer"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -282,7 +287,7 @@ export default function MainLayout() {
                 to={item.path}
                 onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-6 py-4 text-sm font-bold border-l-4 transition-all hover:-translate-y-1
+                  `group px-6 py-4 text-sm font-bold border-l-4 transition-colors
                   ${
                     isActive
                       ? "border-vcf-orange text-vcf-orange bg-white/5"
@@ -290,7 +295,9 @@ export default function MainLayout() {
                   }`
                 }
               >
-                {item.label}
+                <span className="inline-block transition-transform duration-200 group-hover:-translate-y-1">
+                  {item.label}
+                </span>
               </NavLink>
             ))}
           </nav>
@@ -299,6 +306,17 @@ export default function MainLayout() {
 
       {/* Main Content */}
       <main onClick={() => setShowDropdown(false)}>
+        {showBackButton && (
+          <div className="px-4 pt-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:-translate-y-1 transition-all cursor-pointer font-bold text-sm"
+            >
+              <ArrowLeft size={16} />
+              Volver
+            </button>
+          </div>
+        )}
         <Outlet />
       </main>
 

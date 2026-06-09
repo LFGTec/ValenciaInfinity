@@ -75,13 +75,25 @@ export async function getMyRooms(userId: string): Promise<RoomDB[]> {
   return data ?? [];
 }
 
-export async function getRoomByInviteCode(code: string): Promise<RoomDB | null> {
-  const { data } = await supabase
+export async function getRoomById(id: string): Promise<RoomDB | null> {
+  const { data, error } = await supabase
     .from("match_rooms")
     .select("*")
-    .eq("invite_code", code.toUpperCase())
-    .single();
+    .eq("id", id)
+    .maybeSingle();
 
+  if (error) console.error("[getRoomById]", error.message);
+  return data ?? null;
+}
+
+export async function getRoomByInviteCode(code: string): Promise<RoomDB | null> {
+  const { data, error } = await supabase
+    .from("match_rooms")
+    .select("*")
+    .eq("invite_code", code.trim().toUpperCase())
+    .maybeSingle();
+
+  if (error) console.error("[getRoomByInviteCode]", error.message);
   return data ?? null;
 }
 

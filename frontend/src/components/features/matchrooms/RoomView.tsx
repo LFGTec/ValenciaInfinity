@@ -58,10 +58,8 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
     liveMatch?.status === "IN_PLAY" || liveMatch?.status === "PAUSED";
 
   const copyInviteLink = () => {
-    const url = room.invite_code
-      ? `${window.location.origin}/match-rooms?code=${room.invite_code}`
-      : `${window.location.origin}/match-rooms`;
-    navigator.clipboard.writeText(url);
+    const text = room.invite_code ?? "";
+    navigator.clipboard.writeText(text);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
@@ -311,6 +309,7 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
               messages={messages}
               spectatorCount={spectatorCount}
               currentUserId={user.id}
+              currentUserAvatarUrl={user.avatar_url}
               onSendEmoji={(emoji) => sendEmoji(emoji, user)}
             />
           </div>
