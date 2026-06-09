@@ -335,7 +335,7 @@ export default function HomePage() {
                 return (
                   <motion.div
                     key={item.url}
-                    onClick={() => navigate("/news")}
+                    onClick={() => window.open(item.url, '_blank')}
                     className={`relative rounded-[14px] overflow-hidden cursor-pointer group no-underline shadow-[0_4px_20px_rgba(0,0,0,0.18)] ${
                       isFeatured ? "md:col-span-2 md:row-span-2" : ""
                     }`}
