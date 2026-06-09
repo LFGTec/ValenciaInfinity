@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Play,
-  Info,
-  Maximize2,
-  Volume2,
-  VolumeX,
-  RotateCcw,
-} from "lucide-react";
+import { Play, Info, Volume2, VolumeX, RotateCcw } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 export function Juego() {
@@ -16,7 +9,7 @@ export function Juego() {
 
   const { user, isAuthenticated } = useAuth();
 
-  const unityGameBaseUrl = "https://marvelous-belekoy-257d7e.netlify.app";
+  const unityGameBaseUrl = "https://harmonious-pudding-bf6d53.netlify.app";
 
   const unityGameUrl = user?.id
     ? `${unityGameBaseUrl}?userId=${encodeURIComponent(user.id)}`
