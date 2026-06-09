@@ -75,6 +75,17 @@ export async function getMyRooms(userId: string): Promise<RoomDB[]> {
   return data ?? [];
 }
 
+export async function getRoomById(id: string): Promise<RoomDB | null> {
+  const { data, error } = await supabase
+    .from("match_rooms")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) console.error("[getRoomById]", error.message);
+  return data ?? null;
+}
+
 export async function getRoomByInviteCode(code: string): Promise<RoomDB | null> {
   const { data, error } = await supabase
     .from("match_rooms")

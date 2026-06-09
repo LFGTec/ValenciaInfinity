@@ -9,6 +9,7 @@ import {
   deleteRoom,
   subscribeToRooms,
   getRoomByInviteCode,
+  getRoomById,
   getOrCreateMainRoom,
   type RoomDB,
 } from "@/services/matchRoomsService";
@@ -26,7 +27,7 @@ const tabs: { id: Tab; label: string }[] = [
 
 export function MatchRooms() {
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>("discover");
   const [selectedRoom, setSelectedRoom] = useState<RoomDB | null>(null);
   const [publicRooms, setPublicRooms] = useState<RoomDB[]>([]);
@@ -35,6 +36,9 @@ export function MatchRooms() {
   const [codeInput, setCodeInput] = useState("");
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeError, setCodeError] = useState<string | null>(null);
+  const [initializing, setInitializing] = useState(
+    () => !!(searchParams.get("room") || searchParams.get("code"))
+  );
 
   const currentUser = user
     ? {
@@ -58,20 +62,45 @@ export function MatchRooms() {
     }
   };
 
-  // Handle invite code from URL
+  // Restore room from URL on refresh (?room=ID) or invite link (?code=XXX)
   useEffect(() => {
+    const roomId = searchParams.get("room");
     const code = searchParams.get("code");
-    if (!code) return;
-    getRoomByInviteCode(code).then((room) => {
-      if (room) setSelectedRoom(room);
-    });
-  }, [searchParams]);
+
+    if (roomId) {
+      getRoomById(roomId).then((room) => {
+        if (room) setSelectedRoom(room);
+        else setSearchParams({}, { replace: true });
+        setInitializing(false);
+      });
+    } else if (code) {
+      getRoomByInviteCode(code).then((room) => {
+        if (room) {
+          setSelectedRoom(room);
+          setSearchParams({ room: room.id }, { replace: true });
+        } else {
+          setSearchParams({}, { replace: true });
+        }
+        setInitializing(false);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     loadRooms();
     const channel = subscribeToRooms(loadRooms);
     return () => { channel.unsubscribe(); };
   }, [user?.id]);
+
+  const joinRoom = (room: RoomDB) => {
+    setSelectedRoom(room);
+    setSearchParams({ room: room.id }, { replace: true });
+  };
+
+  const leaveRoom = () => {
+    setSelectedRoom(null);
+    setSearchParams({}, { replace: true });
+  };
 
   const handleDelete = async (roomId: string) => {
     await deleteRoom(roomId);
@@ -86,18 +115,26 @@ export function MatchRooms() {
     setCodeLoading(false);
     if (room) {
       setCodeInput("");
-      setSelectedRoom(room);
+      joinRoom(room);
     } else {
       setCodeError("Código no encontrado. Verifica que sea correcto.");
     }
   };
+
+  if (initializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-content">
+        <Loader2 size={36} className="animate-spin text-vcf-orange" />
+      </div>
+    );
+  }
 
   if (selectedRoom && currentUser) {
     return (
       <RoomView
         room={selectedRoom}
         user={currentUser}
-        onLeave={() => setSelectedRoom(null)}
+        onLeave={leaveRoom}
       />
     );
   }
@@ -189,7 +226,7 @@ export function MatchRooms() {
                   key={room.id}
                   room={room}
                   variant="discover"
-                  onJoin={setSelectedRoom}
+                  onJoin={joinRoom}
                 />
               ))}
             </div>
@@ -223,7 +260,7 @@ export function MatchRooms() {
                   key={room.id}
                   room={room}
                   variant="mine"
-                  onJoin={setSelectedRoom}
+                  onJoin={joinRoom}
                   onDelete={handleDelete}
                 />
               ))}
@@ -237,7 +274,7 @@ export function MatchRooms() {
         <CreateRoomForm
           userId={user?.id ?? ""}
           onCreateRoom={(room) => {
-            setSelectedRoom(room);
+            joinRoom(room);
           }}
         />
       )}
