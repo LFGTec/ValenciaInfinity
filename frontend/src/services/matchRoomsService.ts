@@ -76,12 +76,13 @@ export async function getMyRooms(userId: string): Promise<RoomDB[]> {
 }
 
 export async function getRoomByInviteCode(code: string): Promise<RoomDB | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("match_rooms")
     .select("*")
-    .eq("invite_code", code.toUpperCase())
-    .single();
+    .eq("invite_code", code.trim().toUpperCase())
+    .maybeSingle();
 
+  if (error) console.error("[getRoomByInviteCode]", error.message);
   return data ?? null;
 }
 

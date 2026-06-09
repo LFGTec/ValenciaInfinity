@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, Share2, Crown } from "lucide-react";
+import { Lock, Share2, Crown, Check, LogIn } from "lucide-react";
 import type { RoomDB } from "@/services/matchRoomsService";
 
 const spring = { type: "spring", stiffness: 300, damping: 20 } as const;
@@ -12,11 +13,12 @@ interface RoomCardProps {
 }
 
 export function RoomCard({ room, variant, onJoin, onDelete }: RoomCardProps) {
-  const copyInviteLink = () => {
+  const [copied, setCopied] = useState(false);
+  const copyInviteCode = () => {
     if (room.invite_code) {
-      navigator.clipboard.writeText(
-        `${window.location.origin}/match-rooms?code=${room.invite_code}`
-      );
+      navigator.clipboard.writeText(room.invite_code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -80,17 +82,27 @@ export function RoomCard({ room, variant, onJoin, onDelete }: RoomCardProps) {
           <p className="text-xs text-vcf-orange font-bold mt-1">Código: {room.invite_code}</p>
         )}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap justify-end">
+        <motion.button
+          onClick={() => onJoin?.(room)}
+          className="px-4 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black flex items-center gap-2 cursor-pointer"
+          whileHover={{ scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
+          whileTap={{ scale: 0.97 }}
+          transition={spring}
+        >
+          <LogIn size={16} />
+          ENTRAR
+        </motion.button>
         {room.invite_code && (
           <motion.button
-            onClick={copyInviteLink}
-            className="px-4 py-3 bg-vcf-orange border-2 border-vcf-orange text-white rounded-lg font-black flex items-center gap-2 cursor-pointer"
-            whileHover={{ scale: 1.05, backgroundColor: "#e05516", borderColor: "#e05516" }}
+            onClick={copyInviteCode}
+            className="px-4 py-3 bg-card border-2 border-border text-foreground rounded-lg font-black flex items-center gap-2 cursor-pointer"
+            whileHover={{ scale: 1.05, borderColor: "#ff6b1a" }}
             whileTap={{ scale: 0.97 }}
             transition={spring}
           >
-            <Share2 size={16} />
-            INVITAR
+            {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
+            {copied ? "¡COPIADO!" : "COPIAR CÓDIGO"}
           </motion.button>
         )}
         {onDelete && (
