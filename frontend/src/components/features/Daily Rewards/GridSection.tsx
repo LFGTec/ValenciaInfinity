@@ -104,7 +104,7 @@ function GridSection({
             <div className="flex-1 text-center md:text-left">
               {todayReward ? (
                 <>
-                  <p className="text-5xl font-black text-foreground mb-2">
+                  <p className="text-3xl md:text-5xl font-black text-foreground mb-2">
                     {todayReward.type === "card"
                       ? "CARTA"
                       : `+${todayReward.reward}`}

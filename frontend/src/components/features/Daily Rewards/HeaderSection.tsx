@@ -109,10 +109,10 @@ function HeaderSection({
     <>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-5xl font-black mb-4 text-foreground">
+        <h1 className="text-3xl md:text-5xl font-black mb-4 text-foreground">
           RACHA DE <span className="text-vcf-orange">DÍAS</span>
         </h1>
-        <p className="text-xl text-muted-foreground">
+        <p className="text-base md:text-xl text-muted-foreground">
           Inicia sesión cada día y reclama increíbles recompensas
         </p>
       </div>
@@ -247,7 +247,7 @@ function HeaderSection({
                   </div>
 
                   <div className="bg-muted/50 rounded-xl p-5 text-center">
-                    <p className="text-5xl font-black text-foreground mb-1">
+                    <p className="text-3xl md:text-5xl font-black text-foreground mb-1">
                       {daysUntilRecord}
                     </p>
                     <p className="text-sm font-bold text-muted-foreground">

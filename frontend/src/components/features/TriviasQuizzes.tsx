@@ -19,6 +19,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { addTriviaRewardToCurrentUser } from "@/services/rewardsService";
 import { RankingPreview } from "../RankingPreview";
 import { useRanking } from "@/hooks/useRanking";
+import { formatNumber } from "@/utils/formatNumbers";
 
 
 
@@ -199,7 +200,7 @@ export function TriviasQuizzes() {
 
     return (
       <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full bg-card border-2 border-vcf-orange rounded-xl p-8 shadow-2xl">
+        <div className="max-w-2xl w-full bg-card border-2 border-vcf-orange rounded-xl p-5 md:p-8 shadow-2xl">
           <div className="text-center">
             <div className="w-24 h-24 bg-vcf-orange rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
               <Trophy size={48} className="text-white" />
@@ -211,22 +212,22 @@ export function TriviasQuizzes() {
 
             <div className="bg-muted rounded-lg p-6 mb-6">
               <div className="text-6xl font-black mb-2 text-vcf-orange">
-                {percentage}%
+                {formatNumber(percentage)}%
               </div>
 
               <div className="text-xl text-muted-foreground mb-4">
-                {score} de {quizQuestions.length} respuestas correctas
+                {formatNumber(score)} de {formatNumber(quizQuestions.length)} respuestas correctas
               </div>
 
               <div className="flex items-center justify-center gap-2 text-2xl font-black text-foreground">
                 <Award className="text-vcf-orange" size={32} />
-                <span>+{earnedPoints} PUNTOS</span>
+                <span>+{formatNumber(earnedPoints)} PUNTOS</span>
               </div>
             </div>
 
             <button
               onClick={resetQuiz}
-              className="w-full py-4 bg-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] transition-colors shadow-lg"
+              className="w-full py-4 bg-vcf-orange text-white rounded-lg font-black hover:bg-[#e05516] hover:-translate-y-1 transition-all shadow-lg cursor-pointer"
             >
               CONTINUAR
             </button>
@@ -289,13 +290,13 @@ export function TriviasQuizzes() {
                 </h2>
 
                 <p className="text-muted-foreground">
-                  Pregunta {currentQuestion + 1} de {quizQuestions.length}
+                  Pregunta {formatNumber(currentQuestion + 1)} de {formatNumber(quizQuestions.length)}
                 </p>
               </div>
 
               <div className="text-right">
                 <div className="text-3xl font-black text-vcf-orange">
-                  {score}
+                  {formatNumber(score)}
                 </div>
 
                 <div className="text-sm text-muted-foreground font-bold">
@@ -312,7 +313,7 @@ export function TriviasQuizzes() {
             </div>
           </div>
 
-          <div className="bg-card rounded-lg p-8 mb-6 shadow-lg border-2 border-border">
+          <div className="bg-card rounded-lg p-5 md:p-8 mb-6 shadow-lg border-2 border-border">
             <h3 className="text-2xl font-black mb-8 text-foreground">
               {currentQ.question}
             </h3>
@@ -324,7 +325,7 @@ export function TriviasQuizzes() {
                   onClick={() => handleAnswerSelect(index)}
                   disabled={selectedAnswer !== null}
                   className={`w-full p-6 text-left rounded-lg border-2 font-bold transition-all cursor-pointer ${selectedAnswer === null
-                    ? "border-border bg-card hover:border-vcf-orange hover:bg-muted text-foreground"
+                    ? "border-border bg-card hover:border-vcf-orange hover:bg-muted hover:-translate-y-1 text-foreground"
                     : selectedAnswer === index
                       ? index === currentQ.correct_answer
                         ? "border-green-500 bg-green-100 text-black"
@@ -366,11 +367,11 @@ export function TriviasQuizzes() {
   return (
     <div className="min-h-screen max-w-[1600px] mx-auto px-4 py-6 bg-content">
       <div className="mb-6">
-        <h1 className="text-5xl font-black mb-4 text-foreground">
+        <h1 className="text-3xl md:text-5xl font-black mb-4 text-foreground">
           TRIVIAS & <span className="text-vcf-orange">QUIZZES</span>
         </h1>
 
-        <p className="text-xl text-muted-foreground">
+        <p className="text-base md:text-xl text-muted-foreground">
           Demuestra tus conocimientos y gana recompensas
         </p>
       </div>
@@ -378,7 +379,7 @@ export function TriviasQuizzes() {
       <div className="flex gap-2 mb-8 border-b-2 border-border">
         <button
           onClick={() => setActiveTab("active")}
-          className={`px-6 py-3 font-black transition-all text-base ${activeTab === "active"
+          className={`px-6 py-3 font-black transition-all text-base cursor-pointer ${activeTab === "active"
             ? "border-b-4 border-vcf-orange text-vcf-orange"
             : "text-muted-foreground hover:text-foreground"
             }`}
@@ -388,7 +389,7 @@ export function TriviasQuizzes() {
 
         <button
           onClick={() => setActiveTab("leaderboard")}
-          className={`px-6 py-3 font-black transition-all text-base ${activeTab === "leaderboard"
+          className={`px-6 py-3 font-black transition-all text-base cursor-pointer ${activeTab === "leaderboard"
             ? "border-b-4 border-vcf-orange text-vcf-orange"
             : "text-muted-foreground hover:text-foreground"
             }`}
@@ -418,7 +419,7 @@ export function TriviasQuizzes() {
               return (
                 <div
                   key={trivia.id}
-                  className={`bg-card border-2 rounded-xl p-8 transition-all shadow-md ${isCompleted
+                  className={`bg-card border-2 rounded-xl p-5 md:p-8 transition-all shadow-md ${isCompleted
                     ? "border-green-500 opacity-80"
                     : "border-border hover:border-vcf-orange hover:shadow-lg"
                     }`}
@@ -461,7 +462,7 @@ export function TriviasQuizzes() {
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="text-center p-3 bg-muted rounded-lg shadow-sm">
                       <div className="text-2xl font-black mb-1 text-black">
-                        {trivia.questions}
+                        {formatNumber(trivia.questions)}
                       </div>
 
                       <div className="text-sm text-muted-foreground font-bold">
@@ -471,7 +472,7 @@ export function TriviasQuizzes() {
 
                     <div className="text-center p-3 bg-muted rounded-lg shadow-sm">
                       <div className="text-2xl font-black mb-1 text-vcf-orange">
-                        +{trivia.reward}
+                        +{formatNumber(trivia.reward)}
                       </div>
 
                       <div className="text-sm text-muted-foreground font-bold">

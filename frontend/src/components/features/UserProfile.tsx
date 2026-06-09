@@ -109,10 +109,10 @@ export function UserProfile() {
   return (
     <div className="min-h-screen max-w-[1400px] mx-auto px-4 py-12 bg-content">
       <div className="mb-8">
-        <h1 className="text-5xl font-black mb-4 text-foreground">
+        <h1 className="text-3xl md:text-5xl font-black mb-4 text-foreground">
           MI <span className="text-vcf-orange">PERFIL</span>
         </h1>
-        <p className="text-xl text-muted-foreground">
+        <p className="text-base md:text-xl text-muted-foreground">
           Gestiona tu información
         </p>
       </div>

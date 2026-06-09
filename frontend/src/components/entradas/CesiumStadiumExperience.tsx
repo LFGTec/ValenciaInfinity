@@ -413,7 +413,9 @@ export function CesiumStadiumExperience({
               <MapPin size={18} className="text-foreground" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground mb-0.5">Estadio</div>
+              <div className="text-xs text-muted-foreground mb-0.5">
+                Estadio
+              </div>
               <div className="text-sm font-black text-foreground">
                 {match.stadium}
               </div>
@@ -426,7 +428,7 @@ export function CesiumStadiumExperience({
             </div>
             <div>
               <div className="text-xs text-muted-foreground mb-0.5">Aforo</div>
-              <div className="text-sm font-black text-foreground">49.430</div>
+              <div className="text-sm font-black text-foreground">49,430</div>
             </div>
           </div>
 
@@ -435,7 +437,9 @@ export function CesiumStadiumExperience({
               <Trophy size={18} className="text-foreground" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground mb-0.5">Competición</div>
+              <div className="text-xs text-muted-foreground mb-0.5">
+                Competición
+              </div>
               <div className="text-sm font-black text-foreground">
                 {match.competition}
               </div>

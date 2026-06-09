@@ -81,7 +81,7 @@ export function MatchSelection({
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* ── Título ── */}
-        <h1 className="mb-3 text-5xl font-black text-foreground">
+        <h1 className="mb-3 text-3xl md:text-5xl font-black text-foreground">
           PRÓXIMOS <span className="text-vcf-orange">PARTIDOS</span>
         </h1>
         <p className="text-muted-foreground text-sm mb-8">
@@ -206,7 +206,7 @@ export function MatchSelection({
                 Estadio de Mestalla · Valencia
               </div>
               <div className="text-sm text-muted-foreground">
-                Aforo: 49.430 espectadores · LaLiga y Copa del Rey
+                Aforo: 49,430 espectadores · LaLiga y Copa del Rey
               </div>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-xl">

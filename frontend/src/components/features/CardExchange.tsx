@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { formatNumber } from "@/utils/formatNumbers";
 import {
   UsersRound,
   MessageSquare,
@@ -439,11 +440,11 @@ export function CardExchange() {
   return (
     <div className="min-h-screen max-w-[1600px] mx-auto px-4 py-6 bg-content">
       <div className="mb-6">
-        <h1 className="text-5xl font-black mb-4 text-foreground">
+        <h1 className="text-3xl md:text-5xl font-black mb-4 text-foreground">
           INTERCAMBIO DE{" "}
           <span className="text-vcf-orange">CARTAS</span>
         </h1>
-        <p className="text-xl text-muted-foreground">
+        <p className="text-base md:text-xl text-muted-foreground">
 Compra, vende e intercambia cartas con otros fans
         </p>
       </div>
@@ -523,7 +524,7 @@ Compra, vende e intercambia cartas con otros fans
                 <stat.icon size={20} className="text-white" />
               </div>
               <div className="text-3xl font-black text-foreground">
-                {stat.value}
+                {formatNumber(stat.value)}
               </div>
             </div>
             <div className="text-sm text-muted-foreground font-bold">
@@ -672,7 +673,7 @@ Compra, vende e intercambia cartas con otros fans
                                     <div>Categoría: {item.card.rarity}</div>
                                   )}
                                   {item.quantity > 1 && (
-                                    <div className="font-bold text-vcf-orange">x{item.quantity}</div>
+                                    <div className="font-bold text-vcf-orange">x{formatNumber(item.quantity)}</div>
                                   )}
                                 </div>
                               </div>
@@ -723,7 +724,7 @@ Compra, vende e intercambia cartas con otros fans
                                     <div>Rareza: {item.card.rarity}</div>
                                   )}
                                   {item.quantity > 1 && (
-                                    <div className="font-bold text-vcf-orange">x{item.quantity}</div>
+                                    <div className="font-bold text-vcf-orange">x{formatNumber(item.quantity)}</div>
                                   )}
                                 </div>
                               </div>
@@ -771,7 +772,7 @@ Compra, vende e intercambia cartas con otros fans
                     <span className="flex-1 text-left">
                       HISTORIAL{" "}
                       <span className="text-muted-foreground font-bold text-sm">
-                        ({trades.filter((t) => t.status !== "pending").length})
+                        ({formatNumber(trades.filter((t) => t.status !== "pending").length)})
                       </span>
                     </span>
                     <ChevronDown
@@ -1048,7 +1049,7 @@ Compra, vende e intercambia cartas con otros fans
                                 <div>
                                   Tipo: {card?.type || "N/A"} · Temporada: {card?.season ?? "N/A"}
                                 </div>
-                                <div>Cantidad: {item.quantity}</div>
+                                <div>Cantidad: {formatNumber(item.quantity)}</div>
                               </div>
                             </div>
                             <button
@@ -1120,7 +1121,7 @@ Compra, vende e intercambia cartas con otros fans
                                       <div>
                                         Tipo: {card.type || "N/A"} · Temporada: {card.season ?? "N/A"}
                                       </div>
-                                      <div>Tienes: {card.quantity}</div>
+                                      <div>Tienes: {formatNumber(card.quantity)}</div>
                                     </div>
                                   </div>
                                 </div>
@@ -1255,7 +1256,7 @@ Compra, vende e intercambia cartas con otros fans
                                     <div>
                                       Tipo: {card.type || "N/A"} · Temporada: {card.season ?? "N/A"}
                                     </div>
-                                    <div>Cantidad disponible: {card.quantity}</div>
+                                    <div>Cantidad disponible: {formatNumber(card.quantity)}</div>
                                   </div>
                                 </div>
                               </div>
@@ -1389,12 +1390,12 @@ Compra, vende e intercambia cartas con otros fans
                                       {item.card.name}
                                     </div>
                                     {item.quantity && item.quantity > 1 && (
-                                      <div className="text-xs text-vcf-orange">x{item.quantity}</div>
+                                      <div className="text-xs text-vcf-orange">x{formatNumber(item.quantity)}</div>
                                     )}
                                   </div>
                                 </div>
                               ) : item.points_amount ? (
-                                <div className="font-bold text-vcf-orange">💰 {item.points_amount} puntos</div>
+                                <div className="font-bold text-vcf-orange">💰 {formatNumber(item.points_amount)} puntos</div>
                               ) : null}
                             </div>
                           ))}
@@ -1424,12 +1425,12 @@ Compra, vende e intercambia cartas con otros fans
                                       {item.card.name}
                                     </div>
                                     {item.quantity && item.quantity > 1 && (
-                                      <div className="text-xs text-vcf-orange">x{item.quantity}</div>
+                                      <div className="text-xs text-vcf-orange">x{formatNumber(item.quantity)}</div>
                                     )}
                                   </div>
                                 </div>
                               ) : item.points_amount ? (
-                                <div className="font-bold text-vcf-orange">💰 {item.points_amount} puntos</div>
+                                <div className="font-bold text-vcf-orange">💰 {formatNumber(item.points_amount)} puntos</div>
                               ) : null}
                             </div>
                           ))}
@@ -1630,7 +1631,7 @@ Compra, vende e intercambia cartas con otros fans
                                 <div className="text-xs text-muted-foreground space-y-0.5">
                                   <div>Tipo: {card?.type || "N/A"} · Temporada: {card?.season ?? "N/A"}</div>
                                   <div>Categoría: {card?.categories?.name || card?.rarity || "Sin categoría"}</div>
-                                  <div>Cantidad: {item.quantity}</div>
+                                  <div>Cantidad: {formatNumber(item.quantity)}</div>
                                 </div>
                               </div>
 
@@ -1683,7 +1684,7 @@ Compra, vende e intercambia cartas con otros fans
                                     <div className="text-xs text-muted-foreground space-y-0.5">
                                       <div>Tipo: {card.type || "N/A"} · Temporada: {card.season ?? "N/A"}</div>
                                       <div>Categoría: {card.categories?.name || card.rarity || "Sin categoría"}</div>
-                                      <div>Tienes: {card.quantity}</div>
+                                      <div>Tienes: {formatNumber(card.quantity)}</div>
                                     </div>
                                   </div>
                                 </div>
@@ -1799,7 +1800,7 @@ Compra, vende e intercambia cartas con otros fans
                                 <div className="text-xs text-muted-foreground space-y-0.5">
                                   <div>Tipo: {card?.type || "N/A"} · Temporada: {card?.season ?? "N/A"}</div>
                                   <div>Categoría: {card?.categories?.name || card?.rarity || "Sin categoría"}</div>
-                                  <div>Cantidad: {item.quantity}</div>
+                                  <div>Cantidad: {formatNumber(item.quantity)}</div>
                                 </div>
                               </div>
 
@@ -2010,7 +2011,7 @@ Compra, vende e intercambia cartas con otros fans
                             <div className="font-bold mb-1 text-muted-foreground">OFRECES:</div>
                             {offeringItems.map((item) => (
                               <div key={item.id} className="text-foreground">
-                                {item.card ? `${item.card.name}${item.quantity ? ` x${item.quantity}` : ""}` : `💰 ${item.points_amount} puntos`}
+                                {item.card ? `${item.card.name}${item.quantity ? ` x${formatNumber(item.quantity)}` : ""}` : `💰 ${formatNumber(item.points_amount)} puntos`}
                               </div>
                             ))}
                           </div>
@@ -2018,7 +2019,7 @@ Compra, vende e intercambia cartas con otros fans
                             <div className="font-bold mb-1 text-muted-foreground">QUIERES:</div>
                             {wantedItems.map((item) => (
                               <div key={item.id} className="text-foreground">
-                                {item.card ? `${item.card.name}${item.quantity ? ` x${item.quantity}` : ""}` : `💰 ${item.points_amount} puntos`}
+                                {item.card ? `${item.card.name}${item.quantity ? ` x${formatNumber(item.quantity)}` : ""}` : `💰 ${formatNumber(item.points_amount)} puntos`}
                               </div>
                             ))}
                           </div>
