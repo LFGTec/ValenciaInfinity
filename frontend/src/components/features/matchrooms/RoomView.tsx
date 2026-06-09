@@ -309,6 +309,7 @@ export function RoomView({ room, user, onLeave }: RoomViewProps) {
               messages={messages}
               spectatorCount={spectatorCount}
               currentUserId={user.id}
+              currentUserAvatarUrl={user.avatar_url}
               onSendEmoji={(emoji) => sendEmoji(emoji, user)}
             />
           </div>
