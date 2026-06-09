@@ -9,7 +9,7 @@ export function Juego() {
 
   const { user, isAuthenticated } = useAuth();
 
-  const unityGameBaseUrl = "https://harmonious-pudding-bf6d53.netlify.app";
+  const unityGameBaseUrl = "https://bright-tapioca-8a5417.netlify.app";
 
   const unityGameUrl = user?.id
     ? `${unityGameBaseUrl}?userId=${encodeURIComponent(user.id)}`
@@ -72,18 +72,6 @@ export function Juego() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all hover:-translate-y-1 cursor-pointer"
-                    title={isMuted ? "Activar sonido" : "Silenciar"}
-                  >
-                    {isMuted ? (
-                      <VolumeX size={20} className="text-black" />
-                    ) : (
-                      <Volume2 size={20} className="text-black" />
-                    )}
-                  </button>
-
                   <button
                     onClick={handleRestartGame}
                     className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all hover:-translate-y-1 cursor-pointer"

@@ -299,7 +299,7 @@ export function CardAlbum({ userId }: Props) {
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 px-6 py-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-4 md:px-6 py-4">
                 {packs.length > 0 &&
                   packs.map((pack) => (
                     <div

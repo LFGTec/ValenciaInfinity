@@ -16,6 +16,7 @@ import {
 import valenciaPointsIcon from "../assets/ValenciaPoints.png";
 import { Link } from "react-router-dom";
 import { Info } from "lucide-react";
+import { formatNumber } from "@/utils/formatNumbers";
 import {
   getFullAlbumCardsByUser,
   buySpecificCard,
@@ -165,7 +166,7 @@ export function StorePage() {
   return (
     <div className="min-h-screen bg-content">
       {/* ── Hero ── */}
-      <section className="relative bg-card border-b border-border overflow-hidden py-16 px-4">
+      <section className="relative bg-card border-b border-border overflow-hidden py-10 md:py-16 px-4">
         {/* fondo decorativo — sutil para respetar ambos modos */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-vcf-orange rounded-full blur-3xl" />
@@ -193,7 +194,7 @@ export function StorePage() {
             <div className="mt-6 inline-flex items-center gap-2 bg-vcf-orange/10 border border-vcf-orange/30 rounded-xl px-5 py-3">
               <img src={valenciaPointsIcon} alt="" className="w-5 h-5" />
               <span className="text-vcf-orange font-black text-xl tabular-nums">
-                {currentPoints.toLocaleString("es-ES")}
+                {formatNumber(currentPoints)}
               </span>
               <span className="text-muted-foreground text-sm font-bold uppercase">
                 pts disponibles
@@ -246,7 +247,7 @@ export function StorePage() {
                 <div className="flex items-center gap-2 mt-auto">
                   <img src={valenciaPointsIcon} alt="" className="w-5 h-5" />
                   <span className="text-foreground font-black text-2xl tabular-nums">
-                    {product.price.toLocaleString("es-ES")}
+                    {formatNumber(product.price)}
                   </span>
                   <span className="text-muted-foreground text-sm font-bold uppercase">
                     pts

@@ -16,7 +16,7 @@ export function TeamPage() {
 
         {/* HEADER */}
         <div className="mb-6">
-          <h1 className="mb-3 text-5xl font-black text-foreground">
+          <h1 className="mb-3 text-3xl md:text-5xl font-black text-foreground">
             EL <span className="text-vcf-orange">EQUIPO</span>
           </h1>
 

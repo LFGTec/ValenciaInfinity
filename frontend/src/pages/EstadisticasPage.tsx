@@ -121,7 +121,7 @@ export function EstadisticasPage() {
         <div className="flex items-center gap-3">
           <BarChart2 size={32} className="text-vcf-orange" />
           <div>
-            <h1 className="text-5xl font-black text-foreground">
+            <h1 className="text-3xl md:text-5xl font-black text-foreground">
               ESTADÍSTICAS
             </h1>
             <p className="text-base text-muted-foreground">

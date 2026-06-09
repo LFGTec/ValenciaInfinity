@@ -44,11 +44,11 @@ export default function UserConfig(){
   
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-5xl font-black mb-4 text-foreground">
+                <h1 className="text-3xl md:text-5xl font-black mb-4 text-foreground">
                 CONFIGURA<span className="text-vcf-orange">CIÓN</span>
                 </h1>
 
-                <p className="text-xl text-muted-foreground">
+                <p className="text-base md:text-xl text-muted-foreground">
                 Personaliza tu experiencia en la plataforma
                 </p>
             </div>

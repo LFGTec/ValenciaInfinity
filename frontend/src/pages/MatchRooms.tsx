@@ -142,10 +142,10 @@ export function MatchRooms() {
   return (
     <div className="min-h-screen max-w-[1600px] mx-auto px-4 py-6 bg-content">
       <div className="mb-6">
-        <h1 className="text-5xl font-black mb-4 text-foreground">
+        <h1 className="text-3xl md:text-5xl font-black mb-4 text-foreground">
           MATCH <span className="text-vcf-orange">ROOMS</span>
         </h1>
-        <p className="text-xl text-muted-foreground">
+        <p className="text-base md:text-xl text-muted-foreground">
           Sigue los partidos en tiempo real con estadísticas y chat en vivo
         </p>
       </div>
