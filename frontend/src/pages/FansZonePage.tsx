@@ -13,7 +13,7 @@ export function FansZonePage() {
       
      
       <div className="mb-10">
-        <h1 className="text-5xl font-black mb-3 text-foreground">
+        <h1 className="text-3xl md:text-5xl font-black mb-3 text-foreground">
           ZONA <span className="text-vcf-orange">FAN</span>
         </h1>
         <p className="text-base text-muted-foreground">
@@ -34,7 +34,7 @@ export function FansZonePage() {
           <NavLink
             key={i}
             to={feature.path}
-            className="group relative overflow-hidden rounded-xl p-8 transition-all hover:scale-105 shadow-lg hover:shadow-2xl border-2 border-vcf-orange/70 bg-card block"
+            className="group relative overflow-hidden rounded-xl p-5 md:p-8 transition-all hover:scale-105 shadow-lg hover:shadow-2xl border-2 border-vcf-orange/70 bg-card block"
           >
             <div className="relative z-10 text-left">
               <feature.icon
@@ -65,7 +65,7 @@ export function FansZonePage() {
       </div>
 
      
-      <div className="rounded-xl bg-card border-2 border-vcf-orange/70 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-lg">
+      <div className="rounded-xl bg-card border-2 border-vcf-orange/70 p-5 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-lg">
         <div className="flex items-center gap-5">
           <div className="w-14 h-14 rounded-xl bg-vcf-orange/10 flex items-center justify-center flex-shrink-0">
             <UserCircle2 size={32} className="text-vcf-orange" strokeWidth={2} />

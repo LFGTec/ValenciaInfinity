@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getTrivias, type Trivia } from "@/services/triviasService";
+import { formatNumber } from "@/utils/formatNumbers";
 import { useNoticias } from "@/hooks/useNoticias";
 import {
   Video,
@@ -336,7 +337,7 @@ export default function HomePage() {
                 return (
                   <motion.div
                     key={item.url}
-                    onClick={() => navigate("/news")}
+                    onClick={() => window.open(item.url, '_blank')}
                     className={`relative rounded-[14px] overflow-hidden cursor-pointer group no-underline shadow-[0_4px_20px_rgba(0,0,0,0.18)] ${
                       isFeatured ? "md:col-span-2 md:row-span-2" : ""
                     }`}
@@ -416,7 +417,7 @@ export default function HomePage() {
                 TENDENCIA
               </div>
 
-              <h2 className="text-4xl font-black mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+              <h2 className="text-2xl md:text-4xl font-black mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                 VIVE LOS PARTIDOS CON TUS{" "}
                 <span className="text-vcf-orange">AMIGOS</span>
               </h2>
@@ -445,7 +446,7 @@ export default function HomePage() {
             </h2>
 
             <Link
-              to="/juego"
+              to="/trivias"
               className="flex items-center gap-2 text-sm font-bold text-vcf-orange hover:text-vcf-blue hover:gap-3 transition-all"
             >
               VER TODOS <ArrowRight size={16} />
@@ -477,7 +478,7 @@ export default function HomePage() {
                     </div>
 
                     <span className="bg-[#ff671f] text-white px-3 py-1 rounded-full text-xs font-black shadow-md">
-                      +{trivia.reward} PTS
+                      +{formatNumber(trivia.reward)} PTS
                     </span>
                   </div>
 
@@ -514,9 +515,9 @@ export default function HomePage() {
 
         {/* Album CTA */}
         <section className="mb-8">
-          <div className="bg-card rounded-xl p-8 shadow-lg border-2 border-vcf-orange">
+          <div className="bg-card rounded-xl p-5 md:p-8 shadow-lg border-2 border-vcf-orange">
             {/* Header — ancho completo */}
-            <h2 className="text-4xl font-black mb-2 text-foreground">
+            <h2 className="text-2xl md:text-4xl font-black mb-2 text-foreground">
               COMPLETA TU <span className="text-vcf-orange">ÁLBUM</span> DE
               CARTAS
             </h2>

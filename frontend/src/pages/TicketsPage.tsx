@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { MatchSelection } from "@/components/entradas/MatchSelection";
 import { CesiumStadiumExperience } from "@/components/entradas/CesiumStadiumExperience";
 import { Checkout } from "@/components/entradas/Checkout";
@@ -126,6 +127,7 @@ function readSession(): SessionData {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export function TicketPurchase() {
+  const navigate = useNavigate();
   const initial = useMemo(() => readSession(), []);
 
   const [step, setStep] = useState<Step>(initial.step);
@@ -172,6 +174,7 @@ export function TicketPurchase() {
             setSelectedMatch(match);
             setStep("stadium3d");
           }}
+          onBack={() => navigate(-1)}
         />
       )}
 

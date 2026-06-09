@@ -14,6 +14,7 @@ import {
 import { Toast } from "@/components/ui.disabled/Toast";
 import { useFriends } from "@/hooks/useFriends";
 import { Link } from "react-router-dom";
+import { formatNumber } from "@/utils/formatNumbers";
 
 export function Friends() {
     const [activeTab, setActiveTab] = useState<"friends" | "search" | "requests">("friends");
@@ -54,25 +55,25 @@ export function Friends() {
     }
 
     return (
-        <div className="max-w-[1600px] mx-auto px-4 py-12 bg-content min-h-screen">
+        <div className="max-w-[1600px] mx-auto px-4 py-6 md:py-12 bg-content min-h-screen">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-4xl md:text-5xl font-black mb-4 text-foreground">
                 MIS <span className="text-vcf-orange">AMIGOS</span>
                 </h1>
-                <p className="text-xl text-muted-foreground">
+                <p className="text-base md:text-xl text-muted-foreground">
                 Conecta con otros fanáticos del Valencia CF
                 </p>
             </div>
 
             <div className="mb-8">
-                <div className="bg-card border-2 border-border rounded-lg p-8 shadow-md max-w-md">
+                <div className="bg-card border-2 border-border rounded-lg p-5 md:p-8 shadow-md max-w-md">
                 <div className="flex items-center justify-between mb-2">
                     <div className="w-16 h-16 bg-vcf-orange rounded-lg flex items-center justify-center">
                     <Users size={32} className="text-white" />
                     </div>
-                    <div className="text-6xl font-black text-foreground">
-                    {myFriends.length}
+                    <div className="text-4xl md:text-6xl font-black text-foreground">
+                    {formatNumber(myFriends.length)}
                     </div>
                 </div>
                 <div className="text-lg font-bold text-muted-foreground">
@@ -82,10 +83,10 @@ export function Friends() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-8 border-b-2 border-border">
+            <div className="flex gap-1 md:gap-2 mb-8 border-b-2 border-border overflow-x-auto">
                 <button
                 onClick={() => setActiveTab("friends")}
-                className={`px-6 py-3 font-black transition-all cursor-pointer ${
+                className={`px-3 md:px-6 py-3 font-black transition-all cursor-pointer text-sm md:text-base whitespace-nowrap ${
                     activeTab === "friends"
                     ? "border-b-4 border-vcf-orange text-vcf-orange"
                     : "text-muted-foreground hover:text-foreground"
@@ -95,7 +96,7 @@ export function Friends() {
                 </button>
                 <button
                 onClick={() => setActiveTab("requests")}
-                className={`px-6 py-3 font-black transition-all relative cursor-pointer ${
+                className={`px-3 md:px-6 py-3 font-black transition-all relative cursor-pointer text-sm md:text-base whitespace-nowrap ${
                     activeTab === "requests"
                     ? "border-b-4 border-vcf-orange text-vcf-orange"
                     : "text-muted-foreground hover:text-foreground"
@@ -104,13 +105,13 @@ export function Friends() {
                 SOLICITUDES
                 {pendingRequests.length > 0 && (
                     <span className="absolute -top-1 -right-1 w-6 h-6 bg-vcf-orange text-white rounded-full text-xs flex items-center justify-center font-black">
-                    {pendingRequests.length}
+                    {formatNumber(pendingRequests.length)}
                     </span>
                 )}
                 </button>
                 <button
                 onClick={() => setActiveTab("search")}
-                className={`px-6 py-3 font-black transition-all cursor-pointer ${
+                className={`px-3 md:px-6 py-3 font-black transition-all cursor-pointer text-sm md:text-base whitespace-nowrap ${
                     activeTab === "search"
                     ? "border-b-4 border-vcf-orange text-vcf-orange"
                     : "text-muted-foreground hover:text-foreground"
@@ -175,7 +176,7 @@ export function Friends() {
                                 <div className="flex items-center justify-center gap-1 mb-1">
                                     <Trophy size={16} className="text-vcf-orange" />
                                     <span className="text-xl font-black text-foreground">
-                                    {friend.puntos}
+                                    {formatNumber(friend.puntos)}
                                     </span>
                                 </div>
                                 <div className="text-xs text-muted-foreground font-bold">
@@ -408,7 +409,7 @@ export function Friends() {
                     <div>
                     <div className="mb-4 p-4 bg-vcf-orange/10 border-2 border-vcf-orange rounded-lg">
                         <p className="text-sm font-bold text-foreground">
-                        Tienes <span className="text-vcf-orange">{pendingRequests.length}</span>{" "}
+                        Tienes <span className="text-vcf-orange">{formatNumber(pendingRequests.length)}</span>{" "}
                         {pendingRequests.length === 1 ? "solicitud pendiente" : "solicitudes pendientes"}
                         </p>
                     </div>
@@ -451,7 +452,7 @@ export function Friends() {
                                 className="text-vcf-orange"
                                 />
                                 <span className="text-xl font-black text-foreground">
-                                {user.puntos}
+                                {formatNumber(user.puntos)}
                                 </span>
                             </div>
                             <div className="text-xs text-muted-foreground font-bold">
@@ -567,7 +568,7 @@ export function Friends() {
                                 className="text-vcf-orange"
                                 />
                                 <span className="text-xl font-black text-foreground">
-                                {user.puntos}
+                                {formatNumber(user.puntos)}
                                 </span>
                             </div>
                             <div className="text-xs text-muted-foreground font-bold">
